@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        background: #fafafa;
+      }
+    </style>
+    <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  />
+</head>
+<body style="margin-top:2px;margin-bottom:0px;">
+  <how-app></how-app>
+
+    <script type="module">
+      import { HowApp } from './out-tsc';
+      customElements.define('how-app', HowApp);
+    </script>
+  </body>
+</html>

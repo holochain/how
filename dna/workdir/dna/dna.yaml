@@ -1,0 +1,10 @@
+---
+manifest_version: "1"
+name: how
+uuid: 00000000-0000-0000-0000-000000000000
+properties: ~
+zomes:
+  - name: hc_zome_how
+    bundled: ../../../target/wasm32-unknown-unknown/release/how.wasm
+  - name: profiles
+    bundled: ../../../target/wasm32-unknown-unknown/release/profiles.wasm

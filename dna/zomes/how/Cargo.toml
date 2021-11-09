@@ -1,0 +1,28 @@
+[package]
+authors = ["eric@harris-braun.com"]
+edition = "2018"
+name = "how"
+version = "0.0.1-alpha1"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "how"
+
+[dependencies]
+chrono = {version = "0.4", features = ['alloc', 'std']}
+derive_more = "0.99"
+serde = "1.0.123"
+thiserror = "1.0.20"
+hdk = "0.0.114"
+holo_hash = {version = "0.0.12", features = ["encoding"]}
+
+[dev-dependencies]
+#holochain = { git = "https://github.com/holochain/holochain.git", branch = "develop", features = ["test_utils"] }
+#holochain_types = { git = "https://github.com/holochain/holochain.git", branch = "develop", features = ["test_utils"] }
+# holochain = { path = "../../../chain/crates/holochain/"}
+# holochain_types = { path = "../../../chain/crates/holochain_types/"}
+futures = "0.3.1"
+nanoid = "0.3"
+observability = "0.1.2"
+stream-cancel = "0.8.0"
+tokio = {version = "1.3", features = ["full"]}

@@ -1,0 +1,7 @@
+---
+manifest_version: "1"
+name: how
+ui:
+  bundled: "../ui/apps/how/ui.zip"
+happ_manifest:
+  bundled: "../dna/workdir/happ/how.happ"
