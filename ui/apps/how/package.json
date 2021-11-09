@@ -32,9 +32,9 @@
     "typescript": "4.3.5"
   },
   "dependencies": {
-    "@holochain-open-dev/cell-client": "^0.0.4",
+    "@holochain-open-dev/cell-client": "^0.1.0",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#ui-build",
-    "@holochain/conductor-api": "^0.2.1",
+    "@holochain/conductor-api": "^0.2.4",
     "@lit-labs/context": "github:holochain-open-dev/context#build",
     "@how/elements": "^0.0.1",
     "lit": "^2.0.2"
