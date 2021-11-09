@@ -70,14 +70,14 @@ And version-prefix is a `v` followed by three characters that function as a self
 ### Alignment Bundle
 
 ```rust=
-struct AlignmentBundle {
+struct Alignment {
   parent: Vec<String>, // full paths to parent nodes (remember it's a DAG)
   path_abbreviation: String, // max 10 char
   short_name: String, // max 25 char
   title: String,
   summary: String,
   stewards: Vec<AgentPubKey>,  // people who can change this document
-  procesess: Vec<(ProcessType, String)> // paths to process template to use
+  procesess: Vec<(ProcessType, String)>, // paths to process template to use
   history: BtreeMap<(ProcessType, String), EntryHash>,
   meta: BTreeMap<String, String>, // for UI to do things
 }

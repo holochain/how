@@ -9,14 +9,21 @@ use crate::signals::*;
 #[hdk_entry(id = "alignment")]
 #[derive(Clone)]
 pub struct Alignment {
-    pub name: String,
-    pub meta: BTreeMap<String, String>,  // usable by the UI for whatever
+    pub parent: Vec<String>, // full paths to parent nodes (remember it's a DAG)
+    pub path_abbreviation: String, // max 10 char
+    pub short_name: String, // max 25 char
+    pub title: String,
+    pub summary: String,
+    pub stewards: Vec<AgentPubKey>,  // people who can change this document
+    pub procesess: Vec<String>, // paths to process template to use
+    pub history: BTreeMap<String, EntryHash>,
+    pub meta: BTreeMap<String, String>, // for UI to do things    pub name: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct AlignmentOutput {
-    hash: EntryHashB64,
-    content: Alignment,
+    pub hash: EntryHashB64,
+    pub content: Alignment,
 }
 
 

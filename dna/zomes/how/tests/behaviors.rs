@@ -5,6 +5,7 @@ use hdk::prelude::*;
 // use holochain::sweettest::SweetConductor;
 use holochain::sweettest::*;
 use holochain::test_utils::consistency_10s;
+use holo_hash::EntryHashB64;
 
 use how::alignment::*;
 
@@ -22,11 +23,18 @@ pub async fn test_basics() {
     let cell_bob = cells[1];
 
     let input = Alignment {
-        name: "fish".into(),
+        parent: vec!["hc_system/conductor/api".into()], // full paths to parent nodes (remember it's a DAG)
+        path_abbreviation: "app".into(), // max 10 char
+        short_name: "application".into(), // max 25 char
+        title: "specification of the holochain conductor api for application access".into(),
+        summary: "blah blah".into(),
+        stewards: vec![],  // people who can change this document
+        procesess: vec!["soc_proto/self/proposal".into()], // paths to process template to use
+        history: BTreeMap::new(),
         meta: BTreeMap::new(),
     };
 
-    let _: EntryHash = conductor_alice
+    let hash: EntryHashB64 = conductor_alice
         .call(&cell_alice.zome("how"), "create_alignment", input.clone())
         .await;
     consistency_10s(&[&cell_alice, &cell_bob]).await; 
@@ -38,6 +46,7 @@ pub async fn test_basics() {
             (),
         )
         .await;
+    assert_eq!(alignments[0].hash, hash);
     debug!("{:#?}", alignments)
 }
 
