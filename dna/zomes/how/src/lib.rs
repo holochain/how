@@ -4,6 +4,7 @@ pub use error::{HowError, HowResult};
 
 pub mod error;
 pub mod alignment;
+pub mod tree;
 pub mod signals;
 
 #[hdk_extern]

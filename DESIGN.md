@@ -116,7 +116,7 @@ Tree gets built by creating and modifying bundles.  Create checks to make sure p
 - Crud on Bundles keyed to a path
 - Crud on Documents/Comments/Replies keyed to a bundle
 - `init_tree` (can only be called by progenitor)
-- `get_tree`
+- `get_tree` -> Tree
 - `get_bundle`
 - `get_document`
 

@@ -8,6 +8,7 @@ use holochain::test_utils::consistency_10s;
 use holo_hash::EntryHashB64;
 
 use how::alignment::*;
+//use how::tree::*;
 
 const DNA_FILEPATH: &str = "../../workdir/dna/how.dna";
 
@@ -22,6 +23,17 @@ pub async fn test_basics() {
     let cell_alice = cells[0];
     let cell_bob = cells[1];
 
+    /*
+    let tree: Tree<(String, String)> = Tree::new_from
+
+    let _ = conductor_alice
+    .call(&cell_alice.zome("how"), "init", tree)
+    .await;
+
+    let tree_result: Tree = conductor_alice
+    .call(&cell_alice.zome("how"), "get_tree", ())
+    .await;
+ */
     let input = Alignment {
         parent: vec!["hc_system/conductor/api".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "app".into(), // max 10 char
