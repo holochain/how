@@ -10,7 +10,7 @@
   "author": "",
   "license": "CAL-1.0",
   "dependencies": {
-    "@holochain/conductor-api": "^0.2.1",
+    "@holochain/conductor-api": "^0.2.4",
     "@msgpack/msgpack": "^2.7.0",
     "esm": "^3.2.25",
     "js-base64": "^3.6.1",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@detools/tap-diff": "^0.2.2",
-    "@holochain/tryorama": "holochain/tryorama#1965cd0ad3a61d4e4abb7c1bec7a89b9f07b9d69",
+    "@holochain/tryorama": "holochain/tryorama#9b8fc0799db88d3f536bc8ca06f2e50484d786a1",
     "@types/lodash": "^4.14.173",
     "@types/node": "^14.0.14"
   },
