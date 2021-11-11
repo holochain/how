@@ -10,7 +10,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@holochain/conductor-api": "0.2.0",
+    "@holochain/conductor-api": "0.2.4",
     "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-typescript": "^8.2.5",
