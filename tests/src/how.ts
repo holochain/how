@@ -15,9 +15,23 @@ export default async (orchestrator) => {
     // be used to spin up the conductor processes which are returned in a matching array.
     const [a_and_b_conductor] = await s.players([localConductorConfig])
 
+
+    // Create a alignment
+    let alignment1 = {
+      parent: ["hc_system/conductor/api"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "app", // max 10 char
+      short_name: "application", // max 25 char
+      title: "specification of the holochain conductor api for application access",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      procesess: ["soc_proto/self/proposal"], // paths to process template to use
+      history: {},
+      meta: {}
+    };
+
     a_and_b_conductor.setSignalHandler((signal) => {
       console.log("Received Signal:",signal)
-      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: { name: 'foobar', meta: {} } })
+      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: alignment1})
     })
 
     // install your happs into the conductors and destructuring the returned happ data using the same
@@ -26,18 +40,15 @@ export default async (orchestrator) => {
     const [alice_how] = alice_how_happ.cells
 //    const [bobbo_how] = bobbo_how_happ.cells
 
-    // Create a alignment
-    let alignment1 = {
-      name: "foobar",
-      meta: {}
-    };
-
-    const alignment1_hash = await alice_how.call('hc_zome_how', 'create_alignment', alignment1 );
+    const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1 );
     t.ok(alignment1_hash)
     console.log("alignment1_hash", alignment1_hash);
 
-    const alignments = await alice_how.call('hc_zome_how', 'get_alignments', null );
-    console.log(alignments);
+    const alignments = await alice_how.call('how', 'get_alignments', null );
     t.deepEqual(alignments, [{hash: alignment1_hash, content: alignment1}]);
+
+    const tree = await alice_how.call('how', 'get_tree', null );
+    console.log("tree", tree);
+
   })
 }

@@ -4,7 +4,7 @@ import { EntryHashB64 } from "@holochain-open-dev/core-types";
 import { createContext, Context } from "@lit-labs/context";
 import { HowStore } from "./how.store";
 
-export const howContext : Context<HowStore> = createContext('hc_zome_how/service');
+export const howContext : Context<HowStore> = createContext('how/service');
 
 export type Dictionary<T> = { [key: string]: T };
 

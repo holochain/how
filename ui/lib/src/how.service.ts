@@ -5,7 +5,7 @@ import {AlignmentEntry, Alignment, Signal} from './types';
 export class HowService {
   constructor(
     public cellClient: CellClient,
-    protected zomeName = 'hc_zome_how'
+    protected zomeName = 'how'
   ) {}
 
   get myAgentPubKey() : AgentPubKeyB64 {
