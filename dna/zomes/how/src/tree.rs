@@ -1,8 +1,22 @@
 pub use hdk::prelude::*;
 
+pub const TREE_ROOT:&str = "T";
+
+fn build_tree(tree: &mut Tree<String>, node: usize, path: Path) -> ExternResult<()>{
+    for tag in path.children()?.into_iter().map(|link| link.tag) {
+        let val = Path::try_from(&tag)?;
+        let v = val.as_ref();
+        let idx = tree.insert(node, String::try_from(&v[v.len()-1])?);
+        build_tree(tree, idx, val)?;
+    }
+    Ok(())
+}
+
 #[hdk_extern]
 pub fn get_tree(_input: ()) -> ExternResult<Tree<String>> {
-    Ok(Tree::new("".to_string()))
+    let mut tree = Tree::new(TREE_ROOT.to_string());
+    build_tree(&mut tree, 0, Path::from(TREE_ROOT))?;
+    Ok(tree)
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]

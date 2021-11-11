@@ -18,7 +18,7 @@ export default async (orchestrator) => {
 
     // Create a alignment
     let alignment1 = {
-      parent: ["hc_system/conductor/api"], // full paths to parent nodes (remember it's a DAG)
+      parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "app", // max 10 char
       short_name: "application", // max 25 char
       title: "specification of the holochain conductor api for application access",
@@ -48,7 +48,27 @@ export default async (orchestrator) => {
     t.deepEqual(alignments, [{hash: alignment1_hash, content: alignment1}]);
 
     const tree = await alice_how.call('how', 'get_tree', null );
-    console.log("tree", tree);
+    console.log("Rust tree", tree);
+    console.log("JS tree", buildTree(tree.tree,tree.tree[0]))
 
   })
+}
+
+type RustNode = {
+  idx: number,
+  val: string,
+  parent: null | number,
+  children: Array<number>
+}
+type Node = {
+  val: string,
+  children: Array<Node>
+}
+
+function buildTree(tree: Array<RustNode>, node: RustNode): Node {
+  let t: Node = {val: node.val, children: []}
+  for (const n of node.children) {
+    t.children.push(buildTree(tree, tree[n]))
+  }
+  return t
 }

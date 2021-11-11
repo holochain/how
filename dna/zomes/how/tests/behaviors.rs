@@ -35,7 +35,7 @@ pub async fn test_basics() {
     .await;
  */
     let input = Alignment {
-        parent: vec!["hc_system/conductor/api".into()], // full paths to parent nodes (remember it's a DAG)
+        parents: vec!["hc_system.conductor.api".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "app".into(), // max 10 char
         short_name: "application".into(), // max 25 char
         title: "specification of the holochain conductor api for application access".into(),
