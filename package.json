@@ -32,5 +32,8 @@
     "json-parse-better-errors": "^1.0.2",
     "new-port-cli": "^1.0.0",
     "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#ui-build"
   }
 }
