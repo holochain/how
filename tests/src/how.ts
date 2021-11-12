@@ -24,7 +24,7 @@ export default async (orchestrator) => {
       title: "specification of the holochain conductor api for application access",
       summary: "blah blah",
       stewards: [],  // people who can change this document
-      procesess: ["soc_proto/self/proposal"], // paths to process template to use
+      processes: ["soc_proto/self/proposal"], // paths to process template to use
       history: {},
       meta: {}
     };

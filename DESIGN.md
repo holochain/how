@@ -77,7 +77,7 @@ struct Alignment {
   title: String,
   summary: String,
   stewards: Vec<AgentPubKey>,  // people who can change this document
-  procesess: Vec<(ProcessType, String)>, // paths to process template to use
+  processes: Vec<(ProcessType, String)>, // paths to process template to use
   history: BtreeMap<(ProcessType, String), EntryHash>,
   meta: BTreeMap<String, String>, // for UI to do things
 }

@@ -42,7 +42,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
     /** Render layout */
     return html`
-      THING: ${alignment.name}
+      THING: ${alignment.short_name}
     `;
   }
 

@@ -6,7 +6,8 @@ import { HowService } from './how.service';
 import {
   Dictionary,
   Alignment,
-  AlignmentEntry,
+  RustNode,
+  Node,
 } from './types';
 import {
   ProfilesStore,
@@ -22,17 +23,19 @@ export class HowStore {
 
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
-  
+  private treeStore: Writable<Node> = writable({val:"T", children:[]});
+
   /** Static info */
   myAgentPubKey: AgentPubKeyB64;
 
   /** Readable stores */
   public alignments: Readable<Dictionary<Alignment>> = derived(this.alignmentsStore, i => i)
+  public tree: Readable<Node> = derived(this.treeStore, i => i)
   
   constructor(
     protected cellClient: CellClient,
   profilesStore: ProfilesStore,
-  zomeName = 'hc_zome_how'
+  zomeName = 'how'
   ) {
     this.myAgentPubKey = serializeHash(cellClient.cellId[1]);
     this.profiles = profilesStore;
@@ -58,9 +61,7 @@ export class HowStore {
     return Object.keys(get(this.profiles.knownProfiles)).filter((key)=> key != this.myAgentPubKey)
   }
 
-  private async updateAlignmentFromEntry(hash: EntryHashB64, entry: AlignmentEntry): Promise<void>   {
-    //console.log("updateAlignmentFromEntry: " + hash)
-    const alignment : Alignment = await this.service.alignmentFromEntry(hash, entry)
+  private async updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment): Promise<void>   {
     this.alignmentsStore.update(alignments => {
       alignments[hash] = alignment
       return alignments
@@ -76,17 +77,32 @@ export class HowStore {
     return get(this.alignmentsStore)
   }
 
+  buildTree(tree: Array<RustNode>, node: RustNode): Node {
+    let t: Node = {val: node.val, children: []}
+    for (const n of node.children) {
+      t.children.push(this.buildTree(tree, tree[n]))
+    }
+    return t
+  }
+
+  async pullTree() : Promise<Node> {
+    const rtree: Array<RustNode> = await this.service.getTree();
+    const node: Node = this.buildTree(rtree, rtree[0])
+    console.log({node})
+    this.treeStore.update(tree => {
+      tree = node
+      return tree
+    })
+    return get(this.treeStore)
+  }
+
   async addAlignment(alignment: Alignment) : Promise<EntryHashB64> {
-    const s: AlignmentEntry = {
-      name: alignment.name,
-      meta: alignment.meta,
-    };
-    const alignmentEh: EntryHashB64 = await this.service.createAlignment(s)
+    const alignmentEh: EntryHashB64 = await this.service.createAlignment(alignment)
     this.alignmentsStore.update(alignments => {
       alignments[alignmentEh] = alignment
       return alignments
     })
-    this.service.notify({alignmentHash:alignmentEh, message: {type:"NewAlignment", content:s}}, this.others());
+    this.service.notify({alignmentHash:alignmentEh, message: {type:"NewAlignment", content:alignment}}, this.others());
     return alignmentEh
   }
 

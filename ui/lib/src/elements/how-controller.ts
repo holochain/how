@@ -138,7 +138,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
     this._currentAlignmentEh = this._getFirst(alignments);
 
-    console.log("   current alignment: ",  alignments[this._currentAlignmentEh].name, this._currentAlignmentEh);
+    console.log("   current alignment: ",  alignments[this._currentAlignmentEh].short_name, this._currentAlignmentEh);
 
     // request the update so the drawer will be findable
     await this.requestUpdate();
@@ -161,18 +161,26 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   async addHardcodedAlignments() {
  
+    const alignment1: Alignment = {
+      parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "app", // max 10 char
+      short_name: "application", // max 25 char
+      title: "specification of the holochain conductor api for application access",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      history: {},
+      meta: {}
+    }
+    
     /** Alignments */
-    await this._store.addAlignment({
-      name: "Funky",
-      meta: {
-        foo: `bar`,
-      },
-    });
+    await this._store.addAlignment(alignment1);
   }
 
   async refresh() {
     console.log("refresh: Pulling data from DHT")
     await this._store.pullAlignments();
+    await this._store.pullTree();
     await this._profiles.fetchAllProfiles()
   }
 
@@ -238,7 +246,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       ([key, alignment]) => {
         return html`
           <mwc-list-item class="alignment-li" .selected=${key == this._currentAlignmentEh} value="${key}">
-            <span>${alignment.name}</span>
+            <span>${alignment.short_name}</span>
           </mwc-list-item>
           `
       }
@@ -271,7 +279,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <!-- TOP APP BAR -->
     <mwc-top-app-bar id="app-bar" dense style="position: relative;">
       <mwc-icon-button icon="menu" slot="navigationIcon"></mwc-icon-button>
-      <div slot="title">How - ${this._alignments.value[this._currentAlignmentEh].name}</div>
+      <div slot="title">How - ${this._alignments.value[this._currentAlignmentEh].short_name}</div>
       <mwc-icon-button slot="actionItems" icon="autorenew" @click=${() => this.refresh()} ></mwc-icon-button>
       <mwc-icon-button id="menu-button" slot="actionItems" icon="more_vert" @click=${() => this.openTopMenu()}></mwc-icon-button>
       <mwc-menu id="top-menu" @click=${this.handleMenuSelect}>

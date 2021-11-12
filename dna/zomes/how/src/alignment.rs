@@ -17,7 +17,7 @@ pub struct Alignment {
     pub title: String,
     pub summary: String,
     pub stewards: Vec<AgentPubKey>,  // people who can change this document
-    pub procesess: Vec<String>, // paths to process template to use
+    pub processes: Vec<String>, // paths to process template to use
     pub history: BTreeMap<String, EntryHash>,
     pub meta: BTreeMap<String, String>, // for UI to do things    pub name: String,
 }

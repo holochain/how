@@ -41,7 +41,7 @@ pub async fn test_basics() {
         title: "specification of the holochain conductor api for application access".into(),
         summary: "blah blah".into(),
         stewards: vec![],  // people who can change this document
-        procesess: vec!["soc_proto/self/proposal".into()], // paths to process template to use
+        processes: vec!["soc_proto/self/proposal".into()], // paths to process template to use
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
     };

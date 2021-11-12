@@ -52,10 +52,15 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       this._nameField.reportValidity()
     }
     const alignment: Alignment = {
-      name: this._nameField.value,
-      meta: {
-        foo: "bar",
-      },
+      parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "app", // max 10 char
+      short_name: this._nameField.value,
+      title: "specification of the holochain conductor api for application access",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      history: {},
+      meta: {},
     };
 
     // - Add alignment to commons
@@ -76,7 +81,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     if (this._alignmentToPreload) {
       const alignment = this._store.alignment(this._alignmentToPreload);
       if (alignment) {
-        this._nameField.value = alignment.name;
+        this._nameField.value = alignment.short_name;
       }
       this._alignmentToPreload = undefined;
     }
