@@ -9,6 +9,7 @@ import { sharedStyles } from "../sharedStyles";
 import {howContext, Alignment, Dictionary, Signal} from "../types";
 import { HowStore } from "../how.store";
 import { HowAlignment } from "./how-alignment";
+import { HowTree } from "./how-tree";
 import { HowAlignmentDialog } from "./how-alignment-dialog";
 import { SlAvatar } from '@scoped-elements/shoelace';
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
@@ -288,6 +289,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     </mwc-top-app-bar>
 
     <div class="appBody">
+      <how-tree></how-tree>
       <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}></how-alignment>
       <div class="folks">
         ${folks}
@@ -319,6 +321,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "mwc-button": Button,
       "how-alignment-dialog" : HowAlignmentDialog,
       "how-alignment": HowAlignment,
+      "how-tree": HowTree,
       "mwc-formfield": Formfield,
       'sl-avatar': SlAvatar,
     };

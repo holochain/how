@@ -31,8 +31,12 @@ export type RustNode = {
     parent: null | number,
     children: Array<number>
   }
+export type RustTree = {
+  tree: Array<RustNode>
+}
 
 export type Node = {
     val: string,
+    id: string,
     children: Array<Node>
   }

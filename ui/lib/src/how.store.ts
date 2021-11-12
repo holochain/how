@@ -23,7 +23,7 @@ export class HowStore {
 
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
-  private treeStore: Writable<Node> = writable({val:"T", children:[]});
+  private treeStore: Writable<Node> = writable({val:"T", children:[], id:"0"});
 
   /** Static info */
   myAgentPubKey: AgentPubKeyB64;
@@ -78,7 +78,7 @@ export class HowStore {
   }
 
   buildTree(tree: Array<RustNode>, node: RustNode): Node {
-    let t: Node = {val: node.val, children: []}
+    let t: Node = {val: node.val, children: [], id: `${node.idx}`}
     for (const n of node.children) {
       t.children.push(this.buildTree(tree, tree[n]))
     }
@@ -88,7 +88,6 @@ export class HowStore {
   async pullTree() : Promise<Node> {
     const rtree: Array<RustNode> = await this.service.getTree();
     const node: Node = this.buildTree(rtree, rtree[0])
-    console.log({node})
     this.treeStore.update(tree => {
       tree = node
       return tree

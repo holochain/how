@@ -1,6 +1,6 @@
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { HoloHashed, serializeHash, EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
-import { Alignment, Signal, RustNode} from './types';
+import { Alignment, Signal, RustNode, RustTree} from './types';
 
 export class HowService {
   constructor(
@@ -21,7 +21,8 @@ export class HowService {
   }
 
   async getTree(): Promise<Array<RustNode>> {
-    return this.callZome('get_tree', null);
+    let tree:RustTree = await this.callZome('get_tree', null);
+    return tree.tree
   }
   async notify(signal: Signal, folks: Array<AgentPubKeyB64>): Promise<void> {
     return this.callZome('notify', {signal, folks});
