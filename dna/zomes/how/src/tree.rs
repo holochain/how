@@ -1,20 +1,33 @@
 pub use hdk::prelude::*;
+use holo_hash::EntryHashB64;
 
 pub const TREE_ROOT:&str = "T";
 
-fn build_tree(tree: &mut Tree<String>, node: usize, path: Path) -> ExternResult<()>{
+#[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
+pub struct Content {
+    name: String,
+    alignments: Vec<EntryHashB64>,
+}
+
+fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult<()>{
     for tag in path.children()?.into_iter().map(|link| link.tag) {
-        let val = Path::try_from(&tag)?;
-        let v = val.as_ref();
-        let idx = tree.insert(node, String::try_from(&v[v.len()-1])?);
-        build_tree(tree, idx, val)?;
+        let tag_path = Path::try_from(&tag)?;
+        let v = tag_path.as_ref();
+        let alignment_links = get_links(tag_path.hash()?, Some(LinkTag::new("alignment")))?;
+        let alignments = alignment_links.into_iter().map(|l| l.target.as_hash().clone().into()).collect();
+        let val = Content {
+            name: String::try_from(&v[v.len()-1])?,
+            alignments,
+        };
+        let idx = tree.insert(node, val);
+        build_tree(tree, idx, tag_path)?;
     }
     Ok(())
 }
 
 #[hdk_extern]
-pub fn get_tree(_input: ()) -> ExternResult<Tree<String>> {
-    let mut tree = Tree::new(TREE_ROOT.to_string());
+pub fn get_tree(_input: ()) -> ExternResult<Tree<Content>> {
+    let mut tree = Tree::new(Content{name: TREE_ROOT.to_string(), alignments: Vec::new()});
     build_tree(&mut tree, 0, Path::from(TREE_ROOT))?;
     Ok(tree)
 }

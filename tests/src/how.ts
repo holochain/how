@@ -50,7 +50,6 @@ export default async (orchestrator) => {
     const tree = await alice_how.call('how', 'get_tree', null );
     console.log("Rust tree", tree);
     console.log("JS tree", buildTree(tree.tree,tree.tree[0]))
-
   })
 }
 

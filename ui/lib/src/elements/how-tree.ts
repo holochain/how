@@ -1,5 +1,4 @@
 import {css, html, LitElement} from "lit";
-import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import {property, query} from "lit/decorators.js";
 
 import {contextProvided} from "@lit-labs/context";
@@ -31,17 +30,29 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
 
   _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
   _tree = new StoreSubscriber(this, () => this._store.tree);
+  _alignments = new StoreSubscriber(this, () => this._store.alignments);
  
   select(id: string) : void {
     this.currentNode = id
+    this.dispatchEvent(new CustomEvent('node-selected', { detail: id, bubbles: true, composed: true }));
   }
+
+  getNodeId(node: Node) : string {
+    return node.val.alignments.length>0 ? node.val.alignments[0] : node.id
+  }
+
   buildTree(node: Node):any {
-    return html`<li><span class="${node.id == this.currentNode ? "current" : ""}"} @click=${()=>this.select(node.id)}>${node.val}</span>
-    ${node.children.length>0 ? html`<ul>${node.children.map(n => this.buildTree(n))}</ul>` :html``}
+    return html`
+    <li>
+      <span class="${this.getNodeId(node) == this.currentNode ? "current" : ""}" @click=${()=>this.select(this.getNodeId(node))}>
+        ${node.val.name}
+      </span>
+      ${node.children.length>0 ? html`<ul>${node.children.map(n => this.buildTree(n))}</ul>` :html``}
     </li>`
 }
   render() {
-    return html`<ul class="tree">${this.buildTree(this._tree.value)}</ul>`
+    return html`<ul class="tree">${this.buildTree(this._tree.value)}</ul>
+          `
   }
 
 

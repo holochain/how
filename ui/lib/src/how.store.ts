@@ -23,7 +23,7 @@ export class HowStore {
 
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
-  private treeStore: Writable<Node> = writable({val:"T", children:[], id:"0"});
+  private treeStore: Writable<Node> = writable({val:{name:"T", alignments: []}, children:[], id:"0"});
 
   /** Static info */
   myAgentPubKey: AgentPubKeyB64;

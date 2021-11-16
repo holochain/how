@@ -25,9 +25,13 @@ export type Signal =
     alignmentHash: EntryHashB64, message: {type: "NewAlignment", content:  Alignment}
   }
   
+export type Content = {
+  name: string,
+  alignments: Array<EntryHashB64>
+}
 export type RustNode = {
     idx: number,
-    val: string,
+    val: Content,
     parent: null | number,
     children: Array<number>
   }
@@ -36,7 +40,7 @@ export type RustTree = {
 }
 
 export type Node = {
-    val: string,
+    val: Content,
     id: string,
     children: Array<Node>
   }

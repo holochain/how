@@ -211,14 +211,24 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this.alignmentElem.currentAlignmentEh = alignmentEh;
   }
 
+  handleNodeSelected(event: any) {
+    console.log(event.detail)
+    const alignmentEh = event.detail
+    if (this._alignments.value[alignmentEh]) {
+      this.alignmentElem.currentAlignmentEh = alignmentEh
+    }
+  }
+
   openTopMenu() {
     const menu = this.shadowRoot!.getElementById("top-menu") as Menu;
     menu.open = true;
   }
 
   handleMenuSelect(e: any) {
-    console.log("handleMenuSelect: " + e.originalTarget.innerHTML)
-    //console.log({e})
+    const menu = e.currentTarget as Menu;
+    console.log("handleMenuSelect: " + menu)
+    const selected = menu.selected as ListItem;
+    console.log({selected})
     switch (e.originalTarget.innerHTML) {
       case "Duplicate Alignment":
         this.openAlignmentDialog(this._currentAlignmentEh)
@@ -232,15 +242,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     if (!this._currentAlignmentEh) {
       return;
     }
-
-    /** Build agent list */
-    const folks = Object.entries(this._knownProfiles.value).map(([key, profile])=>{
-      return html`
-        <li class="folk">
-          <sl-avatar .image=${profile.fields.avatar}></sl-avatar>
-          <div>${profile.nickname}</div>
-        </li>`
-    })
 
     /** Build alignment list */
     const alignments = Object.entries(this._alignments.value).map(
@@ -283,17 +284,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       <div slot="title">How - ${this._alignments.value[this._currentAlignmentEh].short_name}</div>
       <mwc-icon-button slot="actionItems" icon="autorenew" @click=${() => this.refresh()} ></mwc-icon-button>
       <mwc-icon-button id="menu-button" slot="actionItems" icon="more_vert" @click=${() => this.openTopMenu()}></mwc-icon-button>
-      <mwc-menu id="top-menu" @click=${this.handleMenuSelect}>
+      <mwc-menu id="top-menu" corner="BOTTOM_LEFT" @click=${this.handleMenuSelect}>
         <mwc-list-item graphic="icon" value="fork_alignment"><span>Duplicate Alignment</span><mwc-icon slot="graphic">edit</mwc-icon></mwc-list-item>
       </mwc-menu>
     </mwc-top-app-bar>
 
     <div class="appBody">
-      <how-tree></how-tree>
+      <how-tree @node-selected=${this.handleNodeSelected}></how-tree>
       <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}></how-alignment>
-      <div class="folks">
-        ${folks}
-      </div>
     </div>
 
     <how-alignment-dialog id="alignment-dialog"
@@ -302,6 +300,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     </how-alignment-dialog>
   </div>
 </mwc-drawer>
+
 `;
   }
 
@@ -356,18 +355,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
           width: 100%;
           margin-top: 2px;
           display:flex;
-        }
-
-        .folk {
-          list-style: none;
-          margin: 2px;
-          text-align: center;
-          font-size: 70%;
-        }
-
-        .folk > img {
-          width: 50px;
-          border-radius: 10000px;
         }
 
         mwc-textfield.rounded {
