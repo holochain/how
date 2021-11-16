@@ -25,17 +25,16 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   @contextProvided({ context: howContext })
   _store!: HowStore;
 
-  _alignmentToPreload?: EntryHashB64;
-
   @query('#name-field')
   _nameField!: TextField;
+
+  @state() _parent?: Alignment;
 
   /**
    *
    */
-  open(alignmentToPreload?: EntryHashB64) {
-    this._alignmentToPreload = alignmentToPreload;
-    this.requestUpdate();
+  open(parentEh: EntryHashB64) {
+    this._parent = this._store.alignment(parentEh);
     const dialog = this.shadowRoot!.getElementById("alignment-dialog") as Dialog
     dialog.open = true
   }
@@ -52,8 +51,8 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       this._nameField.reportValidity()
     }
     const alignment: Alignment = {
-      parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: "app", // max 10 char
+      parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: this._nameField.value, // max 10 char
       short_name: this._nameField.value,
       title: "specification of the holochain conductor api for application access",
       summary: "blah blah",
@@ -78,24 +77,28 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   }
 
   private async handleDialogOpened(e: any) {
-    if (this._alignmentToPreload) {
-      const alignment = this._store.alignment(this._alignmentToPreload);
-      if (alignment) {
-        this._nameField.value = alignment.short_name;
-      }
-      this._alignmentToPreload = undefined;
-    }
-    this.requestUpdate()
+    // if (false) {
+    //   const alignment = this._store.alignment(this._alignmentToPreload);
+    //   if (alignment) {
+        
+    //   }
+    //   this._alignmentToPreload = undefined;
+    // }
+   // this.requestUpdate()
   }
 
   private async handleDialogClosing(e: any) {
     this.resetAllFields();
   }
 
-  render() {
+  private parentPath() {
+    return this._parent ? `${this._parent?.parents[0]}.${this._parent?.path_abbreviation}` : ``
+  }
 
+  render() {
     return html`
 <mwc-dialog id="alignment-dialog" heading="New alignment" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
+  Parent: ${this.parentPath()}
   <mwc-textfield dialogInitialFocus type="text"
                  @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
                  id="name-field" minlength="3" maxlength="64" label="Name" autoValidate=true required></mwc-textfield>

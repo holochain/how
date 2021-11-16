@@ -34,6 +34,12 @@ impl Alignment {
             path.push(Component::from(&self.path_abbreviation));
             paths.push(Path::from(path));
         };
+        if paths.len() == 0 {
+            let mut path = Vec::new();
+            path.push(Component::from(TREE_ROOT));
+            path.push(Component::from(&self.path_abbreviation));
+            paths.push(Path::from(path));
+        }
         paths
     }
 }

@@ -56,7 +56,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   private _drawer!: Drawer;
 
   @state() _currentAlignmentEh = "";
-  @state() _currentTemplateEh = "";
 
   private initialized = false;
   private initializing = false;
@@ -161,12 +160,72 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   async addHardcodedAlignments() {
- 
+
+    const alignment0: Alignment = {
+      parents: [], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "soc_proto", // max 10 char
+      short_name: "Social Protocols", // max 25 char
+      title: "Social Protocols used by the Holochain Community",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      history: {},
+      meta: {}
+    }
+
+    const alignment00: Alignment = {
+      parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "self", // max 10 char
+      short_name: "Protcols for How", // max 25 char
+      title: "The social protocols used for updating this tree",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto"], // paths to process template to use
+      history: {},
+      meta: {}
+    }
+
+    const alignment000: Alignment = {
+      parents: ["soc_proto.self"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "proposal", // max 10 char
+      short_name: "Proposal Protocols", // max 25 char
+      title: "Protocol for making proposals",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self"], // paths to process template to use
+      history: {},
+      meta: {}
+    }
+
     const alignment1: Alignment = {
-      parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: "app", // max 10 char
-      short_name: "application", // max 25 char
-      title: "specification of the holochain conductor api for application access",
+      parents: [], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "hc_system", // max 10 char
+      short_name: "Holochain System", // max 25 char
+      title: "Holochain complete system",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      history: {},
+      meta: {}
+    }
+
+    const alignment2: Alignment = {
+      parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "conductor", // max 10 char
+      short_name: "Holochain Conductor", // max 25 char
+      title: "Holochain Conductor",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      history: {},
+      meta: {}
+    }
+
+    const alignment3: Alignment = {
+      parents: ["hc_system.conductor"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "api", // max 10 char
+      short_name: "Holochain Conductor API", // max 25 char
+      title: "specification of the holochain conductor api",
       summary: "blah blah",
       stewards: [],  // people who can change this document
       processes: ["soc_proto.self.proposal"], // paths to process template to use
@@ -175,7 +234,12 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
     
     /** Alignments */
+    await this._store.addAlignment(alignment0);
+    await this._store.addAlignment(alignment00);
+    await this._store.addAlignment(alignment000);
     await this._store.addAlignment(alignment1);
+    await this._store.addAlignment(alignment2);
+    await this._store.addAlignment(alignment3);
   }
 
   async refresh() {
@@ -190,7 +254,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   async openAlignmentDialog(alignment?: any) {
-    this.alignmentDialogElem.resetAllFields();
     this.alignmentDialogElem.open(alignment);
   }
 
@@ -217,6 +280,11 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     if (this._alignments.value[alignmentEh]) {
       this.alignmentElem.currentAlignmentEh = alignmentEh
     }
+  }
+
+  handleAddChild(event: any) {
+    const alignmentEh = event.detail
+    this.openAlignmentDialog(alignmentEh)
   }
 
   openTopMenu() {
@@ -267,7 +335,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     </mwc-list-item>
     <li divider role="separator"></li>
     </mwc-list>
-    <mwc-button icon="add_circle" @click=${() => this.openAlignmentDialog()}>Alignment</mwc-button>
 
     <!-- Alignment List -->
     <mwc-list id="alignments-list" activatable @selected=${this.handleAlignmentSelected}>
@@ -290,7 +357,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     </mwc-top-app-bar>
 
     <div class="appBody">
-      <how-tree @node-selected=${this.handleNodeSelected}></how-tree>
+      <how-tree 
+      @node-selected=${this.handleNodeSelected}
+      @add-child=${this.handleAddChild}
+      ></how-tree>
       <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}></how-alignment>
     </div>
 

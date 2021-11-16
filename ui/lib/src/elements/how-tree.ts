@@ -10,6 +10,9 @@ import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles";
 import { CytoscapeDagre } from '@scoped-elements/cytoscape';
+import {
+  Button, 
+} from "@scoped-elements/material-web";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
 
 /**
@@ -42,11 +45,16 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   }
 
   buildTree(node: Node):any {
+    const nodeId = this.getNodeId(node)
     return html`
     <li>
-      <span class="${this.getNodeId(node) == this.currentNode ? "current" : ""}" @click=${()=>this.select(this.getNodeId(node))}>
+      <span class="${nodeId == this.currentNode ? "current" : ""}" @click=${()=>this.select(nodeId)}>
         ${node.val.name}
+        <mwc-button icon="add_circle" @click=${
+          () => this.dispatchEvent(new CustomEvent('add-child', { detail: nodeId, bubbles: true, composed: true }))}>
+          </mwc-button>
       </span>
+
       ${node.children.length>0 ? html`<ul>${node.children.map(n => this.buildTree(n))}</ul>` :html``}
     </li>`
 }
@@ -59,12 +67,16 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   static get scopedElements() {
     return {
         'cytoscape-dagre': CytoscapeDagre,
-    };
+        "mwc-button": Button,
+      };
   }
   static get styles() {
     return [
       sharedStyles,
       css`
+      mwc-button {
+        width: 30px;
+      }
 /* It's supposed to look like a tree diagram */
 .tree, .tree ul, .tree li {
     list-style: none;
@@ -84,7 +96,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   width: 100%;
 }
 .tree span.current {
-    background-color: red;
+  background-color: red;
 }
     .tree li {
         display: table-cell;

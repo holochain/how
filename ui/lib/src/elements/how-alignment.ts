@@ -42,7 +42,14 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
     /** Render layout */
     return html`
-      Alignment: ${alignment.short_name}
+      <div class="alignment">
+       <li> Parents: ${alignment.parents}</li>
+       <li> Path Abbrev: ${alignment.path_abbreviation}</li>
+       <li> Name: ${alignment.short_name}</li>
+       <li> Title: ${alignment.title}</li>
+       <li> Stewards: ${alignment.stewards}</li>
+       <li> Processes: ${alignment.processes}</li>
+      </div>
     `;
   }
 
@@ -55,6 +62,12 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return [
       sharedStyles,
       css`
+      .alignment {
+        border: solid .1em #666;
+        border-radius: .2em;
+        margin-left: 20px;
+        padding: 20px;
+      }
       `,
     ];
   }
