@@ -56,7 +56,7 @@ fn get_alignments_path() -> Path {
 }
 
 #[hdk_extern]
-fn create_alignment(input: Alignment) -> ExternResult<EntryHashB64> {
+pub fn create_alignment(input: Alignment) -> ExternResult<EntryHashB64> {
     let _header_hash = create_entry(&input)?;
     let tree_paths = input.paths();
     let hash = hash_entry(&input)?;

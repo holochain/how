@@ -7,6 +7,8 @@ pub mod alignment;
 pub mod tree;
 pub mod signals;
 
+use crate::alignment::{Alignment, create_alignment};
+
 #[hdk_extern]
 fn init(_: ()) -> ExternResult<InitCallbackResult> {
     // grant unrestricted access to accept_cap_claim so other agents can send us claims
@@ -26,3 +28,16 @@ entry_defs![
     alignment::Alignment::entry_def()
 ];
 
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Initialization {
+    pub alignments: Vec<Alignment>,
+}
+
+#[hdk_extern]
+fn initialize(input: Initialization) -> ExternResult<()> {
+    // add progenitor check for call
+    for alignment in input.alignments {
+        create_alignment(alignment)?;
+    }
+    Ok(())
+}

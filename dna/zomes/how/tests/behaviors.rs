@@ -8,7 +8,7 @@ use holochain::test_utils::consistency_10s;
 use holo_hash::EntryHashB64;
 
 use how::alignment::*;
-//use how::tree::*;
+use how::*;
 
 const DNA_FILEPATH: &str = "../../workdir/dna/how.dna";
 
@@ -34,21 +34,41 @@ pub async fn test_basics() {
     .call(&cell_alice.zome("how"), "get_tree", ())
     .await;
  */
-    let input = Alignment {
+
+    let aligment1 = Alignment {
+        parents: vec!["hc_system".into()], // full paths to parent nodes (remember it's a DAG)
+        path_abbreviation: "conductor".into(), // max 10 char
+        short_name: "conductor".into(), // max 25 char
+        title: "specification of the holochain conductor".into(),
+        summary: "blah blah".into(),
+        stewards: vec![],  // people who can change this document
+        processes: vec!["soc_proto.self.proposal".into()], // paths to process template to use
+        history: BTreeMap::new(),
+        meta: BTreeMap::new(),
+    };
+
+    let input= Initialization {alignments: vec![aligment1]};
+
+    let _:() = conductor_alice
+        .call(&cell_alice.zome("how"), "initialize", input.clone())
+        .await;
+
+    let alignment2 = Alignment {
         parents: vec!["hc_system.conductor.api".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "app".into(), // max 10 char
         short_name: "application".into(), // max 25 char
         title: "specification of the holochain conductor api for application access".into(),
         summary: "blah blah".into(),
         stewards: vec![],  // people who can change this document
-        processes: vec!["soc_proto/self/proposal".into()], // paths to process template to use
+        processes: vec!["soc_proto.self.proposal".into()], // paths to process template to use
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
     };
-
+    
     let hash: EntryHashB64 = conductor_alice
-        .call(&cell_alice.zome("how"), "create_alignment", input.clone())
-        .await;
+    .call(&cell_alice.zome("how"), "create_alignment", alignment2.clone())
+    .await;
+
     consistency_10s(&[&cell_alice, &cell_bob]).await; 
 
     let alignments : Vec<AlignmentOutput> = conductor_alice
@@ -58,7 +78,8 @@ pub async fn test_basics() {
             (),
         )
         .await;
-    assert_eq!(alignments[0].hash, hash);
+    assert_eq!(alignments[1].hash, hash);
+    assert_eq!(alignments.len(), 2);
     debug!("{:#?}", alignments)
 }
 

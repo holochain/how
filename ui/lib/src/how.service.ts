@@ -1,6 +1,6 @@
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { HoloHashed, serializeHash, EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
-import { Alignment, Signal, RustNode, RustTree} from './types';
+import { Alignment, Signal, RustNode, RustTree, Initialization} from './types';
 
 export class HowService {
   constructor(
@@ -10,6 +10,10 @@ export class HowService {
 
   get myAgentPubKey() : AgentPubKeyB64 {
     return serializeHash(this.cellClient.cellId[1]);
+  }
+
+  async initialize(input: Initialization): Promise<EntryHashB64> {
+    return this.callZome('initialize', input);
   }
 
   async createAlignment(alignment: Alignment): Promise<EntryHashB64> {

@@ -8,6 +8,7 @@ import {
   Alignment,
   RustNode,
   Node,
+  Initialization,
 } from './types';
 import {
   ProfilesStore,
@@ -20,7 +21,7 @@ export class HowStore {
   /** Private */
   private service : HowService
   private profiles: ProfilesStore
-
+  
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
   private treeStore: Writable<Node> = writable({val:{name:"T", alignments: []}, children:[], id:"0"});
@@ -103,6 +104,10 @@ export class HowStore {
     })
     this.service.notify({alignmentHash:alignmentEh, message: {type:"NewAlignment", content:alignment}}, this.others());
     return alignmentEh
+  }
+
+  async initilize(input: Initialization) : Promise<void> {
+    await this.service.initialize(input)
   }
 
   alignment(alignmentEh: EntryHashB64): Alignment {

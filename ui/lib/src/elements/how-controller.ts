@@ -6,7 +6,7 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Alignment, Dictionary, Signal} from "../types";
+import {howContext, Alignment, Dictionary, Initialization} from "../types";
 import { HowStore } from "../how.store";
 import { HowAlignment } from "./how-alignment";
 import { HowTree } from "./how-tree";
@@ -132,6 +132,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       console.log("no alignments found, initializing")
       await this.addHardcodedAlignments();
       alignments = await this._store.pullAlignments();
+      await this._store.pullTree();
     }
     if (Object.keys(alignments).length == 0) {
       console.error("No alignments found")
@@ -161,85 +162,86 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   async addHardcodedAlignments() {
 
-    const alignment0: Alignment = {
+    const init:Initialization = {
+    alignments: [
+      {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "soc_proto", // max 10 char
       short_name: "Social Protocols", // max 25 char
       title: "Social Protocols used by the Holochain Community",
-      summary: "blah blah",
+      summary: "The holochain community uses social protcols to get its work done.",
       stewards: [],  // people who can change this document
-      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
-    }
-
-    const alignment00: Alignment = {
+    },
+    {
       parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "self", // max 10 char
       short_name: "Protcols for How", // max 25 char
       title: "The social protocols used for updating this tree",
       summary: "blah blah",
       stewards: [],  // people who can change this document
-      processes: ["soc_proto"], // paths to process template to use
+      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
-    }
-
-    const alignment000: Alignment = {
+    },
+    {
       parents: ["soc_proto.self"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "proposal", // max 10 char
-      short_name: "Proposal Protocols", // max 25 char
+      short_name: "Proposal Process", // max 25 char
       title: "Protocol for making proposals",
       summary: "blah blah",
       stewards: [],  // people who can change this document
-      processes: ["soc_proto.self"], // paths to process template to use
+      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
-    }
-
-    const alignment1: Alignment = {
+    },
+    {
+      parents: ["soc_proto.self"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "approval", // max 10 char
+      short_name: "Approval Process", // max 25 char
+      title: "Protocol for approving proposals",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "hc_system", // max 10 char
       short_name: "Holochain System", // max 25 char
       title: "Holochain complete system",
       summary: "blah blah",
       stewards: [],  // people who can change this document
-      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
-    }
-
-    const alignment2: Alignment = {
+    },
+    {
       parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "conductor", // max 10 char
       short_name: "Holochain Conductor", // max 25 char
       title: "Holochain Conductor",
       summary: "blah blah",
       stewards: [],  // people who can change this document
-      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
-    }
-
-    const alignment3: Alignment = {
+    },
+    {
       parents: ["hc_system.conductor"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "api", // max 10 char
       short_name: "Holochain Conductor API", // max 25 char
       title: "specification of the holochain conductor api",
       summary: "blah blah",
       stewards: [],  // people who can change this document
-      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
-    }
-    
-    /** Alignments */
-    await this._store.addAlignment(alignment0);
-    await this._store.addAlignment(alignment00);
-    await this._store.addAlignment(alignment000);
-    await this._store.addAlignment(alignment1);
-    await this._store.addAlignment(alignment2);
-    await this._store.addAlignment(alignment3);
+    }]}
+        await this._store.initilize(init);
   }
 
   async refresh() {
@@ -253,8 +255,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return this.shadowRoot!.getElementById("how-alignment") as HowAlignment;
   }
 
-  async openAlignmentDialog(alignment?: any) {
-    this.alignmentDialogElem.open(alignment);
+  async openAlignmentDialog(parent?: any) {
+    this.alignmentDialogElem.open(parent);
   }
 
   get alignmentDialogElem() : HowAlignmentDialog {

@@ -8,6 +8,10 @@ export const howContext : Context<HowStore> = createContext('how/service');
 
 export type Dictionary<T> = { [key: string]: T };
 
+export interface Initialization {
+  alignments: Array<Alignment>
+}
+
 export interface Alignment {
   parents: Array<string>,
   path_abbreviation: string,
