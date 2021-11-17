@@ -278,7 +278,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     console.log(event.detail)
     const alignmentEh = event.detail
     if (this._alignments.value[alignmentEh]) {
-      this.alignmentElem.currentAlignmentEh = alignmentEh
+      this.handleAlignmentSelect(alignmentEh)
     }
   }
 
