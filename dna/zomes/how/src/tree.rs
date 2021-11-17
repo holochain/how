@@ -9,15 +9,20 @@ pub struct Content {
     alignments: Vec<EntryHashB64>,
 }
 
+fn get_alignments(path: &Path) -> ExternResult<Vec<EntryHashB64>> {
+    let alignment_links = get_links(path.hash()?, Some(LinkTag::new("alignment")))?;
+    let alignments = alignment_links.into_iter().map(|l| l.target.as_hash().clone().into()).collect();
+    Ok(alignments)
+}
+
 fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult<()>{
+
     for tag in path.children()?.into_iter().map(|link| link.tag) {
         let tag_path = Path::try_from(&tag)?;
         let v = tag_path.as_ref();
-        let alignment_links = get_links(tag_path.hash()?, Some(LinkTag::new("alignment")))?;
-        let alignments = alignment_links.into_iter().map(|l| l.target.as_hash().clone().into()).collect();
         let val = Content {
             name: String::try_from(&v[v.len()-1])?,
-            alignments,
+            alignments: get_alignments(&tag_path)?,
         };
         let idx = tree.insert(node, val);
         build_tree(tree, idx, tag_path)?;
@@ -27,8 +32,13 @@ fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult
 
 #[hdk_extern]
 pub fn get_tree(_input: ()) -> ExternResult<Tree<Content>> {
-    let mut tree = Tree::new(Content{name: TREE_ROOT.to_string(), alignments: Vec::new()});
-    build_tree(&mut tree, 0, Path::from(TREE_ROOT))?;
+    let root_path = Path::from(TREE_ROOT);
+    let val = Content {
+        name: String::from(""),
+        alignments: get_alignments(&root_path)?,
+    };
+    let mut tree = Tree::new(val);
+    build_tree(&mut tree, 0, root_path)?;
     Ok(tree)
 }
 

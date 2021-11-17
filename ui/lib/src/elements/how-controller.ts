@@ -126,6 +126,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
     this.initializing = true  // because checkInit gets call whenever profiles changes...
     let alignments = await this._store.pullAlignments();
+    await this._store.pullTree();
 
     /** load up a alignment if there are none */
     if (Object.keys(alignments).length == 0) {
@@ -137,9 +138,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     if (Object.keys(alignments).length == 0) {
       console.error("No alignments found")
     }
-    this._currentAlignmentEh = this._getFirst(alignments);
+   // this._currentAlignmentEh = this._getFirst(alignments);
 
-    console.log("   current alignment: ",  alignments[this._currentAlignmentEh].short_name, this._currentAlignmentEh);
+    //console.log("   current alignment: ",  alignments[this._currentAlignmentEh].short_name, this._currentAlignmentEh);
 
     // request the update so the drawer will be findable
     await this.requestUpdate();
@@ -165,11 +166,22 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     const init:Initialization = {
     alignments: [
       {
+        parents: [], // full paths to parent nodes (remember it's a DAG)
+        path_abbreviation: "", // max 10 char
+        short_name: "Holochain Standards", // max 25 char
+        title: "Holochain Community Standards",
+        summary: "All the protocols and process and standards used by the holochain community",
+        stewards: [],  // people who can change this document
+        processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+        history: {},
+        meta: {}
+      },
+      {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "soc_proto", // max 10 char
       short_name: "Social Protocols", // max 25 char
       title: "Social Protocols used by the Holochain Community",
-      summary: "The holochain community uses social protcols to get its work done.",
+      summary: "The holochain community uses social protocols to get its work done.",
       stewards: [],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
@@ -178,8 +190,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     {
       parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "self", // max 10 char
-      short_name: "Protcols for How", // max 25 char
-      title: "The social protocols used for updating this tree",
+      short_name: "How Processes", // max 25 char
+      title: "Processes templates for making changes to this tree",
       summary: "blah blah",
       stewards: [],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
@@ -309,9 +321,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   render() {
-    if (!this._currentAlignmentEh) {
-      return;
-    }
+    // if (!this._currentAlignmentEh) {
+    //   return;
+    // }
 
     /** Build alignment list */
     const alignments = Object.entries(this._alignments.value).map(
@@ -350,7 +362,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <!-- TOP APP BAR -->
     <mwc-top-app-bar id="app-bar" dense style="position: relative;">
       <mwc-icon-button icon="menu" slot="navigationIcon"></mwc-icon-button>
-      <div slot="title">How - ${this._alignments.value[this._currentAlignmentEh].short_name}</div>
+      <div slot="title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].short_name}` : ''}</div>
       <mwc-icon-button slot="actionItems" icon="autorenew" @click=${() => this.refresh()} ></mwc-icon-button>
       <mwc-icon-button id="menu-button" slot="actionItems" icon="more_vert" @click=${() => this.openTopMenu()}></mwc-icon-button>
       <mwc-menu id="top-menu" corner="BOTTOM_LEFT" @click=${this.handleMenuSelect}>

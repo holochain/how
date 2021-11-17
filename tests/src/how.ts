@@ -24,14 +24,26 @@ export default async (orchestrator) => {
       title: "specification of the holochain conductor api for application access",
       summary: "blah blah",
       stewards: [],  // people who can change this document
-      processes: ["soc_proto/self/proposal"], // paths to process template to use
+      processes: ["soc_proto.self.proposal"], // paths to process template to use
+      history: {},
+      meta: {}
+    };
+
+    let root = {
+      parents: [], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "", // max 10 char
+      short_name: "Holochain Community Standards", // max 25 char
+      title: "root node",
+      summary: "blah blah",
+      stewards: [],  // people who can change this document
+      processes: ["soc_proto.self.proposal"], // paths to process template to use
       history: {},
       meta: {}
     };
 
     a_and_b_conductor.setSignalHandler((signal) => {
       console.log("Received Signal:",signal)
-      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: alignment1})
+//      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: alignment1})
     })
 
     // install your happs into the conductors and destructuring the returned happ data using the same
@@ -40,12 +52,14 @@ export default async (orchestrator) => {
     const [alice_how] = alice_how_happ.cells
 //    const [bobbo_how] = bobbo_how_happ.cells
 
+    await alice_how.call('how', 'initialize', {alignments: [root]} );
+
     const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1 );
     t.ok(alignment1_hash)
     console.log("alignment1_hash", alignment1_hash);
 
     const alignments = await alice_how.call('how', 'get_alignments', null );
-    t.deepEqual(alignments, [{hash: alignment1_hash, content: alignment1}]);
+    t.deepEqual(alignments, [{hash: alignments[0].hash, content: root}, {hash: alignment1_hash, content: alignment1}]);
 
     const tree = await alice_how.call('how', 'get_tree', null );
     console.log("Rust tree", tree);
