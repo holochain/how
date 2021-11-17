@@ -73,6 +73,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   }
 
   resetAllFields() {
+    this._parent = undefined
     this._nameField.value = ''
   }
 
@@ -92,7 +93,11 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   }
 
   private parentPath() {
-    return this._parent ? `${this._parent?.parents[0]}.${this._parent?.path_abbreviation}` : ``
+    if (!this._parent) return ``
+    let path = ""
+    if (this._parent.parents.length > 0) path +=  `${this._parent?.parents[0]}.`
+    path += this._parent?.path_abbreviation
+    return path
   }
 
   render() {

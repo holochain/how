@@ -49,7 +49,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
     return html`
     <li>
       <span class="${nodeId == this.currentNode ? "current" : ""}" @click=${()=>this.select(nodeId)}>
-        ${node.id=="0" ? "Root" : node.val.name}
+        ${node.id=="0" ? "Holochain Community Standards" : node.val.name}
         <mwc-button icon="add_circle" @click=${
           () => this.dispatchEvent(new CustomEvent('add-child', { detail: nodeId, bubbles: true, composed: true }))}>
           </mwc-button>
@@ -139,9 +139,24 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
                 position: absolute;
             }
             .tree ul:before {
-                top: -.5em;import {}
+                top: -.5em;
+            }
 
-    }
+            .tree code:before,
+            .tree span:before {
+                top: -.55em;
+            }
+
+            .tree>li {
+                margin-top: 0;
+            }
+
+            .tree>li:before,
+            .tree>li:after,
+            .tree>li>code:before,
+            .tree>li>span:before {
+                outline: none;
+            }
 `,
     ];
   }
