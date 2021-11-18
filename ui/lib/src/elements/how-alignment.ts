@@ -47,6 +47,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
        <li> Name: ${alignment.short_name}</li>
        <li> Title: ${alignment.title}</li>
+       <li> Summary: ${alignment.summary}</li>
        <li> Stewards: ${alignment.stewards}</li>
        <li> Processes: ${alignment.processes}</li>
       </div>

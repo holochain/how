@@ -55,6 +55,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   @query('#my-drawer')
   private _drawer!: Drawer;
 
+  @query('#tree')
+  private _tree!: HowTree;
+
   @state() _currentAlignmentEh = "";
 
   private initialized = false;
@@ -371,7 +374,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     </mwc-top-app-bar>
 
     <div class="appBody">
-      <how-tree 
+      <how-tree id="tree"
       @node-selected=${this.handleNodeSelected}
       @add-child=${this.handleAddChild}
       ></how-tree>
@@ -380,7 +383,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
     <how-alignment-dialog id="alignment-dialog"
                         .myProfile=${this._myProfile.value}
-                        @alignment-added=${(e:any) => this._currentAlignmentEh = e.detail}>
+                        @alignment-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh(); this._tree.currentNode=e.detail}}>
     </how-alignment-dialog>
   </div>
 </mwc-drawer>

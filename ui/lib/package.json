@@ -27,7 +27,6 @@
   "dependencies": {
     "@holochain-open-dev/cell-client": "^0.1.0",
     "@holochain-open-dev/core-types": "^0.1.1",
-    "@scoped-elements/cytoscape": "^0.0.2",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#ui-build",
     "@lit-labs/context": "github:holochain-open-dev/context#build",
     "@open-wc/scoped-elements": "^2.0.1",

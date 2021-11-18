@@ -9,7 +9,6 @@ import {Node, howContext} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles";
-import { CytoscapeDagre } from '@scoped-elements/cytoscape';
 import {
   Button, 
 } from "@scoped-elements/material-web";
@@ -66,7 +65,6 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
 
   static get scopedElements() {
     return {
-        'cytoscape-dagre': CytoscapeDagre,
         "mwc-button": Button,
       };
   }

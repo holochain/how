@@ -10,7 +10,8 @@ import {EntryHashB64} from "@holochain-open-dev/core-types";
 import {
   Button,
   Dialog,
-  TextField
+  TextField,
+  TextArea,
 } from "@scoped-elements/material-web";
 import {Profile} from "@holochain-open-dev/profiles";
 
@@ -27,6 +28,10 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
 
   @query('#name-field')
   _nameField!: TextField;
+  @query('#title-field')
+  _titleField!: TextField;
+  @query('#summary-field')
+  _summaryField!: TextArea;
 
   @state() _parent?: Alignment;
 
@@ -46,16 +51,21 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     /** Check validity */
     // nameField
     let isValid = this._nameField.validity.valid
-
     if (!this._nameField.validity.valid) {
       this._nameField.reportValidity()
+    }
+    if (!this._titleField.validity.valid) {
+      this._titleField.reportValidity()
+    }
+    if (!this._summaryField.validity.valid) {
+      this._summaryField.reportValidity()
     }
     const alignment: Alignment = {
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: this._nameField.value, // max 10 char
       short_name: this._nameField.value,
-      title: "specification of the holochain conductor api for application access",
-      summary: "blah blah",
+      title: this._titleField.value,
+      summary: this._summaryField.value,
       stewards: [],  // people who can change this document
       processes: ["soc_proto.self.proposal"], // paths to process template to use
       history: {},
@@ -75,6 +85,8 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   resetAllFields() {
     this._parent = undefined
     this._nameField.value = ''
+    this._titleField.value = ''
+    this._summaryField.value = ''
   }
 
   private async handleDialogOpened(e: any) {
@@ -107,6 +119,12 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   <mwc-textfield dialogInitialFocus type="text"
                  @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
                  id="name-field" minlength="3" maxlength="64" label="Name" autoValidate=true required></mwc-textfield>
+  <mwc-textfield type="text"
+                 @input=${() => (this.shadowRoot!.getElementById("title-field") as TextField).reportValidity()}
+                 id="title-field" minlength="3" maxlength="64" label="Title" autoValidate=true required></mwc-textfield>
+  <mwc-textarea 
+                 @input=${() => (this.shadowRoot!.getElementById("summary-field") as TextArea).reportValidity()}
+                 id="summary-field" minlength="3" maxlength="64" cols="73" rows="10" label="Summary" autoValidate=true required></mwc-textarea>
   <mwc-button id="primary-action-button" slot="primaryAction" @click=${this.handleOk}>ok</mwc-button>
   <mwc-button slot="secondaryAction"  dialogAction="cancel">cancel</mwc-button>
 </mwc-dialog>
@@ -119,6 +137,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       "mwc-button": Button,
       "mwc-dialog": Dialog,
       "mwc-textfield": TextField,
+      "mwc-textarea": TextArea,
     };
   }
   static get styles() {
