@@ -28,6 +28,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _profiles!: ProfilesStore;
 
   _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
+  _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
 
   get myNickName(): string {
@@ -48,12 +49,12 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     /** Render layout */
     return html`
       <div class="alignment">
+       <h4> ${alignment.short_name} </h4>
        <li> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
-       <li> Name: ${alignment.short_name}</li>
        <li> Title: ${alignment.title}</li>
        <li> Summary: ${alignment.summary}</li>
-       <li> Stewards: ${alignment.stewards}</li>
+       <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
        <li> Processes: ${alignment.processes.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
       </div>
     `;
@@ -72,7 +73,14 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         border: solid .1em #666;
         border-radius: .2em;
         margin-left: 20px;
-        padding: 20px;
+        padding: 10px;
+      }
+      .alignment h4 {
+        margin-top: 0px;
+        margin-bottom: 5px;
+      }
+      .alignment li {
+        list-style: none;
       }
       .node-link {
         cursor: pointer;

@@ -1,7 +1,7 @@
 pub use hdk::prelude::*;
 use hdk::hash_path::path::Component;
 use std::collections::BTreeMap;
-use holo_hash::EntryHashB64;
+use holo_hash::{EntryHashB64, AgentPubKeyB64};
 
 use crate::error::*;
 use crate::signals::*;
@@ -16,9 +16,9 @@ pub struct Alignment {
     pub short_name: String, // max 25 char
     pub title: String,
     pub summary: String,
-    pub stewards: Vec<AgentPubKey>,  // people who can change this document
+    pub stewards: Vec<AgentPubKeyB64>,  // people who can change this document
     pub processes: Vec<String>, // paths to process template to use
-    pub history: BTreeMap<String, EntryHash>,
+    pub history: BTreeMap<String, EntryHashB64>,
     pub meta: BTreeMap<String, String>, // for UI to do things    pub name: String,
 }
 

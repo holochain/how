@@ -5,15 +5,15 @@ import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Alignment, howContext} from "../types";
-import {EntryHashB64} from "@holochain-open-dev/core-types";
+import {Alignment, howContext, Dictionary} from "../types";
+import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
   Dialog,
   TextField,
   TextArea,
 } from "@scoped-elements/material-web";
-import {Profile} from "@holochain-open-dev/profiles";
+import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
 
 /**
  * @element how-alignment-dialog
@@ -32,6 +32,8 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   _titleField!: TextField;
   @query('#summary-field')
   _summaryField!: TextArea;
+  
+  @property() _stewards: Dictionary<string> = {};
 
   @state() _parent?: Alignment;
 
@@ -42,6 +44,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     this._parent = this._store.alignment(parentEh);
     const dialog = this.shadowRoot!.getElementById("alignment-dialog") as Dialog
     dialog.open = true
+    this._store.pullProfiles() // TODO, this won't scale
   }
 
   /**
@@ -66,7 +69,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       short_name: this._nameField.value,
       title: this._titleField.value,
       summary: this._summaryField.value,
-      stewards: [],  // people who can change this document
+      stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
       processes: ["soc_proto.self.proposal"], // paths to process template to use
       history: {},
       meta: {},
@@ -101,6 +104,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   }
 
   private async handleDialogClosing(e: any) {
+    console.log("boink")
     this.resetAllFields();
   }
 
@@ -112,6 +116,13 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     return path
   }
 
+  private addSteward(e:any) {
+    const nickname = e.detail.agent.profile.nickname
+    const pubKey = e.detail.agent.agent_pub_key
+    this._stewards[pubKey] = nickname
+    this._stewards = this._stewards
+    this.requestUpdate()
+  }
   render() {
     return html`
 <mwc-dialog id="alignment-dialog" heading="New alignment" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
@@ -125,6 +136,14 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   <mwc-textarea 
                  @input=${() => (this.shadowRoot!.getElementById("summary-field") as TextArea).reportValidity()}
                  id="summary-field" minlength="3" maxlength="64" cols="73" rows="10" label="Summary" autoValidate=true required></mwc-textarea>
+  Stewards: ${Object.keys(this._stewards).length} ${Object.entries(this._stewards).map(([agent, nickname])=>html`<span class="agent" title="${agent}">${nickname}</span>`)}
+  <search-agent
+  @closing=${(e:any)=>e.stopPropagation()}
+  @agent-selected="${this.addSteward}"
+  clear-on-select
+  style="margin-bottom: 16px;"
+  include-myself></search-agent>
+
   <mwc-button id="primary-action-button" slot="primaryAction" @click=${this.handleOk}>ok</mwc-button>
   <mwc-button slot="secondaryAction"  dialogAction="cancel">cancel</mwc-button>
 </mwc-dialog>
@@ -138,6 +157,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       "mwc-dialog": Dialog,
       "mwc-textfield": TextField,
       "mwc-textarea": TextArea,
+      "search-agent": SearchAgent,
     };
   }
   static get styles() {

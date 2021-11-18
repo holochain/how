@@ -93,6 +93,10 @@ export class HowStore {
     return t
   }
 
+  async pullProfiles() : Promise<void> {
+    this.profiles.fetchAllProfiles()
+  }
+
   async pullTree() : Promise<Node> {
     const rtree: Array<RustNode> = await this.service.getTree();
     const node: Node = this.buildTree(rtree, rtree[0])
