@@ -34,6 +34,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return this._myProfile.value.nickname;
   }
 
+  handleNodelink(path: string) {
+    console.log("clicked on", path)
+    this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
+  }
+
   render() {
     if (!this.currentAlignmentEh) {
       return;
@@ -43,13 +48,13 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     /** Render layout */
     return html`
       <div class="alignment">
-       <li> Parents: ${alignment.parents}</li>
+       <li> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
        <li> Name: ${alignment.short_name}</li>
        <li> Title: ${alignment.title}</li>
        <li> Summary: ${alignment.summary}</li>
        <li> Stewards: ${alignment.stewards}</li>
-       <li> Processes: ${alignment.processes}</li>
+       <li> Processes: ${alignment.processes.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
       </div>
     `;
   }
@@ -68,6 +73,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         border-radius: .2em;
         margin-left: 20px;
         padding: 20px;
+      }
+      .node-link {
+        cursor: pointer;
+        border: solid .1em #666;
+        border-radius: .2em;
       }
       `,
     ];

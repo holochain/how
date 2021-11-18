@@ -24,6 +24,7 @@ export class HowStore {
   
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
+  private alignmentsPathStore: Writable<Dictionary<string>> = writable({});
   private treeStore: Writable<Node> = writable({val:{name:"T", alignments: []}, children:[], id:"0"});
 
   /** Static info */
@@ -31,6 +32,7 @@ export class HowStore {
 
   /** Readable stores */
   public alignments: Readable<Dictionary<Alignment>> = derived(this.alignmentsStore, i => i)
+  public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   
   constructor(
@@ -63,6 +65,11 @@ export class HowStore {
   }
 
   private async updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment): Promise<void>   {
+    this.alignmentsPathStore.update(alignments => {
+      const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
+      alignments[path] = hash
+      return alignments
+    })
     this.alignmentsStore.update(alignments => {
       alignments[hash] = alignment
       return alignments

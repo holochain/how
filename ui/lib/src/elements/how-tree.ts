@@ -97,6 +97,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   background-color: red;
 }
     .tree li {
+      cursor: pointer;
         display: table-cell;
         padding: .5em 0;
         vertical-align: top;

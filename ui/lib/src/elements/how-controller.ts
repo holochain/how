@@ -49,6 +49,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
   _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
+  _alignmentsPath = new StoreSubscriber(this, () => this._store.alignmentsPath);
 
   /** Private properties */
 
@@ -378,7 +379,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       @node-selected=${this.handleNodeSelected}
       @add-child=${this.handleAddChild}
       ></how-tree>
-      <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}></how-alignment>
+      <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
+      @select-node=${(e: any)=>{this.handleAlignmentSelect(this._alignmentsPath.value[e.detail])}}></how-alignment>
     </div>
 
     <how-alignment-dialog id="alignment-dialog"

@@ -154,6 +154,10 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
           margin-top: 10px;
           display: flex;
         }
+        mwc-textarea {
+          margin-top: 10px;
+          display: flex;
+        }
         .ui-item {
           position: absolute;
           pointer-events: none;
