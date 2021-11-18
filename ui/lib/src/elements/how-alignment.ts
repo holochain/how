@@ -76,6 +76,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       }
       .node-link {
         cursor: pointer;
+        background-color: white;
         border: solid .1em #666;
         border-radius: .2em;
       }

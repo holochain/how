@@ -290,10 +290,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   private async handleAlignmentSelect(alignmentEh: string): Promise<void> {
     this._currentAlignmentEh = alignmentEh;
     this.alignmentElem.currentAlignmentEh = alignmentEh;
+    this._tree.currentNode = alignmentEh;
   }
 
   handleNodeSelected(event: any) {
-    console.log(event.detail)
     const alignmentEh = event.detail
     if (this._alignments.value[alignmentEh]) {
       this.handleAlignmentSelect(alignmentEh)
@@ -380,12 +380,12 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       @add-child=${this.handleAddChild}
       ></how-tree>
       <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
-      @select-node=${(e: any)=>{this.handleAlignmentSelect(this._alignmentsPath.value[e.detail])}}></how-alignment>
+      @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}></how-alignment>
     </div>
 
     <how-alignment-dialog id="alignment-dialog"
                         .myProfile=${this._myProfile.value}
-                        @alignment-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh(); this._tree.currentNode=e.detail}}>
+                        @alignment-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
     </how-alignment-dialog>
   </div>
 </mwc-drawer>
