@@ -175,7 +175,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         short_name: "Holochain Standards", // max 25 char
         title: "Holochain Community Standards",
         summary: "All the protocols and process and standards used by the holochain community",
-        stewards: [],  // people who can change this document
+        stewards: [this._store.myAgentPubKey],  // people who can change this document
         processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
         history: {},
         meta: {}
@@ -186,7 +186,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       short_name: "Social Protocols", // max 25 char
       title: "Social Protocols used by the Holochain Community",
       summary: "The holochain community uses social protocols to get its work done.",
-      stewards: [],  // people who can change this document
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
@@ -194,10 +194,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     {
       parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "self", // max 10 char
-      short_name: "How Processes", // max 25 char
+      short_name: "How Processes", // max 25 charAgent
       title: "Processes templates for making changes to this tree",
       summary: "blah blah",
-      stewards: [],  // people who can change this document
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
@@ -208,7 +208,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       short_name: "Proposal Process", // max 25 char
       title: "Protocol for making proposals",
       summary: "blah blah",
-      stewards: [],  // people who can change this document
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
@@ -219,7 +219,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       short_name: "Approval Process", // max 25 char
       title: "Protocol for approving proposals",
       summary: "blah blah",
-      stewards: [],  // people who can change this document
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
@@ -230,7 +230,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       short_name: "Holochain System", // max 25 char
       title: "Holochain complete system",
       summary: "blah blah",
-      stewards: [],  // people who can change this document
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
@@ -241,7 +241,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       short_name: "Holochain Conductor", // max 25 char
       title: "Holochain Conductor",
       summary: "blah blah",
-      stewards: [],  // people who can change this document
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
@@ -252,7 +252,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       short_name: "Holochain Conductor API", // max 25 char
       title: "specification of the holochain conductor api",
       summary: "blah blah",
-      stewards: [],  // people who can change this document
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
