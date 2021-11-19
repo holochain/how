@@ -5,9 +5,10 @@ use hdk::prelude::*;
 // use holochain::sweettest::SweetConductor;
 use holochain::sweettest::*;
 use holochain::test_utils::consistency_10s;
-use holo_hash::EntryHashB64;
+use holo_hash::{EntryHashB64, AgentPubKeyB64};
 
 use how::alignment::*;
+use how::document::*;
 use how::*;
 
 const DNA_FILEPATH: &str = "../../workdir/dna/how.dna";
@@ -59,7 +60,7 @@ pub async fn test_basics() {
         short_name: "application".into(), // max 25 char
         title: "specification of the holochain conductor api for application access".into(),
         summary: "blah blah".into(),
-        stewards: vec![],  // people who can change this document
+        stewards: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document
         processes: vec!["soc_proto.self.proposal".into()], // paths to process template to use
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
@@ -80,7 +81,31 @@ pub async fn test_basics() {
         .await;
     assert_eq!(alignments[1].hash, hash);
     assert_eq!(alignments.len(), 2);
-    debug!("{:#?}", alignments)
+    debug!("{:#?}", alignments);
+
+    let mut content  = BTreeMap::new();
+    content.insert("Introduction".to_string(), "blah blah".to_string());
+    let document = Document {
+      document_type: String::from(DOC_TEMPLATE), // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
+      editors: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document, if empty anyone can
+      content, // semantically identified content components
+      meta: BTreeMap::new(), // semantically identified meta
+    };
+
+    let hash: EntryHashB64 = conductor_alice
+    .call(&cell_alice.zome("how"), "create_document", 
+DocumentInput {
+            path: "hc_system.conductor.api".into(),
+            document,
+        })
+    .await;
+
+    let output:Vec<DocumentOutput> = conductor_alice
+    .call(&cell_alice.zome("how"), "get_documents", "hc_system.conductor.api".to_string())
+    .await;
+
+    assert_eq!(output[0].hash, hash);
+
 }
 
 // UTILS:

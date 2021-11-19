@@ -30,6 +30,13 @@ fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult
     Ok(())
 }
 
+pub fn tree_path(path_str: String) -> Path {
+    let mut path: String = TREE_ROOT.to_owned(); 
+    path.push_str(".");
+    path.push_str(&path_str);
+    Path::from(path)
+}
+
 #[hdk_extern]
 pub fn get_tree(_input: ()) -> ExternResult<Tree<Content>> {
     let root_path = Path::from(TREE_ROOT);

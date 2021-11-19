@@ -15,6 +15,8 @@ pub enum HowError {
     Wasm(#[from] WasmError),
     #[error(transparent)]
     Timestamp(#[from] TimestampError),
+    #[error("Tree path does not exist")]
+    MissingPath,
 }
 
 pub type HowResult<T> = Result<T, HowError>;
