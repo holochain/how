@@ -9,6 +9,7 @@ pub mod tree;
 pub mod signals;
 
 use crate::alignment::{Alignment, create_alignment};
+use crate::document::{DocumentInput, create_document};
 
 #[hdk_extern]
 fn init(_: ()) -> ExternResult<InitCallbackResult> {
@@ -32,6 +33,7 @@ entry_defs![
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Initialization {
     pub alignments: Vec<Alignment>,
+    pub documents: Vec<DocumentInput>,
 }
 
 #[hdk_extern]
@@ -39,6 +41,9 @@ fn initialize(input: Initialization) -> ExternResult<()> {
     // add progenitor check for call
     for alignment in input.alignments {
         create_alignment(alignment)?;
+    }
+    for document in input.documents {
+        create_document(document)?;
     }
     Ok(())
 }

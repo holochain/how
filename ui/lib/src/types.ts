@@ -9,7 +9,8 @@ export const howContext : Context<HowStore> = createContext('how/service');
 export type Dictionary<T> = { [key: string]: T };
 
 export interface Initialization {
-  alignments: Array<Alignment>
+  alignments: Array<Alignment>,
+  documents: Array<DocumentInput>,
 }
 
 export interface Alignment {
@@ -24,6 +25,21 @@ export interface Alignment {
   meta?: Dictionary<string>;
 }
 
+export const DOC_TEMPLATE="_template"
+export const DOC_COMMENT="_comment"
+
+export interface Document {
+  document_type: string, // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
+  editors: Array<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
+  content: Dictionary<String>, // semantically identified content components
+  meta: Dictionary<String>, // semantically identified meta
+}
+
+export interface DocumentInput {
+  path: string,
+  document: Document,
+}
+
 export type Signal =
   | {
     alignmentHash: EntryHashB64, message: {type: "NewAlignment", content:  Alignment}
@@ -31,7 +47,8 @@ export type Signal =
   
 export type Content = {
   name: string,
-  alignments: Array<EntryHashB64>
+  alignments: Array<EntryHashB64>,
+  documents: Array<EntryHashB64>
 }
 export type RustNode = {
     idx: number,

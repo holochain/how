@@ -41,6 +41,18 @@ export default async (orchestrator) => {
       meta: {}
     };
 
+    let document = {
+      path: "",
+      document: {  
+        document_type: "_template",
+        content: {
+          title: "ROOT NODE DOC",
+          summary: "{}",
+        },
+        editors: [],
+        meta: {}
+      }
+    }
     a_and_b_conductor.setSignalHandler((signal) => {
       console.log("Received Signal:",signal)
 //      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: alignment1})
@@ -52,7 +64,7 @@ export default async (orchestrator) => {
     const [alice_how] = alice_how_happ.cells
 //    const [bobbo_how] = bobbo_how_happ.cells
 
-    await alice_how.call('how', 'initialize', {alignments: [root]} );
+    await alice_how.call('how', 'initialize', {alignments: [root], documents:[document]} );
 
     const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1 );
     t.ok(alignment1_hash)

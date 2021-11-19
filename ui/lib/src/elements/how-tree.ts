@@ -48,7 +48,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
     return html`
     <li>
       <span class="${nodeId == this.currentNode ? "current" : ""}" @click=${()=>this.select(nodeId)}>
-        ${node.id=="0" ? "Holochain Community Standards" : node.val.name}
+        ${node.id=="0" ? "Holochain Community Standards" : node.val.name} : ${node.val.documents.length}
         <mwc-button icon="add_circle" @click=${
           () => this.dispatchEvent(new CustomEvent('add-child', { detail: nodeId, bubbles: true, composed: true }))}>
           </mwc-button>

@@ -6,7 +6,7 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Alignment, Dictionary, Initialization} from "../types";
+import {howContext, Alignment, Dictionary, Initialization, DOC_TEMPLATE} from "../types";
 import { HowStore } from "../how.store";
 import { HowAlignment } from "./how-alignment";
 import { HowTree } from "./how-tree";
@@ -256,8 +256,34 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
       history: {},
       meta: {}
-    }]}
-        await this._store.initilize(init);
+    }],
+    documents: [
+    {
+      path: "soc_proto.self.proposal",
+      document: {  
+        document_type: DOC_TEMPLATE,
+        content: {
+          title: "Proposal: {}",
+          summary: "{}",
+        },
+        editors: [this._store.myAgentPubKey],
+        meta: {}
+      }
+    },
+    {
+      path: "soc_proto.self.approval",
+      document: {  
+        document_type: DOC_TEMPLATE,
+        content: {
+          title: "Approval: {}",
+          summary: "{}",
+        },
+        editors: [this._store.myAgentPubKey],
+        meta: {}
+      }
+    }
+    ]}
+    await this._store.initilize(init);
   }
 
   async refresh() {

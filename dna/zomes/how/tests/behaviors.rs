@@ -9,6 +9,7 @@ use holo_hash::{EntryHashB64, AgentPubKeyB64};
 
 use how::alignment::*;
 use how::document::*;
+use how::tree::*;
 use how::*;
 
 const DNA_FILEPATH: &str = "../../workdir/dna/how.dna";
@@ -48,7 +49,7 @@ pub async fn test_basics() {
         meta: BTreeMap::new(),
     };
 
-    let input= Initialization {alignments: vec![aligment1]};
+    let input= Initialization {alignments: vec![aligment1], documents: vec![]};
 
     let _:() = conductor_alice
         .call(&cell_alice.zome("how"), "initialize", input.clone())
@@ -84,7 +85,7 @@ pub async fn test_basics() {
     debug!("{:#?}", alignments);
 
     let mut content  = BTreeMap::new();
-    content.insert("Introduction".to_string(), "blah blah".to_string());
+    content.insert("summary".to_string(), "blah blah".to_string());
     let document = Document {
       document_type: String::from(DOC_TEMPLATE), // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
       editors: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document, if empty anyone can
@@ -103,8 +104,13 @@ DocumentInput {
     let output:Vec<DocumentOutput> = conductor_alice
     .call(&cell_alice.zome("how"), "get_documents", "hc_system.conductor.api".to_string())
     .await;
-
     assert_eq!(output[0].hash, hash);
+
+    let output:Tree<Content> = conductor_alice
+    .call(&cell_alice.zome("how"), "get_tree", ())
+    .await;
+
+    debug!("TREE: {:?}", output);
 
 }
 
