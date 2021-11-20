@@ -30,6 +30,8 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
   _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
+  _documents = new StoreSubscriber(this, () => this._store.documents);
+  _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
   get myNickName(): string {
     return this._myProfile.value.nickname;
@@ -40,12 +42,27 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
   }
 
+  getPath() : string {
+    if (!this.currentAlignmentEh) {
+      return ""
+    }
+    const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
+    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
+  }
+
   render() {
     if (!this.currentAlignmentEh) {
       return;
     }
-    /** Get current alignment and zoom level */
-    const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
+    /** Get current alignment*/
+    const alignment: Alignment = this._alignments.value[this.currentAlignmentEh]
+
+    /** the list of documents for this alignment */
+    const path = this.getPath()
+    this._store.pullDocuments(path)
+    const docs = this._documentPaths.value[path]
+    const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${Object.entries(doc.content.content).map(([key,value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
+
     /** Render layout */
     return html`
       <div class="alignment">
@@ -56,6 +73,10 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Summary: ${alignment.summary}</li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
        <li> Processes: ${alignment.processes.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
+       <li> Documents:
+        <ul>${documents}
+        </ul>
+      </li>
       </div>
     `;
   }

@@ -25,6 +25,11 @@ export interface Alignment {
   meta?: Dictionary<string>;
 }
 
+export interface AlignmentOutput {
+  hash: EntryHashB64,
+  content: Alignment,
+}
+
 export const DOC_TEMPLATE="_template"
 export const DOC_COMMENT="_comment"
 
@@ -38,6 +43,11 @@ export interface Document {
 export interface DocumentInput {
   path: string,
   document: Document,
+}
+
+export interface DocumentOutput {
+  hash: EntryHashB64,
+  content: Document,
 }
 
 export type Signal =

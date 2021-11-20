@@ -9,6 +9,8 @@ import {
   RustNode,
   Node,
   Initialization,
+  Document,
+  DocumentOutput,
 } from './types';
 import {
   ProfilesStore,
@@ -24,16 +26,20 @@ export class HowStore {
   
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
+  private documentsStore: Writable<Dictionary<Document>> = writable({});
   private alignmentsPathStore: Writable<Dictionary<string>> = writable({});
   private treeStore: Writable<Node> = writable({val:{name:"T", alignments: [], documents: []}, children:[], id:"0"});
+  private documentPathStore: Writable<Dictionary<Array<DocumentOutput>>> = writable({});
 
   /** Static info */
   myAgentPubKey: AgentPubKeyB64;
 
   /** Readable stores */
   public alignments: Readable<Dictionary<Alignment>> = derived(this.alignmentsStore, i => i)
+  public documents: Readable<Dictionary<Document>> = derived(this.documentsStore, i => i)
   public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
+  public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
   
   constructor(
     protected cellClient: CellClient,
@@ -64,7 +70,7 @@ export class HowStore {
     return Object.keys(get(this.profiles.knownProfiles)).filter((key)=> key != this.myAgentPubKey)
   }
 
-  private async updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment): Promise<void>   {
+  private updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment) {
     this.alignmentsPathStore.update(alignments => {
       const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
       alignments[path] = hash
@@ -78,11 +84,36 @@ export class HowStore {
 
   async pullAlignments() : Promise<Dictionary<Alignment>> {
     const alignments = await this.service.getAlignments();
-    //console.log({alignments})
     for (const s of alignments) {
-      await this.updateAlignmentFromEntry(s.hash, s.content)
+      this.updateAlignmentFromEntry(s.hash, s.content)
     }
     return get(this.alignmentsStore)
+  }
+
+  private updateDocuments(path: string, doc: DocumentOutput)  {
+    this.documentPathStore.update(documents => {
+      if (!documents[path]) {
+        documents[path] = [doc]
+      }
+      else {
+        if (documents[path].find(e=>e.hash = doc.hash) == undefined) {
+          documents[path].push(doc)
+        }
+      }
+      return documents
+    })
+    this.documentsStore.update(documents => {
+      documents[doc.hash] = doc.content
+      return documents
+    })
+  }
+  
+  async pullDocuments(path: string) : Promise<Array<DocumentOutput>> {
+    const documents = await this.service.getDocuments(path)
+    for (const s of documents) {
+      this.updateDocuments(path, s)
+    }
+    return get(this.documentPathStore)[path]
   }
 
   buildTree(tree: Array<RustNode>, node: RustNode): Node {
