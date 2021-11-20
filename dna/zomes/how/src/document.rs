@@ -13,7 +13,7 @@ pub const DOC_TEMPLATE:&str = "T";
 pub struct Document {
     pub document_type: String, // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
     pub editors: Vec<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
-    pub content: BTreeMap<String, String>, // semantically identified content components
+    pub content: Vec<(String, String)>, // semantically identified content components
     pub meta: BTreeMap<String, String>, // semantically identified meta
 }
 

@@ -96,7 +96,7 @@ export class HowStore {
         documents[path] = [doc]
       }
       else {
-        if (documents[path].find(e=>e.hash = doc.hash) == undefined) {
+        if (documents[path].find(e=>e.hash == doc.hash) == undefined) {
           documents[path].push(doc)
         }
       }
@@ -154,5 +154,9 @@ export class HowStore {
 
   alignment(alignmentEh: EntryHashB64): Alignment {
     return get(this.alignmentsStore)[alignmentEh];
+  }
+
+  async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
+    return await this.service.createDocument({path, document})
   }
 }

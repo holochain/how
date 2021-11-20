@@ -90,6 +90,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     this._nameField.value = ''
     this._titleField.value = ''
     this._summaryField.value = ''
+    this._stewards = {}
   }
 
   private async handleDialogOpened(e: any) {
@@ -104,7 +105,6 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   }
 
   private async handleDialogClosing(e: any) {
-    console.log("boink")
     this.resetAllFields();
   }
 

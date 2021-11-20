@@ -45,10 +45,10 @@ export default async (orchestrator) => {
       path: "",
       document: {  
         document_type: "_template",
-        content: {
-          title: "ROOT NODE DOC",
-          summary: "{}",
-        },
+        content: [
+          ["title","ROOT NODE DOC"],
+          ["summary", "{}"]
+        ],
         editors: [],
         meta: {}
       }

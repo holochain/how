@@ -36,8 +36,8 @@ export const DOC_COMMENT="_comment"
 export interface Document {
   document_type: string, // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
   editors: Array<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
-  content: Dictionary<String>, // semantically identified content components
-  meta: Dictionary<String>, // semantically identified meta
+  content: Array<[string, string]>, // semantically identified content components
+  meta: Dictionary<string>, // semantically identified meta
 }
 
 export interface DocumentInput {

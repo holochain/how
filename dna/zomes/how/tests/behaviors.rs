@@ -84,8 +84,7 @@ pub async fn test_basics() {
     assert_eq!(alignments.len(), 2);
     debug!("{:#?}", alignments);
 
-    let mut content  = BTreeMap::new();
-    content.insert("summary".to_string(), "blah blah".to_string());
+    let content  = vec![("summary".to_string(), "blah blah".to_string())];
     let document = Document {
       document_type: String::from(DOC_TEMPLATE), // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
       editors: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document, if empty anyone can

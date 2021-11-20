@@ -262,10 +262,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       path: "soc_proto.self.proposal",
       document: {  
         document_type: DOC_TEMPLATE,
-        content: {
-          title: "Proposal: {}",
-          summary: "{}",
-        },
+        content: [
+          ["title", "Proposal: {}"],
+          ["summary", "{}"],
+        ],
         editors: [this._store.myAgentPubKey],
         meta: {}
       }
@@ -274,10 +274,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       path: "soc_proto.self.approval",
       document: {  
         document_type: DOC_TEMPLATE,
-        content: {
-          title: "Approval: {}",
-          summary: "{}",
-        },
+        content: [
+          ["title", "Approval: {}"],
+          ["summary", "{}"],
+        ],
         editors: [this._store.myAgentPubKey],
         meta: {}
       }
@@ -406,6 +406,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       @add-child=${this.handleAddChild}
       ></how-tree>
       <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
+      @document-added=${(e:any)=>{this.refresh();}}
       @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}></how-alignment>
     </div>
 

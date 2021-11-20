@@ -7,9 +7,15 @@ import {StoreSubscriber} from "lit-svelte-stores";
 import {sharedStyles} from "../sharedStyles";
 import {Alignment, howContext} from "../types";
 import {HowStore} from "../how.store";
+import { HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles";
-//import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
+import {
+  Button,
+  Dialog,
+  TextField,
+  TextArea,
+} from "@scoped-elements/material-web";
 
 /**
  * @element how-alignment
@@ -33,6 +39,9 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
+  @query('#document-dialog')
+  _documentDialogElem!: HowDocumentDialog;
+
   get myNickName(): string {
     return this._myProfile.value.nickname;
   }
@@ -50,6 +59,10 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
   }
 
+  addDoc(document_type: string ) {
+    this._documentDialogElem.open(this.getPath(), document_type);
+  }
+
   render() {
     if (!this.currentAlignmentEh) {
       return;
@@ -61,7 +74,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const path = this.getPath()
     this._store.pullDocuments(path)
     const docs = this._documentPaths.value[path]
-    const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${Object.entries(doc.content.content).map(([key,value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
+    const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(([key, value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
 
     /** Render layout */
     return html`
@@ -74,16 +87,21 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
        <li> Processes: ${alignment.processes.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
        <li> Documents:
-        <ul>${documents}
+        <ul>${documents} 
         </ul>
+        <mwc-button icon="add_circle"  @click=${()=>this.addDoc("soc_proto.self.proposal")}>Proposal</mwc-button>
       </li>
       </div>
+      <how-document-dialog id="document-dialog">
+      </how-document-dialog>
     `;
   }
 
 
   static get scopedElements() {
     return {
+      "mwc-button": Button,
+      "how-document-dialog": HowDocumentDialog,
     };
   }
   static get styles() {
