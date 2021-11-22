@@ -5,7 +5,7 @@ import {contextProvided} from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {Alignment, howContext} from "../types";
+import {Alignment, howContext, Node} from "../types";
 import {HowStore} from "../how.store";
 import { HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -38,6 +38,10 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
+
+  processes = new StoreSubscriber(this, () => this._store.processes);
+
+
 
   @query('#document-dialog')
   _documentDialogElem!: HowDocumentDialog;
@@ -76,6 +80,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(([key, value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
 
+    const processes = this.processes.value?.children.map(p => {
+        const processPath = `soc_proto.self.${p.val.name}`
+        return html`<mwc-button icon="add_circle"  @click=${()=>this.addDoc(processPath)}>${p.val.name}</mwc-button>`
+      })
+
     /** Render layout */
     return html`
       <div class="alignment">
@@ -89,7 +98,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Documents:
         <ul>${documents} 
         </ul>
-        <mwc-button icon="add_circle"  @click=${()=>this.addDoc("soc_proto.self.proposal")}>Proposal</mwc-button>
+         ${processes}
       </li>
       </div>
       <how-document-dialog id="document-dialog">

@@ -40,6 +40,7 @@ export class HowStore {
   public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
+  public processes: Readable<Node|undefined> = derived(this.treeStore, i => this.find(i,"soc_proto.self".split(".")))
   
   constructor(
     protected cellClient: CellClient,
@@ -122,6 +123,18 @@ export class HowStore {
       t.children.push(this.buildTree(tree, tree[n]))
     }
     return t
+  }
+
+  private find(tree: Node, path: Array<string>): Node | undefined {
+    const node = tree.children.find(n=> {console.log(path[0], n.val.name); return path[0]==n.val.name})
+    if (!node) return undefined
+    path.shift()
+    if (path.length == 0) return node
+    return this.find(node, path)
+  }
+
+  findInTree(path: string): Node | undefined {
+    return this.find(get(this.treeStore), path.split("."))
   }
 
   async pullProfiles() : Promise<void> {
