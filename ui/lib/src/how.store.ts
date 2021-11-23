@@ -11,6 +11,7 @@ import {
   Initialization,
   Document,
   DocumentOutput,
+  Process,
 } from './types';
 import {
   ProfilesStore,
@@ -40,7 +41,7 @@ export class HowStore {
   public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
-  public processes: Readable<Node|undefined> = derived(this.treeStore, i => this.find(i,"soc_proto.self".split(".")))
+  public processes: Readable<Array<Process>> = derived(this.treeStore, i => this.getProcesses(i))
   
   constructor(
     protected cellClient: CellClient,
@@ -123,6 +124,17 @@ export class HowStore {
       t.children.push(this.buildTree(tree, tree[n]))
     }
     return t
+  }
+
+  private getProcesses(tree: Node) : Array<Process> {
+    const node = this.find(tree,"soc_proto.self".split("."))
+    if (node) {
+      const processes = node.children.map(n => {
+        return {path: `soc_proto.self.${n.val.name}`, name: n.val.name}
+      })
+      return processes
+    }
+    return []
   }
 
   private find(tree: Node, path: Array<string>): Node | undefined {

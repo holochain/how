@@ -74,4 +74,9 @@ export type Node = {
     val: Content,
     id: string,
     children: Array<Node>
-  }
+}
+
+export type Process = {
+  path: string,
+  name: string,
+}

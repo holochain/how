@@ -80,9 +80,8 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(([key, value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
 
-    const processes = this.processes.value?.children.map(p => {
-        const processPath = `soc_proto.self.${p.val.name}`
-        return html`<mwc-button icon="add_circle"  @click=${()=>this.addDoc(processPath)}>${p.val.name}</mwc-button>`
+    const processes = this.processes.value.map(process => {
+        return html`<mwc-button icon="add_circle"  @click=${()=>this.addDoc(process.path)}>${process.name}</mwc-button>`
       })
 
     /** Render layout */
