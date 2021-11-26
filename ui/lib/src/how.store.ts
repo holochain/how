@@ -12,6 +12,7 @@ import {
   Document,
   DocumentOutput,
   Process,
+  DOC_TEMPLATE,
 } from './types';
 import {
   ProfilesStore,
@@ -41,7 +42,7 @@ export class HowStore {
   public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
-  public processes: Readable<Array<Process>> = derived(this.treeStore, i => this.getProcesses(i))
+  public processes: Readable<Array<Process>> = derived(this.documents, d => this.getProcesses(get(this.treeStore)))
   
   constructor(
     protected cellClient: CellClient,
@@ -93,6 +94,7 @@ export class HowStore {
   }
 
   private updateDocuments(path: string, doc: DocumentOutput)  {
+    console.log("updating doc for ",path, "to", doc)
     this.documentPathStore.update(documents => {
       if (!documents[path]) {
         documents[path] = [doc]
@@ -112,9 +114,11 @@ export class HowStore {
   
   async pullDocuments(path: string) : Promise<Array<DocumentOutput>> {
     const documents = await this.service.getDocuments(path)
+    console.log("pull got", documents)
     for (const s of documents) {
       this.updateDocuments(path, s)
     }
+    console.log("pull after update")
     return get(this.documentPathStore)[path]
   }
 
@@ -127,18 +131,28 @@ export class HowStore {
   }
 
   private getProcesses(tree: Node) : Array<Process> {
-    const node = this.find(tree,"soc_proto.self".split("."))
+    console.log("GET PROCS", tree)
+    const node = this.find(tree,"soc_proto.process".split("."))
+    let processes : Array<Process> = []
     if (node) {
-      const processes = node.children.map(n => {
-        return {path: `soc_proto.self.${n.val.name}`, name: n.val.name}
-      })
-      return processes
+      for (const n of node.children) {
+        const docs = get(this.documentPathStore)[`soc_proto.process.${n.val.name}`]         
+        console.log("docs", get(this.documentPathStore), docs, `soc_proto.process.${n.val.name}`)
+
+        if (docs) {
+          const doc  = docs.find(doc=>doc.content.document_type == DOC_TEMPLATE)
+          console.log("doc", doc)
+          if (doc) {
+            processes.push({path: `soc_proto.process.${n.val.name}`, name: n.val.name})
+          }
+        }
+      }
     }
-    return []
+    return processes
   }
 
   private find(tree: Node, path: Array<string>): Node | undefined {
-    const node = tree.children.find(n=> {console.log(path[0], n.val.name); return path[0]==n.val.name})
+    const node = tree.children.find(n=> {return path[0]==n.val.name})
     if (!node) return undefined
     path.shift()
     if (path.length == 0) return node

@@ -13,6 +13,9 @@ export interface Initialization {
   documents: Array<DocumentInput>,
 }
 
+export type ProcessName = string
+export type ProcessType = string
+
 export interface Alignment {
   parents: Array<string>,
   path_abbreviation: string,
@@ -20,7 +23,7 @@ export interface Alignment {
   title: string,
   summary: string,
   stewards: Array<AgentPubKeyB64>,
-  processes: Array<string>,
+  processes: Array<[ProcessType, ProcessName]>,
   history: Dictionary<EntryHashB64>,
   meta?: Dictionary<string>;
 }

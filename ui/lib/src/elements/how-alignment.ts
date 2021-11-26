@@ -39,10 +39,6 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
-  processes = new StoreSubscriber(this, () => this._store.processes);
-
-
-
   @query('#document-dialog')
   _documentDialogElem!: HowDocumentDialog;
 
@@ -76,13 +72,18 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
 
     /** the list of documents for this alignment */
     const path = this.getPath()
-    this._store.pullDocuments(path)
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(([key, value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
 
-    const processes = this.processes.value.map(process => {
-        return html`<mwc-button icon="add_circle"  @click=${()=>this.addDoc(process.path)}>${process.name}</mwc-button>`
-      })
+    const processActions = []
+    const processes = []
+     for (const [procType, procName] of alignment.processes) {
+        const path = `${procType}.${procName}`
+        const elems = procType.split(".")
+        const typeName = elems[elems.length-1]
+        processActions.push(html`<mwc-button icon="add_circle"  @click=${()=>this.addDoc(path)}>${typeName}</mwc-button>`)
+        processes.push(html`<li>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></li>`)
+      }
 
     /** Render layout */
     return html`
@@ -93,11 +94,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Title: ${alignment.title}</li>
        <li> Summary: ${alignment.summary}</li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
-       <li> Processes: ${alignment.processes.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
+       ${processes}
        <li> Documents:
         <ul>${documents} 
         </ul>
-         ${processes}
+         ${processActions}
       </li>
       </div>
       <how-document-dialog id="document-dialog">

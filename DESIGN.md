@@ -12,7 +12,7 @@ We want this process to maximize collective alignment both on specific needs but
 ## Notes
 - Standards are named, not numbered (They are versioned, but they proposal identifier is not a number like RFCs or ERCs)
 - Standards are tree structured to help with dependencies and relations
-- A standard is a collection of Documents that have gone through an alignment process (that itself is a standard in the tree). The initial processes are Proposal, Review, Approval
+- A standard is a collection of Documents that have gone through an alignment process (that itself is a standard in the tree). The initial processes are Define, Refine, Align
 
 ### Template for Submitting Feature Request Proposal
 - Feature Name (alias names may be added shared sensemaking develops)
@@ -55,9 +55,9 @@ The link tags to AlignmentBundles follow this format:
 [phase]-[version]
 ```
 where `phase` is one of:
-- proposed (wip)
-- review (presumed complete ready for review)
-- final (approved)
+- define (wip)
+- refine (presumed complete ready for review)
+- align (approved)
 
 The protocol for each one of these phases must be named in the bundle and point to the protocol standard on the tree being used.
 

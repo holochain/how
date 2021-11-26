@@ -7,6 +7,9 @@ use crate::error::*;
 use crate::signals::*;
 use crate::tree::*;
 
+type ProcessType = String;
+type ProcessPath = String;
+
 /// Alignment entry definition
 #[hdk_entry(id = "alignment")]
 #[derive(Clone)]
@@ -17,7 +20,7 @@ pub struct Alignment {
     pub title: String,
     pub summary: String,
     pub stewards: Vec<AgentPubKeyB64>,  // people who can change this document
-    pub processes: Vec<String>, // paths to process template to use
+    pub processes: Vec<(ProcessType,ProcessPath)>, // paths to process templates to use
     pub history: BTreeMap<String, EntryHashB64>,
     pub meta: BTreeMap<String, String>, // for UI to do things    pub name: String,
 }

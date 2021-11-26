@@ -6,7 +6,7 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Alignment, Dictionary, Initialization, DOC_TEMPLATE} from "../types";
+import {howContext, Alignment, Dictionary, Initialization, DOC_TEMPLATE, ProcessType, ProcessName} from "../types";
 import { HowStore } from "../how.store";
 import { HowAlignment } from "./how-alignment";
 import { HowTree } from "./how-tree";
@@ -93,6 +93,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return this._myProfile.value.fields.avatar;
   }
 
+  getPath() : string {
+    if (!this._currentAlignmentEh) {
+      return ""
+    }
+    const alignment: Alignment = this._alignments.value[this._currentAlignmentEh];
+    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
+  }
+
   private subscribeProfile() {
     let unsubscribe: Unsubscriber;
     unsubscribe = this._profiles.myProfile.subscribe(async (profile) => {
@@ -166,7 +174,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   async addHardcodedAlignments() {
-
+    const std_procs: Array<[ProcessType, ProcessName]> = [["soc_proto.process.define","declare"], ["soc_proto.process.refine", "rfc"], ["soc_proto.process.align", "consensus"]]
     const init:Initialization = {
     alignments: [
       {
@@ -176,7 +184,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         title: "Holochain Community Standards",
         summary: "All the protocols and process and standards used by the holochain community",
         stewards: [this._store.myAgentPubKey],  // people who can change this document
-        processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+        processes: std_procs, // paths to process template to use
         history: {},
         meta: {}
       },
@@ -187,40 +195,105 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Social Protocols used by the Holochain Community",
       summary: "The holochain community uses social protocols to get its work done.",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
-      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     },
     {
       parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: "self", // max 10 char
+      path_abbreviation: "process", // max 10 char
       short_name: "How Processes", // max 25 charAgent
-      title: "Processes templates for making changes to this tree",
+      title: "Processes types used for making changes to this tree",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
-      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     },
     {
-      parents: ["soc_proto.self"], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: "proposal", // max 10 char
-      short_name: "Proposal Process", // max 25 char
-      title: "Protocol for making proposals",
+      parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "define", // max 10 char
+      short_name: "Proposal procesess", // max 25 char
+      title: "",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
-      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     },
     {
-      parents: ["soc_proto.self"], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: "approval", // max 10 char
-      short_name: "Approval Process", // max 25 char
-      title: "Protocol for approving proposals",
+      parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "declare", // max 10 char
+      short_name: "Declaration", // max 25 char
+      title: "Making a proposal via declaration",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
-      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
+      parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "petition", // max 10 char
+      short_name: "Petition", // max 25 char
+      title: "Making a proposal via petition",
+      summary: "blah blah",
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
+      parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "refine", // max 10 char
+      short_name: "Refinement Processes", // max 25 char
+      title: "Processes for reviewing proposals",
+      summary: "blah blah",
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
+      parents: ["soc_proto.process.refine"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "rfc", // max 10 char
+      short_name: "Request for Comments", // max 25 char
+      title: "Reviewing proposals via RFC process",
+      summary: "blah blah",
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },    {
+      parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "align", // max 10 char
+      short_name: "Alignment Processes", // max 25 char
+      title: "Processes for approving proposals",
+      summary: "blah blah",
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
+      parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "vote", // max 10 char
+      short_name: "Voting", // max 25 char
+      title: "Process for approving reviewed proposals by voting",
+      summary: "blah blah",
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
+      parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "consensus", // max 10 char
+      short_name: "Consensus", // max 25 char
+      title: "Process for approving reviewed proposals by consensus",
+      summary: "blah blah",
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
+      processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     },
@@ -231,7 +304,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Holochain complete system",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
-      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     },
@@ -242,7 +315,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Holochain Conductor",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
-      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     },
@@ -253,17 +326,17 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "specification of the holochain conductor api",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
-      processes: ["soc_proto.self.proposal", "soc_proto.self.approval"], // paths to process template to use
+      processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     }],
     documents: [
     {
-      path: "soc_proto.self.proposal",
+      path: "soc_proto.process.define.petition",
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Proposal: {}"],
+          ["title", "Petition"],
           ["summary", "{}"],
         ],
         editors: [this._store.myAgentPubKey],
@@ -271,17 +344,53 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       }
     },
     {
-      path: "soc_proto.self.approval",
+      path: "soc_proto.process.define.declare",
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Approval: {}"],
+          ["title", "Declaration"],
           ["summary", "{}"],
         ],
         editors: [this._store.myAgentPubKey],
         meta: {}
       }
-    }
+    },
+    {
+      path: "soc_proto.process.refine.rfc",
+      document: {  
+        document_type: DOC_TEMPLATE,
+        content: [
+          ["title", "Request For Comment Process"],
+          ["summary", "{}"],
+        ],
+        editors: [this._store.myAgentPubKey],
+        meta: {}
+      }
+    },
+    {
+      path: "soc_proto.process.align.vote",
+      document: {  
+        document_type: DOC_TEMPLATE,
+        content: [
+          ["title", "Voting Process"],
+          ["summary", "{}"],
+        ],
+        editors: [this._store.myAgentPubKey],
+        meta: {}
+      }
+    },
+    {
+      path: "soc_proto.process.align.consensus",
+      document: {  
+        document_type: DOC_TEMPLATE,
+        content: [
+          ["title", "Consensus Process"],
+          ["summary", "{}"],
+        ],
+        editors: [this._store.myAgentPubKey],
+        meta: {}
+      }
+    },
     ]}
     await this._store.initilize(init);
   }
@@ -305,14 +414,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return this.shadowRoot!.getElementById("alignment-dialog") as HowAlignmentDialog;
   }
 
-  private async handleAlignmentSelected(e: any): Promise<void> {
-    const index = e.detail.index;
-    const alignmentList = this.shadowRoot!.getElementById("alignments-list") as List;
-    const value = alignmentList.items[index].value;
-    console.log("alignment value: " + value);
-    this.handleAlignmentSelect(value);
-  }
-
   private async handleAlignmentSelect(alignmentEh: string): Promise<void> {
     this._currentAlignmentEh = alignmentEh;
     this.alignmentElem.currentAlignmentEh = alignmentEh;
@@ -323,6 +424,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     const alignmentEh = event.detail
     if (this._alignments.value[alignmentEh]) {
       this.handleAlignmentSelect(alignmentEh)
+      this._store.pullDocuments(this.getPath())
     }
   }
 
@@ -351,22 +453,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   render() {
-    // if (!this._currentAlignmentEh) {
-    //   return;
-    // }
-
-    /** Build alignment list */
-    const alignments = Object.entries(this._alignments.value).map(
-      ([key, alignment]) => {
-        return html`
-          <mwc-list-item class="alignment-li" .selected=${key == this._currentAlignmentEh} value="${key}">
-            <span>${alignment.short_name}</span>
-          </mwc-list-item>
-          `
-      }
-    )
-
-
     return html`
 <!--  DRAWER -->
 <mwc-drawer type="dismissible" id="my-drawer">
@@ -378,11 +464,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       <sl-avatar style="margin-left:-22px;" slot="graphic" .image=${this.myAvatar}></sl-avatar>
     </mwc-list-item>
     <li divider role="separator"></li>
-    </mwc-list>
-
-    <!-- Alignment List -->
-    <mwc-list id="alignments-list" activatable @selected=${this.handleAlignmentSelected}>
-      ${alignments}
     </mwc-list>
 
   </div>
