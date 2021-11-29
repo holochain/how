@@ -174,7 +174,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   async addHardcodedAlignments() {
-    const std_procs: Array<[ProcessType, ProcessName]> = [["soc_proto.process.define","declare"], ["soc_proto.process.refine", "rfc"], ["soc_proto.process.align", "consensus"]]
+    const std_procs: Array<[ProcessType, ProcessName]> = [["soc_proto.process.define","declaration"], ["soc_proto.process.refine", "rfc"], ["soc_proto.process.align", "consensus"]]
     const init:Initialization = {
     alignments: [
       {
@@ -223,7 +223,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     },
     {
       parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: "declare", // max 10 char
+      path_abbreviation: "declaration", // max 10 char
       short_name: "Declaration", // max 25 char
       title: "Making a proposal via declaration",
       summary: "blah blah",
@@ -298,6 +298,17 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       meta: {}
     },
     {
+      parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "sortition", // max 10 char
+      short_name: "Sortition", // max 25 char
+      title: "Process for approving reviewed proposals by sortition",
+      summary: "blah blah",
+      stewards: [this._store.myAgentPubKey],  // people who can change this document
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "hc_system", // max 10 char
       short_name: "Holochain System", // max 25 char
@@ -344,7 +355,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       }
     },
     {
-      path: "soc_proto.process.define.declare",
+      path: "soc_proto.process.define.declaration",
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
@@ -385,6 +396,18 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         document_type: DOC_TEMPLATE,
         content: [
           ["title", "Consensus Process"],
+          ["summary", "{}"],
+        ],
+        editors: [this._store.myAgentPubKey],
+        meta: {}
+      }
+    },
+    {
+      path: "soc_proto.process.align.sortition",
+      document: {  
+        document_type: DOC_TEMPLATE,
+        content: [
+          ["title", "Sortition"],
           ["summary", "{}"],
         ],
         editors: [this._store.myAgentPubKey],

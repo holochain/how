@@ -129,12 +129,14 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       }
       .alignment li {
         list-style: none;
+        line-height: 1.5em;
       }
       .node-link {
         cursor: pointer;
         background-color: white;
         border: solid .1em #666;
         border-radius: .2em;
+        padding: 0 6px 0 6px;
       }
       `,
     ];
