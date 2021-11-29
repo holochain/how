@@ -96,20 +96,20 @@ fn get_alignments_inner(base: EntryHash) -> HowResult<Vec<AlignmentOutput>> {
 
     let alignment_elements = HDK.with(|hdk| hdk.borrow().get(get_input))?;
 
-    let alignment_entries: Vec<Alignment> = alignment_elements
+    let alignment_entries: Vec<(Alignment, Header)> = alignment_elements
         .into_iter()
         .filter_map(|me| me)
         .filter_map(|element| match element.entry().to_app_option() {
-            Ok(Some(g)) => Some(g),
+            Ok(Some(g)) => Some((g, element.header().clone())),
             _ => None,
         })
         .collect();
 
     let mut alignments = vec![];
-    for e in alignment_entries {
+    for (a,h) in alignment_entries {
         alignments.push(AlignmentOutput {
-            hash: hash_entry(&e)?.into(),
-            content: e,
+            hash: h.entry_hash().unwrap().clone().into(),
+            content: a,
         });
     }
     Ok(alignments)
