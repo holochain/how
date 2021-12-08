@@ -81,6 +81,7 @@ pub async fn test_basics() {
         )
         .await;
     assert_eq!(alignments[1].hash, hash);
+    assert_eq!(alignments[1].header.author(), cell_alice.agent_pubkey());
     assert_eq!(alignments.len(), 2);
     debug!("{:#?}", alignments);
 
