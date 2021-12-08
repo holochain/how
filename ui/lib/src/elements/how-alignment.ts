@@ -10,6 +10,7 @@ import {HowStore} from "../how.store";
 import { HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles";
+import { Header } from "@holochain-open-dev/core-types";
 import {
   Button,
   Dialog,
@@ -36,6 +37,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
   _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
+  _alignmentsHeader = new StoreSubscriber(this, () => this._store.alignmentsHeader);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
@@ -57,6 +59,18 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     }
     const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
     return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
+  }
+
+  getCreated(): string {
+    if (!this.currentAlignmentEh) {
+      return ''
+    }
+    const header: Header = this._alignmentsHeader.value[this.currentAlignmentEh];
+    const timestamp = header.timestamp as any
+    const date = new Date(timestamp / 1000)
+    console.log('header', header)
+    
+    return date.toLocaleString('en-us');
   }
 
   addDoc(document_type: string ) {
@@ -89,6 +103,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return html`
       <div class="alignment">
        <h4> ${alignment.short_name} </h4>
+       ${this.getCreated() ? html`<h5><i>Created: ${this.getCreated()}</i></h5>` : ""}
        <li> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
        <li> Title: ${alignment.title}</li>

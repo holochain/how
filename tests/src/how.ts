@@ -69,9 +69,14 @@ export default async (orchestrator) => {
     const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1 );
     t.ok(alignment1_hash)
     console.log("alignment1_hash", alignment1_hash);
+    
 
     const alignments = await alice_how.call('how', 'get_alignments', null );
-    t.deepEqual(alignments, [{hash: alignments[0].hash, content: root}, {hash: alignment1_hash, content: alignment1}]);
+
+    t.deepEqual(alignments, [
+      {hash: alignments[0].hash, content: root, header: alignments[0].header}, 
+      {hash: alignment1_hash, content: alignment1, header: alignments[1].header}
+    ]);
 
     const tree = await alice_how.call('how', 'get_tree', null );
     console.log("Rust tree", tree);

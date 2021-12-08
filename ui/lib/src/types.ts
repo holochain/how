@@ -1,6 +1,6 @@
 // TODO: add globally available interfaces for your elements
 
-import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
+import { EntryHashB64, AgentPubKeyB64, Header } from "@holochain-open-dev/core-types";
 import { createContext, Context } from "@lit-labs/context";
 import { HowStore } from "./how.store";
 
@@ -31,6 +31,7 @@ export interface Alignment {
 export interface AlignmentOutput {
   hash: EntryHashB64,
   content: Alignment,
+  header: Header,
 }
 
 export const DOC_TEMPLATE="_template"

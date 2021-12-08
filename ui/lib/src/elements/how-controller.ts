@@ -50,6 +50,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
   _alignmentsPath = new StoreSubscriber(this, () => this._store.alignmentsPath);
+  _alignmentsHeader = new StoreSubscriber(this, () => this._store.alignmentsHeader);
 
   /** Private properties */
 

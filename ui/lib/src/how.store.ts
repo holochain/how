@@ -1,4 +1,4 @@
-import { EntryHashB64, HeaderHashB64, AgentPubKeyB64, serializeHash } from '@holochain-open-dev/core-types';
+import { EntryHashB64, HeaderHashB64, AgentPubKeyB64, serializeHash, Header } from '@holochain-open-dev/core-types';
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 
@@ -30,6 +30,7 @@ export class HowStore {
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
   private documentsStore: Writable<Dictionary<Document>> = writable({});
   private alignmentsPathStore: Writable<Dictionary<string>> = writable({});
+  private alignmentsHeaderStore: Writable<Dictionary<Header>> = writable({});
   private treeStore: Writable<Node> = writable({val:{name:"T", alignments: [], documents: []}, children:[], id:"0"});
   private documentPathStore: Writable<Dictionary<Array<DocumentOutput>>> = writable({});
 
@@ -40,6 +41,7 @@ export class HowStore {
   public alignments: Readable<Dictionary<Alignment>> = derived(this.alignmentsStore, i => i)
   public documents: Readable<Dictionary<Document>> = derived(this.documentsStore, i => i)
   public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
+  public alignmentsHeader: Readable<Dictionary<Header>> = derived(this.alignmentsHeaderStore, i => i)  
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
   public processes: Readable<Array<Process>> = derived(this.documents, d => this.getProcesses(get(this.treeStore)))
@@ -89,6 +91,10 @@ export class HowStore {
     const alignments = await this.service.getAlignments();
     for (const s of alignments) {
       this.updateAlignmentFromEntry(s.hash, s.content)
+      this.alignmentsHeaderStore.update(store => {
+        store[s.hash] = s.header
+        return store
+      })
     }
     return get(this.alignmentsStore)
   }
