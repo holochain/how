@@ -44,6 +44,7 @@ pub async fn test_basics() {
         title: "specification of the holochain conductor".into(),
         summary: "blah blah".into(),
         stewards: vec![],  // people who can change this document
+        status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
@@ -62,6 +63,7 @@ pub async fn test_basics() {
         title: "specification of the holochain conductor api for application access".into(),
         summary: "blah blah".into(),
         stewards: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document
+        status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
@@ -84,7 +86,7 @@ pub async fn test_basics() {
     assert_eq!(alignments.len(), 2);
     debug!("{:#?}", alignments);
 
-    let content  = vec![("summary".to_string(), "blah blah".to_string())];
+    let content  = vec![Section::new("summary", "text/markdown", "blah blah")];
     let document = Document {
       document_type: String::from(DOC_TEMPLATE), // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
       editors: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document, if empty anyone can

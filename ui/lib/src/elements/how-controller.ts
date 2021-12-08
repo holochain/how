@@ -6,7 +6,7 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Alignment, Dictionary, Initialization, DOC_TEMPLATE, ProcessType, ProcessName} from "../types";
+import {howContext, Alignment, Dictionary, Initialization, DOC_TEMPLATE, ProcessType, ProcessName,STAUTS_COMPLETED} from "../types";
 import { HowStore } from "../how.store";
 import { HowAlignment } from "./how-alignment";
 import { HowTree } from "./how-tree";
@@ -174,7 +174,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   async addHardcodedAlignments() {
-    const std_procs: Array<[ProcessType, ProcessName]> = [["soc_proto.process.define","declaration"], ["soc_proto.process.refine", "rfc"], ["soc_proto.process.align", "consensus"]]
+    const std_procs: Array<[ProcessType, ProcessName]> = [["soc_proto.process.define","declaration"], ["soc_proto.process.refine", "prototyped"], ["soc_proto.process.align", "consensus"]]
     const init:Initialization = {
     alignments: [
       {
@@ -184,6 +184,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         title: "Holochain Community Standards",
         summary: "All the protocols and process and standards used by the holochain community",
         stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {}
@@ -195,6 +196,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Social Protocols used by the Holochain Community",
       summary: "The holochain community uses social protocols to get its work done.",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -206,6 +208,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Processes types used for making changes to this tree",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -217,6 +220,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -228,6 +232,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Making a proposal via declaration",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -239,6 +244,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Making a proposal via petition",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -250,17 +256,19 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Processes for reviewing proposals",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
     },
     {
       parents: ["soc_proto.process.refine"], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: "rfc", // max 10 char
-      short_name: "Request for Comments", // max 25 char
-      title: "Reviewing proposals via RFC process",
+      path_abbreviation: "prototyped", // max 10 char
+      short_name: "Prototyped refinements", // max 25 char
+      title: "Refining a standard with prototypes",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -271,6 +279,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Processes for approving proposals",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -282,6 +291,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Process for approving reviewed proposals by voting",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -293,6 +303,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Process for approving reviewed proposals by consensus",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -304,6 +315,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Process for approving reviewed proposals by sortition",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -315,6 +327,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Holochain complete system",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -326,6 +339,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "Holochain Conductor",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -337,6 +351,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       title: "specification of the holochain conductor api",
       summary: "blah blah",
       stewards: [this._store.myAgentPubKey],  // people who can change this document
+      status: STAUTS_COMPLETED,
       processes: std_procs, // paths to process template to use
       history: {},
       meta: {}
@@ -347,8 +362,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Petition"],
-          ["summary", "{}"],
+          {name: "title", content: "petition", content_type:"text/plain"},
         ],
         editors: [this._store.myAgentPubKey],
         meta: {}
@@ -359,20 +373,20 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Declaration"],
-          ["summary", "{}"],
+          {name: "title", content: "Declaration", content_type:"text/plain"},
+          {name: "summary", content: "{}", content_type:"text/plain"},
         ],
         editors: [this._store.myAgentPubKey],
         meta: {}
       }
     },
     {
-      path: "soc_proto.process.refine.rfc",
+      path: "soc_proto.process.refine.prototyped",
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Request For Comment Process"],
-          ["summary", "{}"],
+          {name: "title", content: "Prototyped", content_type:"text/plain"},
+          {name: "summary", content: "{}", content_type:"text/plain"},
         ],
         editors: [this._store.myAgentPubKey],
         meta: {}
@@ -383,8 +397,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Voting Process"],
-          ["summary", "{}"],
+          {name: "title", content: "Voting", content_type:"text/plain"},
+          {name: "summary", content: "{}", content_type:"text/plain"},
         ],
         editors: [this._store.myAgentPubKey],
         meta: {}
@@ -395,8 +409,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Consensus Process"],
-          ["summary", "{}"],
+          {name: "title", content: "Consensus", content_type:"text/plain"},
+          {name: "summary", content: "{}", content_type:"text/plain"},
         ],
         editors: [this._store.myAgentPubKey],
         meta: {}
@@ -407,8 +421,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       document: {  
         document_type: DOC_TEMPLATE,
         content: [
-          ["title", "Sortition"],
-          ["summary", "{}"],
+          {name: "title", content: "Sortition", content_type:"text/plain"},
+          {name: "summary", content: "{}", content_type:"text/plain"},
         ],
         editors: [this._store.myAgentPubKey],
         meta: {}

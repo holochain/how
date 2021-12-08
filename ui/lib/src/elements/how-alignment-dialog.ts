@@ -70,6 +70,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       title: this._titleField.value,
       summary: this._summaryField.value,
       stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
+      status: 0,
       processes: [["soc_proto.process.define","petition"]], // paths to process template to use
       history: {},
       meta: {},

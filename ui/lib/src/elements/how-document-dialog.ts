@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Document, howContext, Dictionary} from "../types";
+import {Document, howContext, Dictionary, Section} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -47,11 +47,11 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     private async handleOk(e: any) {
         /** Check validity */
         // nameField
-        let content: Array<[string,string]> = []
+        let content: Array<Section> = []
         let val = this._contentField.value;
         const title = val.match(/^# (.*)/)
         if (title) {
-            content.push(["title",title[1]])
+            content.push({name: "title", content: title[1], content_type:"type/plain"})
         }
         const sections = val.split("\n## ")
         sections.shift()
@@ -59,7 +59,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
             let body = section.split("\n")
             const firstLine = body.shift()
             if (firstLine) {
-                content.push([firstLine, body.join("\n")])
+                content.push({name: firstLine, content_type: "text/plain", content: body.join("\n")})
             }
         })
         

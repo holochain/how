@@ -20,7 +20,8 @@ pub struct Alignment {
     pub title: String,
     pub summary: String,
     pub stewards: Vec<AgentPubKeyB64>,  // people who can change this document
-    pub processes: Vec<(ProcessType,ProcessName)>, // paths to process templates to use
+    pub status: i8, // index of current process
+    pub processes: Vec<(ProcessType,ProcessName)>, // paths to processes to use
     pub history: BTreeMap<String, EntryHashB64>,
     pub meta: BTreeMap<String, String>, // for UI to do things    pub name: String,
 }
