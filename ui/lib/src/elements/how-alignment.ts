@@ -5,7 +5,7 @@ import {contextProvided} from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {Alignment, howContext, STAUTS_COMPLETED} from "../types";
+import {Alignment, Header, howContext, STAUTS_COMPLETED} from "../types";
 import {HowStore} from "../how.store";
 import { HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -36,6 +36,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
   _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
+  _headers = new StoreSubscriber(this, () => this._store.headers);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
@@ -63,12 +64,17 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     this._documentDialogElem.open(this.getPath(), document_type);
   }
 
+  getDateString(timestamp: number | undefined) {
+    return timestamp ? new Date(timestamp).toDateString() : "";
+  }
+
   render() {
     if (!this.currentAlignmentEh) {
       return;
     }
     /** Get current alignment*/
     const alignment: Alignment = this._alignments.value[this.currentAlignmentEh]
+    const header: Header | undefined = this._headers.value[this.currentAlignmentEh]
 
     /** the list of documents for this alignment */
     const path = this.getPath()
@@ -88,7 +94,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     /** Render layout */
     return html`
       <div class="alignment">
-       <h4> ${alignment.short_name} </h4>
+       <h4> ${alignment.short_name} - ${this.getDateString(header?.timestamp)}</h4>
        <li> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
        <li> Title: ${alignment.title}</li>

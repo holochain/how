@@ -54,6 +54,7 @@ impl Alignment {
 pub struct AlignmentOutput {
     pub hash: EntryHashB64,
     pub content: Alignment,
+    pub header: Header,
 }
 
 
@@ -111,6 +112,7 @@ fn get_alignments_inner(base: EntryHash) -> HowResult<Vec<AlignmentOutput>> {
         alignments.push(AlignmentOutput {
             hash: h.entry_hash().unwrap().clone().into(),
             content: a,
+            header: h
         });
     }
     Ok(alignments)

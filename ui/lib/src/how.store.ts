@@ -13,6 +13,7 @@ import {
   DocumentOutput,
   Process,
   DOC_TEMPLATE,
+  Header,
 } from './types';
 import {
   ProfilesStore,
@@ -28,6 +29,7 @@ export class HowStore {
   
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
+  private headersStore: Writable<Dictionary<Header | undefined>> = writable({});
   private documentsStore: Writable<Dictionary<Document>> = writable({});
   private alignmentsPathStore: Writable<Dictionary<string>> = writable({});
   private treeStore: Writable<Node> = writable({val:{name:"T", alignments: [], documents: []}, children:[], id:"0"});
@@ -38,6 +40,7 @@ export class HowStore {
 
   /** Readable stores */
   public alignments: Readable<Dictionary<Alignment>> = derived(this.alignmentsStore, i => i)
+  public headers: Readable<Dictionary<Header | undefined>> = derived(this.headersStore, i => i)
   public documents: Readable<Dictionary<Document>> = derived(this.documentsStore, i => i)
   public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
@@ -73,7 +76,7 @@ export class HowStore {
     return Object.keys(get(this.profiles.knownProfiles)).filter((key)=> key != this.myAgentPubKey)
   }
 
-  private updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment) {
+  private updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment, header?: Header) {
     this.alignmentsPathStore.update(alignments => {
       const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
       alignments[path] = hash
@@ -83,12 +86,16 @@ export class HowStore {
       alignments[hash] = alignment
       return alignments
     })
+    this.headersStore.update(headers => {
+      headers[hash] = header;
+      return headers
+    })
   }
 
   async pullAlignments() : Promise<Dictionary<Alignment>> {
     const alignments = await this.service.getAlignments();
     for (const s of alignments) {
-      this.updateAlignmentFromEntry(s.hash, s.content)
+      this.updateAlignmentFromEntry(s.hash, s.content, s.header)
     }
     return get(this.alignmentsStore)
   }

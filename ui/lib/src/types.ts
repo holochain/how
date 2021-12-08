@@ -31,9 +31,19 @@ export interface Alignment {
   meta?: Dictionary<string>;
 }
 
+export interface Header {
+  type: string,
+  author: Uint8Array,
+  timestamp: number,
+  entry_hash: Uint8Array,
+  header_seq: number,
+  prev_header: Uint8Array,
+}
+
 export interface AlignmentOutput {
   hash: EntryHashB64,
   content: Alignment,
+  header: Header
 }
 
 export const DOC_TEMPLATE="_template"
