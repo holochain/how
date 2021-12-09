@@ -82,6 +82,9 @@ pub async fn test_basics() {
         .await;
     assert_eq!(alignments[1].hash, hash);
     assert_eq!(alignments.len(), 2);
+
+    assert!(alignments[1].header);
+
     debug!("{:#?}", alignments);
 
     let content  = vec![("summary".to_string(), "blah blah".to_string())];
