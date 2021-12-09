@@ -101,8 +101,8 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
 
     const { summary = '' } = alignment;
 
-    const shouldTruncateSummary = this._fullSummaryVisible || summary.length < this._summaryMaxLength;
-    const formattedSummary = shouldTruncateSummary ? summary : `${summary.substr(0, this._summaryMaxLength)}...`;
+    const shouldTruncateSummary = !this._fullSummaryVisible && summary.length > this._summaryMaxLength;
+    const formattedSummary = shouldTruncateSummary ? `${summary.substr(0, this._summaryMaxLength)}...` : summary;
 
     /** Render layout */
     return html`
@@ -113,7 +113,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Title: ${alignment.title}</li>
        <li> Summary: 
         <span>${formattedSummary}</span>
-        ${!shouldTruncateSummary ? html`<span class="node-link" @click=${() => this._fullSummaryVisible = true}>Show more</span>` : ''}
+        ${shouldTruncateSummary ? html`<span class="node-link" @click=${() => this._fullSummaryVisible = true}>Show more</span>` : ''}
       </li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
        ${header?.timestamp ? html`<li> Created at: ${toLocaleDate(+header.timestamp)}</li>` : ''}
