@@ -111,6 +111,18 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     });
   }
 
+  private handleDocumentClick = (event: MouseEvent) => {
+    if (!this.alignmentElem) {
+      return
+    }
+
+    const outsideClick = !event.composedPath().includes(this.alignmentElem)
+
+    if (this._currentAlignmentEh && outsideClick) {
+      this.handleAlignmentSelect('')
+    }
+  }
+
   async firstUpdated() {
     if (this.canLoadDummy) {
       await this.createDummyProfile()
@@ -475,6 +487,18 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
   }
 
+  connectedCallback() {
+    super.connectedCallback()
+
+    window.addEventListener('click', this.handleDocumentClick)
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback()
+
+    window.removeEventListener('click', this.handleDocumentClick)
+  }
+
   render() {
     return html`
 <!--  DRAWER -->
@@ -572,6 +596,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         }
 
         .appBody {
+          min-height: 100vh;
           width: 100%;
           margin-top: 2px;
           display:flex;

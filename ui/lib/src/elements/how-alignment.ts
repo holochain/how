@@ -1,5 +1,5 @@
 import {css, html, LitElement} from "lit";
-import {property, query} from "lit/decorators.js";
+import {property, query, state} from "lit/decorators.js";
 
 import {contextProvided} from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
@@ -27,6 +27,8 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
 
   @property() currentAlignmentEh = "";
 
+  @state() _fullSummaryVisible = false;
+
   @contextProvided({ context: howContext })
   _store!: HowStore;
 
@@ -41,6 +43,8 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
 
   @query('#document-dialog')
   _documentDialogElem!: HowDocumentDialog;
+
+  private readonly _summaryMaxLength = 100;
 
   get myNickName(): string {
     return this._myProfile.value.nickname;
@@ -61,6 +65,14 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
 
   addDoc(document_type: string ) {
     this._documentDialogElem.open(this.getPath(), document_type);
+  }
+
+  update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('currentAlignmentEh')) {
+      this._fullSummaryVisible = false;
+    }
+
+    super.update(changedProperties);
   }
 
   render() {
@@ -87,14 +99,22 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         processes.push(html`<li>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></li>`)
       }
 
+    const { summary = '' } = alignment;
+
+    const shouldTruncateSummary = this._fullSummaryVisible || summary.length < this._summaryMaxLength;
+    const formattedSummary = shouldTruncateSummary ? summary : `${summary.substr(0, this._summaryMaxLength)}...`;
+
     /** Render layout */
     return html`
       <div class="alignment">
-       <h4> ${alignment.short_name} </h4>
+       <h4 title=${alignment.short_name}> ${alignment.short_name}</h4>
        <li> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
        <li> Title: ${alignment.title}</li>
-       <li> Summary: ${alignment.summary}</li>
+       <li> Summary: 
+        <span>${formattedSummary}</span>
+        ${!shouldTruncateSummary ? html`<span class="node-link" @click=${() => this._fullSummaryVisible = true}>Show more</span>` : ''}
+      </li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
        ${header?.timestamp ? html`<li> Created at: ${toLocaleDate(+header.timestamp)}</li>` : ''}
        ${processes}
@@ -125,10 +145,18 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         border-radius: .2em;
         margin-left: 20px;
         padding: 10px;
+        max-width: 320px;
+        max-height: 50vh;
+        overflow-x: scroll;
       }
       .alignment h4 {
         margin-top: 0px;
         margin-bottom: 5px;
+
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
       }
       .alignment li {
         list-style: none;
