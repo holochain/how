@@ -35,7 +35,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
 
   _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
   _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
-  _alignments = new StoreSubscriber(this, () => this._store.alignments);
+  _alignmentOutputs = new StoreSubscriber(this, () => this._store.alignmentOutputs);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
@@ -55,7 +55,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     if (!this.currentAlignmentEh) {
       return ""
     }
-    const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
+    const alignment: Alignment = this._alignmentOutputs.value[this.currentAlignmentEh].content;
     return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
   }
 
@@ -68,12 +68,14 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       return;
     }
     /** Get current alignment*/
-    const alignment: Alignment = this._alignments.value[this.currentAlignmentEh]
+    const { content: alignment, header } = this._alignmentOutputs.value[this.currentAlignmentEh]
 
     /** the list of documents for this alignment */
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(([key, value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
+
+    const toLocaleDate = (timestamp: number) => new Date(timestamp / 1000).toLocaleDateString()
 
     const processActions = []
     const processes = []
@@ -94,6 +96,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Title: ${alignment.title}</li>
        <li> Summary: ${alignment.summary}</li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
+       ${header?.timestamp ? html`<li> Created at: ${toLocaleDate(+header.timestamp)}</li>` : ''}
        ${processes}
        <li> Documents:
         <ul>${documents} 
