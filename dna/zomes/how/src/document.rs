@@ -7,13 +7,30 @@ use crate::tree::*;
 
 pub const DOC_TEMPLATE:&str = "T";
 
-/// Alignment entry definition
-#[hdk_entry(id = "alignment")]
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Section {
+    pub name: String,
+    pub content_type: String,
+    pub content: String,    
+}
+impl Section {
+    pub fn new(name: &str, content_type: &str, content: &str) -> Self {
+        Section {
+            name: name.into(),
+            content_type: content_type.into(),
+            content: content.into(),
+        }
+    }
+}
+
+/// Document entry definition
+#[hdk_entry(id = "document")]
 #[derive(Clone)]
 pub struct Document {
     pub document_type: String, // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
     pub editors: Vec<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
-    pub content: Vec<(String, String)>, // semantically identified content components
+    pub content: Vec<Section>, // semantically identified content components
     pub meta: BTreeMap<String, String>, // semantically identified meta
 }
 

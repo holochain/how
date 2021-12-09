@@ -24,6 +24,7 @@ export default async (orchestrator) => {
       title: "specification of the holochain conductor api for application access",
       summary: "blah blah",
       stewards: [],  // people who can change this document
+      status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
       history: {},
       meta: {}
@@ -36,6 +37,7 @@ export default async (orchestrator) => {
       title: "root node",
       summary: "blah blah",
       stewards: [],  // people who can change this document
+      status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
       history: {},
       meta: {}
@@ -46,8 +48,8 @@ export default async (orchestrator) => {
       document: {  
         document_type: "_template",
         content: [
-          ["title","ROOT NODE DOC"],
-          ["summary", "{}"]
+          {name: "title", content: "ROOT NODE DOC", content_type:"text/plain"},
+          {name: "summary", content: "{}", content_type:"text/plain"}
         ],
         editors: [],
         meta: {}

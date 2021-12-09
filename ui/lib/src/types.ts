@@ -16,6 +16,8 @@ export interface Initialization {
 export type ProcessName = string
 export type ProcessType = string
 
+export const STAUTS_COMPLETED = -1
+
 export interface Alignment {
   parents: Array<string>,
   path_abbreviation: string,
@@ -23,6 +25,7 @@ export interface Alignment {
   title: string,
   summary: string,
   stewards: Array<AgentPubKeyB64>,
+  status: number,
   processes: Array<[ProcessType, ProcessName]>,
   history: Dictionary<EntryHashB64>,
   meta?: Dictionary<string>;
@@ -37,10 +40,16 @@ export interface AlignmentOutput {
 export const DOC_TEMPLATE="_template"
 export const DOC_COMMENT="_comment"
 
+export interface Section {
+  name: string,
+  content_type: string,
+  content: string,    
+}
+
 export interface Document {
   document_type: string, // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
   editors: Array<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
-  content: Array<[string, string]>, // semantically identified content components
+  content: Array<Section>, // semantically identified content components
   meta: Dictionary<string>, // semantically identified meta
 }
 
