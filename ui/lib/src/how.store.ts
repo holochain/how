@@ -6,6 +6,7 @@ import { HowService } from './how.service';
 import {
   Dictionary,
   Alignment,
+  AlignmentOutput,
   RustNode,
   Node,
   Initialization,
@@ -27,7 +28,7 @@ export class HowStore {
   private profiles: ProfilesStore
   
   /** AlignmentEh -> Alignment */
-  private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
+  private alignmentOutputsStore: Writable<Dictionary<AlignmentOutput>> = writable({});
   private documentsStore: Writable<Dictionary<Document>> = writable({});
   private alignmentsPathStore: Writable<Dictionary<string>> = writable({});
   private treeStore: Writable<Node> = writable({val:{name:"T", alignments: [], documents: []}, children:[], id:"0"});
@@ -37,7 +38,13 @@ export class HowStore {
   myAgentPubKey: AgentPubKeyB64;
 
   /** Readable stores */
-  public alignments: Readable<Dictionary<Alignment>> = derived(this.alignmentsStore, i => i)
+  public alignments: Readable<Dictionary<Alignment>> = derived(
+    this.alignmentOutputsStore, 
+    alignmentOutputsStore => 
+      Object.entries(alignmentOutputsStore)
+        .reduce((alignments, [hash, alignment]) => ({ ...alignments, [hash]: alignment.content }), {})
+  )
+  public alignmentOutputs: Readable<Dictionary<AlignmentOutput>> = derived(this.alignmentOutputsStore, i => i)
   public documents: Readable<Dictionary<Document>> = derived(this.documentsStore, i => i)
   public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
@@ -62,7 +69,13 @@ export class HowStore {
       switch(payload.message.type) {
       case "NewAlignment":
         if (!get(this.alignments)[payload.alignmentHash]) {
-          this.updateAlignmentFromEntry(payload.alignmentHash, payload.message.content)
+          const alignment = { 
+            hash: payload.alignmentHash,
+            content: payload.message.content,
+            header: {} as any
+          }
+
+          this.updateAlignmentFromEntry(payload.alignmentHash, alignment)
         }
         break;
       }
@@ -73,24 +86,29 @@ export class HowStore {
     return Object.keys(get(this.profiles.knownProfiles)).filter((key)=> key != this.myAgentPubKey)
   }
 
-  private updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment) {
+  private updateAlignmentFromEntry(hash: EntryHashB64, alignmentOutput: AlignmentOutput) {
+    const { content: alignment } = alignmentOutput;
+
     this.alignmentsPathStore.update(alignments => {
       const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
       alignments[path] = hash
       return alignments
     })
-    this.alignmentsStore.update(alignments => {
-      alignments[hash] = alignment
-      return alignments
+    
+    this.alignmentOutputsStore.update(alignmentOutputs => {
+      alignmentOutputs[hash] = alignmentOutput
+      return alignmentOutputs
     })
   }
 
   async pullAlignments() : Promise<Dictionary<Alignment>> {
-    const alignments = await this.service.getAlignments();
-    for (const s of alignments) {
-      this.updateAlignmentFromEntry(s.hash, s.content)
+    const alignmentOutputs: AlignmentOutput[] = await this.service.getAlignments();
+
+    for (const alignmentOutput of alignmentOutputs) {
+      this.updateAlignmentFromEntry(alignmentOutput.hash, alignmentOutput)
     }
-    return get(this.alignmentsStore)
+
+    return get(this.alignments)
   }
 
   private updateDocuments(path: string, doc: DocumentOutput)  {
@@ -179,10 +197,17 @@ export class HowStore {
 
   async addAlignment(alignment: Alignment) : Promise<EntryHashB64> {
     const alignmentEh: EntryHashB64 = await this.service.createAlignment(alignment)
-    this.alignmentsStore.update(alignments => {
-      alignments[alignmentEh] = alignment
-      return alignments
+
+    this.alignmentOutputsStore.update(alignmentOutputs => {
+      alignmentOutputs[alignmentEh] = {
+        hash: alignmentEh,
+        content: alignment,
+        header: {} as any,
+      };
+      
+      return alignmentOutputs
     })
+
     this.service.notify({alignmentHash:alignmentEh, message: {type:"NewAlignment", content:alignment}}, this.others());
     return alignmentEh
   }
@@ -192,7 +217,7 @@ export class HowStore {
   }
 
   alignment(alignmentEh: EntryHashB64): Alignment {
-    return get(this.alignmentsStore)[alignmentEh];
+    return get(this.alignments)[alignmentEh];
   }
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
