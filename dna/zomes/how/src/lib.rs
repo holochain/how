@@ -27,7 +27,8 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
 
 entry_defs![
     Path::entry_def(),
-    alignment::Alignment::entry_def()
+    alignment::Alignment::entry_def(),
+    document::Document::entry_def()
 ];
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

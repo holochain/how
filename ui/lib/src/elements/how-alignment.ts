@@ -5,7 +5,7 @@ import {contextProvided} from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {Alignment, howContext, Node} from "../types";
+import {Alignment, howContext, STAUTS_COMPLETED} from "../types";
 import {HowStore} from "../how.store";
 import { HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -73,7 +73,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     /** the list of documents for this alignment */
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
-    const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(([key, value])=>html`<h3>${key}</h3><div>${value}</div>`)}`) : undefined
+    const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(({name, content, content_type})=>html`<h3>${name}</h3><div>${content}</div>`)}`) : undefined
 
     const toLocaleDate = (timestamp: number) => new Date(timestamp / 1000).toLocaleDateString()
 
@@ -97,6 +97,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Summary: ${alignment.summary}</li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
        ${header?.timestamp ? html`<li> Created at: ${toLocaleDate(+header.timestamp)}</li>` : ''}
+       <li> Status: ${alignment.status == STAUTS_COMPLETED ? "Completed" : alignment.processes[alignment.status][1]}
        ${processes}
        <li> Documents:
         <ul>${documents} 
