@@ -9,3 +9,4 @@ export * from './elements/how-tree';
 export * from './how.service';
 export * from './how.store';
 export * from './types';
+export * from './init';
