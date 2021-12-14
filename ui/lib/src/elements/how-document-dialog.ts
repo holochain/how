@@ -1,11 +1,11 @@
 import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
-
+import {StoreSubscriber} from "lit-svelte-stores";
 import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Document, howContext, Dictionary, Section} from "../types";
+import {Document, howContext, Dictionary, Section, DOC_TEMPLATE} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -29,9 +29,11 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @query('#content-field')
     _contentField!: TextArea;
   
+    _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
+
     resetAllFields() {
         this._editors = {}
-        this._contentField.value = "# Title\n## Section1\nSection 1 contents\n## Section 2\n Section 2 contents"
+        this._contentField.value = ""
     }
 
     /**
@@ -40,6 +42,16 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     open(path: string, document_type: string) {
         this.path = path
         this.document_type = document_type
+        const docs = this._documentPaths.value[document_type]
+        for (const doc of docs) {
+          if (doc.content.document_type == DOC_TEMPLATE) {
+            // Poor-mans convert to markdown for now, this should actually add different sections to the dialog
+            const title = doc.content.content[0].content
+            const sections = doc.content.content.filter(section => section.name != 'title').map(({name, content, content_type})=>`## ${name}\n${content}`)            
+            this._contentField.value = `# ${title}\n\n`+sections.join("\n\n") 
+          } 
+        }
+        console.log(docs)
         const dialog = this.shadowRoot!.getElementById("document-dialog") as Dialog
         dialog.open = true
     }
