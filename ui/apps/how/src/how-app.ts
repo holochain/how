@@ -50,9 +50,9 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
   render() {
     if (!this.loaded) return html`<span>Loading...</span>`;
     return html`
-        <profile-prompt></profile-prompt>
-        <how-controller></how-controller>
-<!--      <how-controller dummy></how-controller>-->
+      <profile-prompt style="margin-left:-7px; margin-top:0px;display:block;">
+         <how-controller></how-controller>
+      </profile-prompt>
     `;
   }
 

@@ -88,10 +88,17 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
 
   get myNickName(): string {
-    return this._myProfile.value.nickname;
+    if (this._myProfile.value) {
+      return this._myProfile.value.nickname;
+    }
+    return ""
   }
+
   get myAvatar(): string {
-    return this._myProfile.value.fields.avatar;
+    if (this._myProfile.value) {
+      return this._myProfile.value.fields.avatar;
+    }
+    return ""
   }
 
   getPath() : string {
