@@ -4,7 +4,6 @@ use std::collections::BTreeMap;
 use holo_hash::{EntryHashB64, AgentPubKeyB64};
 
 use crate::error::*;
-use crate::signals::*;
 use crate::tree::*;
 
 type ProcessType = String;
@@ -63,20 +62,37 @@ fn get_alignments_path() -> Path {
 }
 
 #[hdk_extern]
-pub fn create_alignment(input: Alignment) -> ExternResult<EntryHashB64> {
+pub fn create_alignment(input: Alignment) -> ExternResult<AlignmentOutput> {
     let _header_hash = create_entry(&input)?;
     let tree_paths = input.paths();
     let hash = hash_entry(&input)?;
-    emit_signal(&SignalPayload::new(hash.clone().into(), Message::NewAlignment(input)))?;
+
+    let element: Element = get(EntryHash::from(hash.clone()), GetOptions::default())?.ok_or(
+        WasmError::Guest(String::from("Could not get Alignment for entry hash")),
+    )?;
+
+    let header = element.header();
+
+    let output = AlignmentOutput {
+        hash: hash.clone().into(),
+        content: input,
+        header: header.clone()
+    };
+
+    emit_signal(&output)?;
+
     let path = get_alignments_path();
     path.ensure()?;
     let anchor_hash = path.hash()?;
+
     create_link(anchor_hash, hash.clone(), ())?;   
+
     for path in tree_paths {
         path.ensure()?;
         create_link(path.hash()?, hash.clone(), LinkTag::new("alignment"))?;   
     }
-    Ok(hash.into())
+
+    Ok(output)
 }
 
 ///

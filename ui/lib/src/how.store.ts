@@ -196,20 +196,18 @@ export class HowStore {
   }
 
   async addAlignment(alignment: Alignment) : Promise<EntryHashB64> {
-    const alignmentEh: EntryHashB64 = await this.service.createAlignment(alignment)
+    const alignmentOutput: AlignmentOutput = await this.service.createAlignment(alignment)
+
+    const { hash } = alignmentOutput
 
     this.alignmentOutputsStore.update(alignmentOutputs => {
-      alignmentOutputs[alignmentEh] = {
-        hash: alignmentEh,
-        content: alignment,
-        header: {} as any,
-      };
+      alignmentOutputs[hash] = alignmentOutput
       
       return alignmentOutputs
     })
 
-    this.service.notify({alignmentHash:alignmentEh, message: {type:"NewAlignment", content:alignment}}, this.others());
-    return alignmentEh
+    this.service.notify({ alignmentHash: hash, message: { type:"NewAlignment", content:alignment }}, this.others());
+    return hash
   }
 
   async initilize(input: Initialization) : Promise<void> {

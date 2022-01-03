@@ -68,14 +68,13 @@ export default async (orchestrator) => {
 
     await alice_how.call('how', 'initialize', {alignments: [root], documents:[document]} );
 
-    const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1 );
-    t.ok(alignment1_hash)
-    console.log("alignment1_hash", alignment1_hash);
+    const alignmentOutput = await alice_how.call('how', 'create_alignment', alignment1 );
+    t.ok(alignmentOutput)
 
     const alignments = await alice_how.call('how', 'get_alignments', null );
     const noHeaderAlignments = alignments.map(({ hash, content }) => ({ hash, content }));
 
-    t.deepEqual(noHeaderAlignments, [{hash: alignments[0].hash, content: root}, {hash: alignment1_hash, content: alignment1}]);
+    t.deepEqual(noHeaderAlignments, [{hash: alignments[0].hash, content: root}, {hash: alignmentOutput.hash, content: alignment1}]);
 
     t.ok(alignments[1].header);
 
