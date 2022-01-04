@@ -16,7 +16,7 @@ export class HowService {
     return this.callZome('initialize', input);
   }
 
-  async createAlignment(alignment: Alignment): Promise<EntryHashB64> {
+  async createAlignment(alignment: Alignment): Promise<AlignmentOutput> {
     return this.callZome('create_alignment', alignment);
   }
 

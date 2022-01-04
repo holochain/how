@@ -69,7 +69,7 @@ pub async fn test_basics() {
         meta: BTreeMap::new(),
     };
     
-    let hash: EntryHashB64 = conductor_alice
+    let alignment2_output: AlignmentOutput = conductor_alice
     .call(&cell_alice.zome("how"), "create_alignment", alignment2.clone())
     .await;
 
@@ -82,8 +82,11 @@ pub async fn test_basics() {
             (),
         )
         .await;
-    assert_eq!(alignments[1].hash, hash);
+    assert_eq!(alignments[1].hash, alignment2_output.hash);
     assert_eq!(alignments.len(), 2);
+
+    assert_eq!(alignments[1].header, alignment2_output.header);
+
     debug!("{:#?}", alignments);
 
     let content  = vec![Section::new("summary", "text/markdown", "blah blah")];
