@@ -43,6 +43,18 @@ export class HowStore {
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
   public processes: Readable<Array<Process>> = derived(this.documents, d => this.getProcesses(get(this.treeStore)))
+
+  private processTypes: Readable<Array<Node>> = derived(
+    this.tree, 
+    $tree => {
+      const { children = [] } = this.find($tree, ['soc_proto', 'process']) || {};
+      return children || []
+    }
+  )
+
+  public alignProcesses: Readable<Array<Node>> = this.getProcessesStoreForType('align');
+  public defineProcesses: Readable<Array<Node>> = this.getProcessesStoreForType('define');
+  public refineProcesses: Readable<Array<Node>> = this.getProcessesStoreForType('refine');
   
   constructor(
     protected cellClient: CellClient,
@@ -67,6 +79,13 @@ export class HowStore {
         break;
       }
     })
+  }
+
+  private getProcessesStoreForType(type: string): Readable<Array<Node>> {
+    return derived(
+      this.processTypes,
+      $processTypes => $processTypes.find(processType => processType.val.name === type)?.children || []
+    )
   }
 
   private others(): Array<AgentPubKeyB64> {
