@@ -1,7 +1,7 @@
 import { EntryHashB64, HeaderHashB64, AgentPubKeyB64, serializeHash } from '@holochain-open-dev/core-types';
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
-
+import cloneDeep from 'lodash/cloneDeep';
 import { HowService } from './how.service';
 import {
   Dictionary,
@@ -13,6 +13,7 @@ import {
   DocumentOutput,
   Process,
   DOC_TEMPLATE,
+  setDocumentSection,
 } from './types';
 import {
   ProfilesStore,
@@ -201,8 +202,9 @@ export class HowStore {
     const proc = alignment.processes[0]
     const processPath = `${proc[0]}.${proc[1]}`
     const docOutput: DocumentOutput = (await this.pullDocuments(processPath))[0]
-    const doc = Object.assign({},docOutput.content)
+    const doc = cloneDeep(docOutput.content)
     doc.document_type = processPath
+    setDocumentSection(doc, "title", alignment.title)
     const path = `${alignment.parents[0]}.${alignment.path_abbreviation}`
     await this.addDocument(path, doc)
   }

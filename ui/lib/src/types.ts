@@ -52,6 +52,18 @@ export interface Document {
   meta: Dictionary<string>, // semantically identified meta
 }
 
+export function getDocumentSection(document: Document, sectionName: string) : Section {
+  return document.content.filter(({name, content, content_type})=>name == sectionName)[0]
+}
+
+export function setDocumentSection(document: Document, sectionName: string, content: string ) {
+  const section = document.content.filter(({name, content, content_type})=>name == sectionName)[0]
+  if (section != null) {
+    console.log("SETTING", sectionName, content)
+    section.content = content
+  }
+}
+
 export interface DocumentInput {
   path: string,
   document: Document,

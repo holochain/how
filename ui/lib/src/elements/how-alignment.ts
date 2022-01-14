@@ -5,7 +5,7 @@ import {contextProvided} from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {Alignment, howContext, STAUTS_COMPLETED} from "../types";
+import {Alignment, howContext, STAUTS_COMPLETED, getDocumentSection} from "../types";
 import {HowStore} from "../how.store";
 import { HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -63,6 +63,9 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     this._documentDialogElem.open(this.getPath(), document_type);
   }
 
+  renderType(type: String, content: String) : String {
+    return content
+  }
   render() {
     if (!this.currentAlignmentEh) {
       return;
@@ -73,7 +76,10 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     /** the list of documents for this alignment */
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
-    const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(({name, content, content_type})=>html`<h3>${name}</h3><div>${content}</div>`)}`) : undefined
+    const documents = docs ? docs.map(doc => {
+      const title = getDocumentSection(doc.content, "title")
+      return html`<div class="document-title">${this.renderType(title.content_type,title.content)}</div><div class="document-tye">${doc.content.document_type}</div>`
+    }) : ""
 
     const processes = []
      for (const [procType, procName] of alignment.processes) {
@@ -95,7 +101,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Status: ${alignment.status == STAUTS_COMPLETED ? "Completed" : alignment.processes[alignment.status][1]}
        ${processes}
        <li> Documents:
-        <ul>${documents} 
+        <ul class="document">${documents} 
         </ul>
       </li>
       </div>
