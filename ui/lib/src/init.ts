@@ -150,6 +150,18 @@ export function initialTree(progenitor: AgentPubKeyB64)  {
       meta: {}
     },
     {
+      parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+      path_abbreviation: "fiat", // max 10 char
+      short_name: "Fiat", // max 25 char
+      title: "Process for approving reviewed proposals by fiat",
+      summary: "blah blah",
+      stewards: [progenitor],  // people who can change this document
+      status: STAUTS_COMPLETED,
+      processes: std_procs, // paths to process template to use
+      history: {},
+      meta: {}
+    },
+    {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "hc_system", // max 10 char
       short_name: "Holochain System", // max 25 char
@@ -207,7 +219,7 @@ export function initialTree(progenitor: AgentPubKeyB64)  {
             {name: "summary", content: "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}", content_type:"text/plain"},
             {name: "context", content: "{Description of the context and use-case an why it requires a standard. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Holochain ecosystem? What use cases does this standard address?}", content_type:"text/plain" },
             {name: "specification", content: "{Description of the syntax, semantics, state diagrams, and workflows of any new feature/protocol/process. The specification should be detailed enough to allow for multiple interoperable implementations.}", content_type:"text/markdown"},
-            {name: "zome siganures", content: "{Machine readable function signatures to expect of zomes that implement this standard.", content_type:"text/json"},
+            {name: "zome signatures", content: "{Machine readable function signatures to expect of zomes that implement this standard.", content_type:"text/json"},
             {name: "rationale", content: "{Description of what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.}", content_type:"text/plain"},
             {name: "reference implementation", content: "{An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification.}", content_type:"text/rust"},
           ],
@@ -257,6 +269,18 @@ export function initialTree(progenitor: AgentPubKeyB64)  {
         document_type: DOC_TEMPLATE,
         content: [
           {name: "title", content: "Sortition", content_type:"text/plain"},
+          {name: "summary", content: "{}", content_type:"text/plain"},
+        ],
+        editors: [progenitor],
+        meta: {}
+      }
+    },
+    {
+      path: "soc_proto.process.align.fiat",
+      document: {
+        document_type: DOC_TEMPLATE,
+        content: [
+          {name: "title", content: "Fiat", content_type:"text/plain"},
           {name: "summary", content: "{}", content_type:"text/plain"},
         ],
         editors: [progenitor],

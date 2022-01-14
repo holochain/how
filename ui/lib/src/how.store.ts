@@ -196,12 +196,25 @@ export class HowStore {
     return get(this.treeStore)
   }
 
+  async initializeAlignment(algnmentEh: EntryHashB64) : Promise<void>  {
+    const alignment = this.alignment(algnmentEh)
+    const proc = alignment.processes[0]
+    const processPath = `${proc[0]}.${proc[1]}`
+    const docOutput: DocumentOutput = (await this.pullDocuments(processPath))[0]
+    const doc = Object.assign({},docOutput.content)
+    doc.document_type = processPath
+    const path = `${alignment.parents[0]}.${alignment.path_abbreviation}`
+    await this.addDocument(path, doc)
+  }
+
   async addAlignment(alignment: Alignment) : Promise<EntryHashB64> {
     const alignmentEh: EntryHashB64 = await this.service.createAlignment(alignment)
     this.alignmentsStore.update(alignments => {
       alignments[alignmentEh] = alignment
       return alignments
     })
+    await this.initializeAlignment(alignmentEh)
+
     this.service.notify({alignmentHash:alignmentEh, message: {type:"NewAlignment", content:alignment}}, this.others());
     return alignmentEh
   }
