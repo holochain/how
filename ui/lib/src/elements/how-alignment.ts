@@ -75,13 +75,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.map(doc => html`<b>${doc.content.document_type}</b>${doc.content.content.map(({name, content, content_type})=>html`<h3>${name}</h3><div>${content}</div>`)}`) : undefined
 
-    const processActions = []
     const processes = []
      for (const [procType, procName] of alignment.processes) {
         const path = `${procType}.${procName}`
         const elems = procType.split(".")
         const typeName = elems[elems.length-1]
-        processActions.push(html`<mwc-button icon="add_circle"  @click=${()=>this.addDoc(path)}>${typeName}</mwc-button>`)
         processes.push(html`<li>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></li>`)
       }
 
@@ -99,7 +97,6 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Documents:
         <ul>${documents} 
         </ul>
-         ${processActions}
       </li>
       </div>
       <how-document-dialog id="document-dialog">
