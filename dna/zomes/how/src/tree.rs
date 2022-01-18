@@ -11,23 +11,22 @@ pub struct Content {
 }
 
 fn get_entry_hashes(path: &Path, tag: LinkTag) -> ExternResult<Vec<EntryHashB64>> {
-    let links = get_links(path.hash()?, Some(tag))?;
+    let links = get_links(path.path_entry_hash()?, Some(tag))?;
     let entry_hashes = links.into_iter().map(|l| l.target.as_hash().clone().into()).collect();
     Ok(entry_hashes)
 }
 
 fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult<()>{
 
-    for tag in path.children()?.into_iter().map(|link| link.tag) {
-        let tag_path = Path::try_from(&tag)?;
-        let v = tag_path.as_ref();
+    for path in path.children_paths()? {
+        let v = path.as_ref();
         let val = Content {
             name: String::try_from(&v[v.len()-1])?,
-            alignments: get_entry_hashes(&tag_path, LinkTag::new("alignment"))?,
-            documents: get_entry_hashes(&tag_path, LinkTag::new("document"))?,
+            alignments: get_entry_hashes(&path, LinkTag::new("alignment"))?,
+            documents: get_entry_hashes(&path, LinkTag::new("document"))?,
         };
         let idx = tree.insert(node, val);
-        build_tree(tree, idx, tag_path)?;
+        build_tree(tree, idx, path)?;
     }
     Ok(())
 }

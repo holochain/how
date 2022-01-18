@@ -47,7 +47,7 @@ pub fn create_document(input: DocumentInput) -> ExternResult<EntryHashB64> {
     if !path.exists()? {
         return Err(HowError::MissingPath.into());
     }
-    let anchor_hash = path.hash()?;
+    let anchor_hash = path.path_entry_hash()?;
     let hash = hash_entry(&input.document)?;
     create_link(anchor_hash, hash.clone(), LinkTag::new("document"))?;   
 
@@ -63,7 +63,7 @@ pub struct DocumentOutput {
 #[hdk_extern]
 pub fn get_documents(input: String) -> ExternResult<Vec<DocumentOutput>> {
     let path = tree_path(input);
-    let documents = get_documents_inner(path.hash()?)?;
+    let documents = get_documents_inner(path.path_entry_hash()?)?;
     Ok(documents)
 }
 
