@@ -22,6 +22,10 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() _editors: Dictionary<string> = {};
     @property() document_type = ""
     @property() path = ""
+    @property() isNew = false
+    @property() editable = false
+
+    @state() sections: Array<Section> = []
 
     @contextProvided({ context: howContext })
     _store!: HowStore;
@@ -30,6 +34,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     _contentField!: TextArea;
   
     _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
+    _documents = new StoreSubscriber(this, () => this._store.documents);
 
     resetAllFields() {
         this._editors = {}
@@ -39,8 +44,10 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     /**
      *
      */
-    open(path: string, document_type: string) {
-        this.path = path
+    new(path: string, document_type: string) {
+      this.isNew = true
+      this.editable = true
+      this.path = path
         this.document_type = document_type
         const docs = this._documentPaths.value[document_type]
         for (const doc of docs) {
@@ -54,6 +61,17 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         console.log(docs)
         const dialog = this.shadowRoot!.getElementById("document-dialog") as Dialog
         dialog.open = true
+    }
+
+    open(path: string, hash: EntryHashB64, editable: boolean) {
+      this.isNew = false
+      this.editable = editable
+      this.path = path
+      const document = this._documents.value[hash]
+      this.document_type = document.document_type
+      this.sections = document.content
+      const dialog = this.shadowRoot!.getElementById("document-dialog") as Dialog
+      dialog.open = true
     }
     
     private async handleOk(e: any) {
@@ -114,7 +132,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     }
     render() {
         return html`
-<mwc-dialog id="document-dialog" heading="New document" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
+<mwc-dialog id="document-dialog" heading="${this.isNew ? "New" : this.editable? "Edit":"View"} Document" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
   <div> Path: ${this.path} </div>
   <div> Type: ${this.document_type} </div>
   <mwc-textarea 
@@ -128,8 +146,10 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
   style="margin-bottom: 16px;"
   include-myself></search-agent>
 
+  ${this.editable ? html`
   <mwc-button id="primary-action-button" slot="primaryAction" @click=${this.handleOk}>ok</mwc-button>
-  <mwc-button slot="secondaryAction"  dialogAction="cancel">cancel</mwc-button>
+  <mwc-button slot="secondaryAction"  dialogAction="cancel">cancel</mwc-button>` :
+  html`<mwc-button id="primary-action-button" slot="primaryAction" dialogAction="cancel">close</mwc-button>`}
 </mwc-dialog>
  `
     }

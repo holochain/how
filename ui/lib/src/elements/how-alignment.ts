@@ -5,9 +5,10 @@ import {contextProvided} from "@holochain-open-dev/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
+import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {Alignment, howContext, STAUTS_COMPLETED, getDocumentSection} from "../types";
 import {HowStore} from "../how.store";
-import { HowDocumentDialog } from "./how-document-dialog";
+import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles";
 import {
@@ -60,7 +61,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   }
 
   addDoc(document_type: string ) {
-    this._documentDialogElem.open(this.getPath(), document_type);
+    this._documentDialogElem.new(this.getPath(), document_type);
+  }
+
+  openDoc(documentEh: EntryHashB64, editable: boolean ) {
+    this._documentDialogElem.open(this.getPath(), documentEh, editable);
   }
 
   renderType(type: String, content: String) : String {
@@ -78,7 +83,12 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.map(doc => {
       const title = getDocumentSection(doc.content, "title")
-      return html`<div class="document-title">${this.renderType(title.content_type,title.content)}</div><div class="document-tye">${doc.content.document_type}</div>`
+      return html`
+      <ul class="document">
+        <div class="document-title">${this.renderType(title.content_type,title.content)}</div><div class="document-tye">${doc.content.document_type}</div>
+        ${alignment.status == STAUTS_COMPLETED ? html`<mwc-button icon="visibility" @click=${()=>this.openDoc(doc.hash, false)}>View</mwc-button>` : html`<mwc-button icon="edit"  @click=${()=>this.openDoc(doc.hash, true)}>Edit</mwc-button>` }
+        
+      </ul>`
     }) : ""
 
     const processes = []
@@ -101,8 +111,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Status: ${alignment.status == STAUTS_COMPLETED ? "Completed" : alignment.processes[alignment.status][1]}
        ${processes}
        <li> Documents:
-        <ul class="document">${documents} 
-        </ul>
+        ${documents} 
       </li>
       </div>
       <how-document-dialog id="document-dialog">
