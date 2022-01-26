@@ -1,7 +1,7 @@
 // TODO: add globally available interfaces for your elements
 
 import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
-import { createContext, Context } from "@lit-labs/context";
+import { createContext, Context } from "@holochain-open-dev/context";
 import { HowStore } from "./how.store";
 
 export const howContext : Context<HowStore> = createContext('how/service');

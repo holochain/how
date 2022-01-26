@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { state, property, query } from "lit/decorators.js";
 
-import { contextProvided } from "@lit-labs/context";
+import { contextProvided } from "@holochain-open-dev/context";
 import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber } from "svelte/store";
 
@@ -184,6 +184,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   async addHardcodedAlignments() {
     const init:Initialization = initialTree(this._store.myAgentPubKey)
     await this._store.initilize(init);
+    this._store.pullDocuments("soc_proto.process.define.declaration")
   }
 
   async refresh() {
@@ -281,7 +282,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       @document-added=${(e:any)=>{this.refresh();}}
       @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}></how-alignment>
     </div>
-
     <how-alignment-dialog id="alignment-dialog"
                         .myProfile=${this._myProfile.value}
                         @alignment-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>

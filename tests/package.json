@@ -10,7 +10,7 @@
   "author": "",
   "license": "CAL-1.0",
   "dependencies": {
-    "@holochain/conductor-api": "^0.2.4",
+    "@holochain/client": "^0.3.2",
     "@msgpack/msgpack": "^2.7.0",
     "esm": "^3.2.25",
     "js-base64": "^3.6.1",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@detools/tap-diff": "^0.2.2",
-    "@holochain/tryorama": "^0.4.6",
+    "@holochain/tryorama": "^0.4.10",
     "@types/lodash": "^4.14.173",
     "@types/node": "^14.0.14"
   },

@@ -1,4 +1,4 @@
-import { ContextProvider } from "@lit-labs/context";
+import { ContextProvider } from "@holochain-open-dev/context";
 import { state } from "lit/decorators.js";
 import {
   HowController,
@@ -11,7 +11,7 @@ import {
   ProfilesStore,
   profilesStoreContext,
 } from "@holochain-open-dev/profiles";
-import { AppWebsocket } from "@holochain/conductor-api";
+import { AppWebsocket } from "@holochain/client";
 import { HolochainClient } from "@holochain-open-dev/cell-client";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html } from "lit";

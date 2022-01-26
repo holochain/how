@@ -2,7 +2,7 @@ import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
-import {contextProvided} from "@lit-labs/context";
+import {contextProvided} from "@holochain-open-dev/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Alignment, howContext, Dictionary, Node} from "../types";
@@ -128,6 +128,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     // - Add alignment to commons
     const newAlignment = await this._store.addAlignment(alignment);
     this.dispatchEvent(new CustomEvent('alignment-added', { detail: newAlignment, bubbles: true, composed: true }));
+
     // - Clear all fields
     // this.resetAllFields();
     // - Close dialog

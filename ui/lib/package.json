@@ -10,7 +10,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@holochain/conductor-api": "0.2.4",
+    "@holochain/client": "^0.3.2",
     "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-typescript": "^8.2.5",
@@ -25,13 +25,13 @@
     "watch-cli": "^0.2.3"
   },
   "dependencies": {
-    "@holochain-open-dev/cell-client": "^0.1.0",
+    "@holochain-open-dev/cell-client": "^0.2.0",
     "@holochain-open-dev/core-types": "^0.1.1",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#ui-build",
-    "@lit-labs/context": "github:holochain-open-dev/context#build",
+    "@holochain-open-dev/profiles": "^0.0.1",
+    "@holochain-open-dev/context": "^0.0.3",
     "@open-wc/scoped-elements": "^2.0.1",
     "@scoped-elements/material-web": "0.0.16",
-    "@scoped-elements/shoelace": "0.0.7",
+    "@scoped-elements/shoelace": "0.0.8",
     "cqfill": "^0.6.0",
     "lit": "^2.0.2",
     "lit-svelte-stores": "^0.1.3",
