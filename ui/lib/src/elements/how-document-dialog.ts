@@ -135,6 +135,8 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
 <mwc-dialog id="document-dialog" heading="${this.isNew ? "New" : this.editable? "Edit":"View"} Document" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
   <div> Path: ${this.path} </div>
   <div> Type: ${this.document_type} </div>
+  ${this.editable ?
+  html`
   <mwc-textarea 
                  @input=${() => (this.shadowRoot!.getElementById("content-field") as TextArea).reportValidity()}
                  id="content-field" minlength="3" maxlength="64" cols="73" rows="10" label="Content" autoValidate=true required></mwc-textarea>
@@ -145,6 +147,12 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
   clear-on-select
   style="margin-bottom: 16px;"
   include-myself></search-agent>
+  `
+  :
+  html`${this.sections.map((section) => html`<h3>${section.name}</h3><div>${section.content}</div>`)}
+  <hr />Editors: ${Object.entries(this._editors).map(([key,nickname])=> html`${nickname} `)}
+ `
+  }
 
   ${this.editable ? html`
   <mwc-button id="primary-action-button" slot="primaryAction" @click=${this.handleOk}>ok</mwc-button>
