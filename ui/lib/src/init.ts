@@ -215,13 +215,13 @@ export function initialTree(progenitor: AgentPubKeyB64)  {
         document: {  
           document_type: DOC_TEMPLATE,
           content: [
-            {name: "title", content: "{title of the standard being defined}", content_type:"text/plain"},
-            {name: "summary", content: "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}", content_type:"text/plain"},
-            {name: "context", content: "{Description of the context and use-case an why it requires a standard. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Holochain ecosystem? What use cases does this standard address?}", content_type:"text/plain" },
-            {name: "specification", content: "{Description of the syntax, semantics, state diagrams, and workflows of any new feature/protocol/process. The specification should be detailed enough to allow for multiple interoperable implementations.}", content_type:"text/markdown"},
-            {name: "zome signatures", content: "{Machine readable function signatures to expect of zomes that implement this standard.", content_type:"text/json"},
-            {name: "rationale", content: "{Description of what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.}", content_type:"text/plain"},
-            {name: "reference implementation", content: "{An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification.}", content_type:"text/rust"},
+            {name: "title", content_type:"text/plain", content: "{title of the standard being defined}"},
+            {name: "summary", content_type:"text/plain:long", content: "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}"},
+            {name: "context", content_type:"text/plain:long", content: "{Description of the context and use-case an why it requires a standard. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Holochain ecosystem? What use cases does this standard address?}" },
+            {name: "specification", content_type:"text/markdown", content: "{Description of the syntax, semantics, state diagrams, and workflows of any new feature/protocol/process. The specification should be detailed enough to allow for multiple interoperable implementations.}"},
+            {name: "zome signatures", content_type:"text/json", content: "{Machine readable function signatures to expect of zomes that implement this standard."},
+            {name: "rationale", content_type:"text/plain:long", content: "{Description of what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.}"},
+            {name: "reference implementation", content_type:"text/rust", content: "{An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification.}"},
           ],
           editors: [progenitor],
           meta: {}

@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@holochain-open-dev/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Document, howContext, Dictionary, Section, DOC_TEMPLATE} from "../types";
+import {Document, howContext, Dictionary, Section, DOC_TEMPLATE, DocumentOutput} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -30,15 +30,19 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @contextProvided({ context: howContext })
     _store!: HowStore;
   
-    @query('#content-field')
-    _contentField!: TextArea;
+    @state() _sectionElems: Array<HTMLElement> = [];
   
     _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
     _documents = new StoreSubscriber(this, () => this._store.documents);
 
     resetAllFields() {
         this._editors = {}
-        this._contentField.value = ""
+        this._sectionElems = []
+    }
+
+    initSectionElements(document: DocumentOutput) {
+      this.sections.forEach((section, index) => {
+      })
     }
 
     /**
@@ -52,10 +56,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         const docs = this._documentPaths.value[document_type]
         for (const doc of docs) {
           if (doc.content.document_type == DOC_TEMPLATE) {
-            // Poor-mans convert to markdown for now, this should actually add different sections to the dialog
-            const title = doc.content.content[0].content
-            const sections = doc.content.content.filter(section => section.name != 'title').map(({name, content, content_type})=>`## ${name}\n${content}`)            
-            this._contentField.value = `# ${title}\n\n`+sections.join("\n\n") 
+            this.sections = doc.content.content
           } 
         }
         console.log(docs)
@@ -78,25 +79,16 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         /** Check validity */
         // nameField
         let content: Array<Section> = []
-        let val = this._contentField.value;
-        const title = val.match(/^# (.*)/)
-        if (title) {
-            content.push({name: "title", content: title[1], content_type:"type/plain"})
-        }
-        const sections = val.split("\n## ")
-        sections.shift()
-        sections.map(section => {
-            let body = section.split("\n")
-            const firstLine = body.shift()
-            if (firstLine) {
-                content.push({name: firstLine, content_type: "text/plain", content: body.join("\n")})
-            }
+
+        this.sections.forEach((section, index) => {
+          const elem = this.shadowRoot!.getElementById(`section-${index}`) as TextArea
+          section.content = elem?.value
         })
         
         const document: Document = {
           document_type: this.document_type,
           editors: Object.keys(this._editors).map((agent)=> agent),  // people who can change this document
-          content, 
+          content: this.sections, 
           meta: {},
         };
     
@@ -130,6 +122,22 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         this._editors = this._editors
         this.requestUpdate()
     }
+    private sectionWidget(section: Section, index: number) {
+      const id = `section-${index}`
+      console.log(section.name,section.content_type)
+      switch (section.content_type) {
+        case "text/plain":
+          return html`
+            <mwc-textfield dialogInitialFocus type="text"
+            @input=${() => (this.shadowRoot!.getElementById(id) as TextField).reportValidity()}
+            id="${id}" maxlength="255" label="${section.name}" autoValidate=true value="${section.content}" required></mwc-textfield>`
+        case "text/plain:long":        
+        default: 
+          return html`<mwc-textarea @input=${() => (this.shadowRoot!.getElementById(id) as TextArea).reportValidity()}
+            id="${id}" cols="100" rows="10" label="${section.name}" value="${section.content}" autoValidate=true required>
+            </mwc-textarea>`
+      } 
+    }
     render() {
         return html`
 <mwc-dialog id="document-dialog" heading="${this.isNew ? "New" : this.editable? "Edit":"View"} Document" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
@@ -137,10 +145,8 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
   <div> Type: ${this.document_type} </div>
   ${this.editable ?
   html`
-  <mwc-textarea 
-                 @input=${() => (this.shadowRoot!.getElementById("content-field") as TextArea).reportValidity()}
-                 id="content-field" minlength="3" maxlength="64" cols="73" rows="10" label="Content" autoValidate=true required></mwc-textarea>
-  Editors: ${Object.keys(this._editors).length} ${Object.entries(this._editors).map(([agent, nickname])=>html`<span class="agent" title="${agent}">${nickname}</span>`)}
+    ${this.sections.map((section, index) => {return html `${this.sectionWidget(section, index)}`})}
+  <h4>Editors:</h4>
   <search-agent
   @closing=${(e:any)=>e.stopPropagation()}
   @agent-selected="${this.addEditor}"
@@ -149,7 +155,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
   include-myself></search-agent>
   `
   :
-  html`${this.sections.map((section) => html`<h3>${section.name}</h3><div>${section.content}</div>`)}
+  html`${this.sections.map((section) => html`<h4>${section.name}</h4><div>${section.content}</div>`)}
   <hr />Editors: ${Object.entries(this._editors).map(([key,nickname])=> html`${nickname} `)}
  `
   }
@@ -174,7 +180,9 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       static get styles() {
         return [
           sharedStyles,
-          css``
+          css`
+          :host {--mdc-dialog-max-width:1000px}
+          `
         ]
     }
 }
