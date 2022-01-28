@@ -141,9 +141,9 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     private sectionValue(section: Section, index: number) {
       switch (section.content_type) {
         case "text/markdown":
-          return html`${unsafeHTML(Marked.parse(section.content))}`
+          return html`<div class="section">${unsafeHTML(Marked.parse(section.content))}</div>`
         default: 
-          return html`${section.content}` 
+          return html`<div class="section">${section.content}</div>`
       }
     }
     render() {
@@ -163,7 +163,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
   include-myself></search-agent>
   `
   :
-  html`${this.sections.map((section, index) => html`<h4>${section.name}</h4><div>${this.sectionValue(section, index)}</div>`)}
+  html`${this.sections.map((section, index) => html`<h4 class="section-name">${section.name}</h4><div>${this.sectionValue(section, index)}</div>`)}
   <hr />Editors: ${Object.entries(this._editors).map(([key,nickname])=> html`${nickname} `)}
  `
   }
@@ -190,6 +190,14 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
           sharedStyles,
           css`
           :host {--mdc-dialog-max-width:1000px}
+          .section {
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 10px;
+          }
+          .section-name {
+            margin-bottom: 0px;
+          }
           `
         ]
     }
