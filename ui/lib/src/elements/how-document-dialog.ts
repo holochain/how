@@ -1,5 +1,6 @@
 import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
+import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import {StoreSubscriber} from "lit-svelte-stores";
 import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@holochain-open-dev/context";
@@ -14,6 +15,7 @@ import {
   TextArea,
 } from "@scoped-elements/material-web";
 import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
+import {Marked} from "@ts-stack/markdown";
 
 /**
  * @element how-alignment-dialog
@@ -108,10 +110,9 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         
     //   }
     //   this._alignmentToPreload = undefined;
-    // }
+    // }marked
     // this.requestUpdate()
     }
-
     private async handleDialogClosing(e: any) {
     this.resetAllFields();
     }
@@ -124,19 +125,26 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     }
     private sectionWidget(section: Section, index: number) {
       const id = `section-${index}`
-      console.log(section.name,section.content_type)
       switch (section.content_type) {
         case "text/plain":
           return html`
             <mwc-textfield dialogInitialFocus type="text"
             @input=${() => (this.shadowRoot!.getElementById(id) as TextField).reportValidity()}
             id="${id}" maxlength="255" label="${section.name}" autoValidate=true value="${section.content}" required></mwc-textfield>`
-        case "text/plain:long":        
+        case "text/plain:long":
         default: 
           return html`<mwc-textarea @input=${() => (this.shadowRoot!.getElementById(id) as TextArea).reportValidity()}
             id="${id}" cols="100" rows="10" label="${section.name}" value="${section.content}" autoValidate=true required>
             </mwc-textarea>`
       } 
+    }
+    private sectionValue(section: Section, index: number) {
+      switch (section.content_type) {
+        case "text/markdown":
+          return html`${unsafeHTML(Marked.parse(section.content))}`
+        default: 
+          return html`${section.content}` 
+      }
     }
     render() {
         return html`
@@ -155,7 +163,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
   include-myself></search-agent>
   `
   :
-  html`${this.sections.map((section) => html`<h4>${section.name}</h4><div>${section.content}</div>`)}
+  html`${this.sections.map((section, index) => html`<h4>${section.name}</h4><div>${this.sectionValue(section, index)}</div>`)}
   <hr />Editors: ${Object.entries(this._editors).map(([key,nickname])=> html`${nickname} `)}
  `
   }
