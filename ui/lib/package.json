@@ -27,7 +27,7 @@
   "dependencies": {
     "@holochain-open-dev/cell-client": "^0.2.0",
     "@holochain-open-dev/core-types": "^0.1.1",
-    "@holochain-open-dev/profiles": "^0.0.1",
+    "@holochain-open-dev/profiles": "^0.0.4",
     "@holochain-open-dev/context": "^0.0.3",
     "@open-wc/scoped-elements": "^2.0.1",
     "@scoped-elements/material-web": "0.0.16",
@@ -39,6 +39,6 @@
     "svelte": "^3.42.4",
     "lodash": "^4.17.21",
     "@ts-stack/markdown": "^1.4.0",
-    "@types/dompurify": "^2.3.3"
+    "@types/sanitize-html": "^2.6.2"
   }
 }

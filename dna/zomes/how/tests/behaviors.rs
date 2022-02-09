@@ -40,9 +40,6 @@ pub async fn test_basics() {
     let aligment1 = Alignment {
         parents: vec!["hc_system".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "conductor".into(), // max 10 char
-        short_name: "conductor".into(), // max 25 char
-        title: "specification of the holochain conductor".into(),
-        summary: "blah blah".into(),
         stewards: vec![],  // people who can change this document
         status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use
@@ -59,9 +56,6 @@ pub async fn test_basics() {
     let alignment2 = Alignment {
         parents: vec!["hc_system.conductor.api".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "app".into(), // max 10 char
-        short_name: "application".into(), // max 25 char
-        title: "specification of the holochain conductor api for application access".into(),
-        summary: "blah blah".into(),
         stewards: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document
         status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use

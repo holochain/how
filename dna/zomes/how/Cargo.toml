@@ -13,8 +13,7 @@ chrono = {version = "0.4", features = ['alloc', 'std']}
 derive_more = "0.99"
 serde = "1.0.123"
 thiserror = "1.0.20"
-hdk = "0.0.119"
-holo_hash = {version = "0.0.16", features = ["encoding"]}
+hdk = {version = "0.0.120", features = ["encoding"]}
 
 [dev-dependencies]
 holochain = { version = "0.0.123", default-features = false, features = ["test_utils"] }

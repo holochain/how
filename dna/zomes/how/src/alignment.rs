@@ -16,9 +16,6 @@ type ProcessName = String;
 pub struct Alignment {
     pub parents: Vec<String>, // full paths to parent nodes (remember it's a DAG)
     pub path_abbreviation: String, // max 10 char
-    pub short_name: String, // max 25 char
-    pub title: String,
-    pub summary: String,
     pub stewards: Vec<AgentPubKeyB64>,  // people who can change this document
     pub status: i8, // index of current process
     pub processes: Vec<(ProcessType,ProcessName)>, // paths to processes to use

@@ -20,9 +20,6 @@ export default async (orchestrator) => {
     let alignment1 = {
       parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "app", // max 10 char
-      short_name: "application", // max 25 char
-      title: "specification of the holochain conductor api for application access",
-      summary: "blah blah",
       stewards: [],  // people who can change this document
       status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
@@ -33,9 +30,6 @@ export default async (orchestrator) => {
     let root = {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "", // max 10 char
-      short_name: "Holochain Community Standards", // max 25 char
-      title: "root node",
-      summary: "blah blah",
       stewards: [],  // people who can change this document
       status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
