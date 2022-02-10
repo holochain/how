@@ -90,7 +90,12 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         <div class="document-type">Type: ${doc.document_type}</div>
         <div class="document-state">State: ${doc.state}</div>
         ${doc.isAlive()? html`<mwc-button icon="visibility" @click=${()=>this.openDoc(docOutput.hash, false)}>View</mwc-button>` : html`<mwc-button icon="edit"  @click=${()=>this.openDoc(docOutput.hash, true)}>Edit</mwc-button>` }
-        
+        <div>
+          Move to: 
+          ${doc.nextStates().map(state => 
+          html `<mwc-button @click=${()=>alert("not implmented")}>${state}</mwc-button>`
+        )}
+        </div>
       </ul>`
     }) : ""
 

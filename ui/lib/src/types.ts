@@ -55,10 +55,12 @@ export class Document {
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
   state: string = "define"
-  machine: Object =  {
+  machine: Dictionary<Array<string>> =  {
     define:["refine", SysState.Defunct],
     refine: ["align", SysState.Defunct],
-    align: [SysState.Alive, SysState.Defunct]
+    align: [SysState.Alive, SysState.Defunct],
+    [SysState.Defunct]: [],
+    [SysState.Alive]: [SysState.Defunct]
    }
   constructor(init?: Partial<Document> ) {
     Object.assign(this, init);
@@ -75,6 +77,9 @@ export class Document {
   }
   public isAlive() : boolean {
     return this.state == SysState.Alive
+  }
+  public nextStates() : Array<string> {
+    return Object.values(this.machine[this.state])
   }
 }
 
