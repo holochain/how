@@ -40,7 +40,9 @@ pub async fn test_basics() {
     let aligment1 = Alignment {
         parents: vec!["hc_system".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "conductor".into(), // max 10 char
+        short_name: "Conductor".into(),
         stewards: vec![],  // people who can change this document
+        required_sections: vec![], 
         status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use
         history: BTreeMap::new(),
@@ -56,7 +58,9 @@ pub async fn test_basics() {
     let alignment2 = Alignment {
         parents: vec!["hc_system.conductor.api".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "app".into(), // max 10 char
+        short_name: "Application API".into(), // max 10 char
         stewards: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document
+        required_sections: vec![], 
         status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use
         history: BTreeMap::new(),
