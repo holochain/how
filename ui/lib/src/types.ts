@@ -22,8 +22,7 @@ export interface Alignment {
   parents: Array<string>,
   path_abbreviation: string,
   short_name: string,
-  title: string,
-  summary: string,
+  required_sections: Array<Section>,
   stewards: Array<AgentPubKeyB64>,
   status: number,
   processes: Array<[ProcessType, ProcessName]>,
@@ -36,8 +35,11 @@ export interface AlignmentOutput {
   content: Alignment,
 }
 
-export const DOC_TEMPLATE="_template"
-export const DOC_COMMENT="_comment"
+export enum DocType {
+  Template = "Template",
+  Document = "Document",
+  Comment = "Comment"
+}
 
 export interface Section {
   name: string,
@@ -45,22 +47,23 @@ export interface Section {
   content: string,    
 }
 
-export interface Document {
-  document_type: string, // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
-  editors: Array<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
-  content: Array<Section>, // semantically identified content components
-  meta: Dictionary<string>, // semantically identified meta
-}
-
-export function getDocumentSection(document: Document, sectionName: string) : Section {
-  return document.content.filter(({name, content, content_type})=>name == sectionName)[0]
-}
-
-export function setDocumentSection(document: Document, sectionName: string, content: string ) {
-  const section = document.content.filter(({name, content, content_type})=>name == sectionName)[0]
-  if (section != null) {
-    console.log("SETTING", sectionName, content)
-    section.content = content
+export class Document {
+  document_type: string = "" // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
+  editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
+  content: Array<Section> = [] // semantically identified content components
+  meta: Dictionary<string> = {} // semantically identified meta
+  constructor(init?: Partial<Document> ) {
+    Object.assign(this, init);
+  }
+  public getDocumentSection(sectionName: string) : Section {
+    return this.content.filter(({name, content, content_type})=>name == sectionName)[0]
+  }
+  public setDocumentSection(sectionName: string, content: string ) {
+    const section = this.content.filter(({name, content, content_type})=>name == sectionName)[0]
+    if (section != null) {
+      console.log("SETTING", sectionName, content)
+      section.content = content
+    }
   }
 }
 

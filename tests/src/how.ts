@@ -21,6 +21,7 @@ export default async (orchestrator) => {
       parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
+      required_sections: [],
       status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
       history: {},
@@ -31,6 +32,7 @@ export default async (orchestrator) => {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
+      required_sections: [],
       status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
       history: {},

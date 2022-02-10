@@ -12,8 +12,8 @@ import {
   Document,
   DocumentOutput,
   Process,
-  DOC_TEMPLATE,
-  setDocumentSection,
+  DocType,
+  Section,
 } from './types';
 import {
   ProfilesStore,
@@ -82,6 +82,46 @@ export class HowStore {
     })
   }
 
+  // gather together all of the required sections by walking the tree from the root
+  getRequiredSectionsForPath(path: string): Array<Section> {
+    let sections: Array<Section> = []
+    path = `.${path}` // so we also search the root
+    let walk = ""
+    for (const segment of path.split(".") ) {
+      if (walk != "") { walk += "."}
+      walk += segment
+      const alignmentHash = get(this.alignmentsPath)[walk]
+      const alignment = this.alignment(alignmentHash)
+      sections = sections.concat(alignment.required_sections)
+    }
+    return sections
+  }
+
+  // get all of the sections needed for a specific process by getting the template contents
+  // for that proccess hierarchy
+  async getSectionsForProcess(path: string): Promise<Array<Section>> {
+    let sections: Array<Section> = []
+    let segments = path.split(".")
+    let walk = segments.shift()!
+    for (const segment of segments) {
+      walk += "." + segment
+      // find the templates at this level and add them into the sections
+      await this.pullDocuments(walk)
+      const docs = get(this.documentPaths)[walk]
+      if (docs) {
+        console.log("found", docs)
+        for (const doc of docs) {
+          if (doc.content.document_type == DocType.Template) {
+            console.log("found templates", doc.content.content)
+
+            sections = sections.concat(doc.content.content)
+          } 
+        }
+      }
+    }
+    return sections
+  }
+
   private getProcessesStoreForType(type: string): Readable<Array<Node>> {
     return derived(
       this.processTypes,
@@ -133,7 +173,10 @@ export class HowStore {
   }
   
   async pullDocuments(path: string) : Promise<Array<DocumentOutput>> {
-    const documents = await this.service.getDocuments(path)
+    let documents = await this.service.getDocuments(path)
+    documents.forEach(doc => {
+      doc.content = new Document(doc.content)
+    })
     console.log("pull got", documents)
     for (const s of documents) {
       this.updateDocuments(path, s)
@@ -160,7 +203,7 @@ export class HowStore {
         console.log("docs", get(this.documentPathStore), docs, `soc_proto.process.${n.val.name}`)
 
         if (docs) {
-          const doc  = docs.find(doc=>doc.content.document_type == DOC_TEMPLATE)
+          const doc  = docs.find(doc=>doc.content.document_type == DocType.Template)
           console.log("doc", doc)
           if (doc) {
             processes.push({path: `soc_proto.process.${n.val.name}`, name: n.val.name})
@@ -201,10 +244,13 @@ export class HowStore {
     const alignment = this.alignment(algnmentEh)
     const proc = alignment.processes[0]
     const processPath = `${proc[0]}.${proc[1]}`
-    const docOutput: DocumentOutput = (await this.pullDocuments(processPath))[0]
-    const doc = cloneDeep(docOutput.content)
-    doc.document_type = processPath
-    setDocumentSection(doc, "title", alignment.title)
+    const doc = new Document({document_type: DocType.Document})
+
+    doc.content = this.getRequiredSectionsForPath(alignment.parents[0])
+    await this.pullDocuments(processPath)
+    doc.content = doc.content.concat(await this.getSectionsForProcess(processPath))
+
+    doc.setDocumentSection("title", alignment.short_name)
     const path = `${alignment.parents[0]}.${alignment.path_abbreviation}`
     await this.addDocument(path, doc)
   }

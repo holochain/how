@@ -6,7 +6,7 @@ import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@holochain-open-dev/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Document, howContext, Dictionary, Section, DOC_TEMPLATE, DocumentOutput} from "../types";
+import {Document, howContext, Dictionary, Section, DocType, DocumentOutput} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -54,16 +54,20 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       this.isNew = true
       this.editable = true
       this.path = path
-        this.document_type = document_type
-        const docs = this._documentPaths.value[document_type]
-        for (const doc of docs) {
-          if (doc.content.document_type == DOC_TEMPLATE) {
-            this.sections = doc.content.content
-          } 
-        }
-        console.log(docs)
-        const dialog = this.shadowRoot!.getElementById("document-dialog") as Dialog
-        dialog.open = true
+      this.document_type = document_type
+      this.sections = this._store.getRequiredSectionsForPath(path)
+
+      // also  get the sections from the process template
+      const docs = this._documentPaths.value[document_type]
+      for (const doc of docs) {
+        if (doc.content.document_type == DocType.Template) {
+          this.sections = this.sections.concat(doc.content.content)
+        } 
+      }
+      console.log(docs)
+
+      const dialog = this.shadowRoot!.getElementById("document-dialog") as Dialog
+      dialog.open = true
     }
 
     open(path: string, hash: EntryHashB64, editable: boolean) {
@@ -87,12 +91,11 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
           section.content = elem?.value
         })
         
-        const document: Document = {
+        const document: Document = new Document ({
           document_type: this.document_type,
           editors: Object.keys(this._editors).map((agent)=> agent),  // people who can change this document
           content: this.sections, 
-          meta: {},
-        };
+        });
     
         // - Add alignment to commons
         const newDocument = await this._store.addDocument(this.path, document);

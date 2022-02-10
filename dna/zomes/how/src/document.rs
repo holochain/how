@@ -6,7 +6,8 @@ use crate::error::*;
 use crate::tree::*;
 
 pub const DOC_TEMPLATE:&str = "T";
-
+pub const DOC_DOCUMENT:&str = "D";
+pub const DOC_COMMENT:&str = "C";
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Section {
@@ -28,10 +29,10 @@ impl Section {
 #[hdk_entry(id = "document")]
 #[derive(Clone)]
 pub struct Document {
-    pub document_type: String, // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
+    pub document_type: String, // DOC_TEMPLATE, DOC_DOCUMENT, DOC_COMMENT, ...
     pub editors: Vec<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
     pub content: Vec<Section>, // semantically identified content components
-    pub meta: BTreeMap<String, String>, // semantically identified meta
+    pub meta: BTreeMap<String, String>, // semantically identified meta data including state
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
