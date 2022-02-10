@@ -115,7 +115,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     const alignment: Alignment = {
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: this._nameField.value, // max 10 char
-      short_name: this._nameField.value,
+      short_name: this._titleField.value,
       required_sections: [],
       stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
       status: 0,
@@ -138,6 +138,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   resetAllFields() {
     this._parent = undefined
     this._nameField.value = ''
+    this._titleField.value = ''
     this._summaryField.value = ''
     this._alignProcessSelect.value = HowAlignmentDialog.NONE
     this._defineProcessSelect.value = HowAlignmentDialog.NONE
@@ -182,7 +183,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   Parent: ${this.parentPath()}
   <mwc-textfield dialogInitialFocus type="text"
                  @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
-                 id="name-field" minlength="3" maxlength="64" label="Name" autoValidate=true required></mwc-textfield>
+                 id="name-field" minlength="3" maxlength="64" label="Path Abbreviation" autoValidate=true required></mwc-textfield>
   <mwc-textfield type="text"
                  @input=${() => (this.shadowRoot!.getElementById("title-field") as TextField).reportValidity()}
                  id="title-field" minlength="3" maxlength="64" label="Title" autoValidate=true required></mwc-textfield>

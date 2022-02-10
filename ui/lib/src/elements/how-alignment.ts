@@ -105,6 +105,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       <div class="alignment">
        <li> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
+       <li> Name: ${alignment.short_name}</li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
        <li> Status: ${alignment.status == STAUTS_COMPLETED ? "Completed" : alignment.processes[alignment.status][1]}
        ${processes}

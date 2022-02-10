@@ -19,6 +19,7 @@ export default async (orchestrator) => {
     // Create a alignment
     let alignment1 = {
       parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
+      short_name: "API",
       path_abbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
       required_sections: [],
@@ -30,6 +31,7 @@ export default async (orchestrator) => {
 
     let root = {
       parents: [], // full paths to parent nodes (remember it's a DAG)
+      short_name: "Holochain Community Standards",
       path_abbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
       required_sections: [],
