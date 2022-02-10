@@ -3,7 +3,7 @@ import {
   DocType,
   ProcessType,
   ProcessName,
-  STAUTS_COMPLETED,
+  SysState,
   Document
 } from "./types";
 import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
@@ -35,7 +35,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
           },
         ],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -46,7 +45,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Social Protocols", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -64,7 +62,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
           },
         ],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -75,7 +72,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Proposal procesess", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -86,7 +82,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Declaration", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -97,7 +92,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Petition", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -108,7 +102,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Refinement Processes", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -119,7 +112,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Prototyped refinements", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -130,7 +122,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Alignment Processes", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -141,7 +132,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Voting", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -152,7 +142,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Consensus", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -163,7 +152,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Sortition", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -174,7 +162,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Fiat", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -185,7 +172,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Holochain System", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -196,7 +182,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Holochain Conductor", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -207,7 +192,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         short_name: "Holochain Conductor API", // max 25 char
         required_sections: [],
         stewards: [progenitor], // people who can change this document
-        status: STAUTS_COMPLETED,
         processes: std_procs, // paths to process template to use
         history: {},
         meta: {},
@@ -231,6 +215,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             },
           ],
           editors: [progenitor],
+          state: SysState.Alive
         })
       },
       {
@@ -258,6 +243,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             },
           ],
           editors: [progenitor],
+          state: SysState.Alive,
         }),
       },
       {
@@ -272,7 +258,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             },
           ],
           editors: [progenitor],
-          meta: { },
+          state: SysState.Alive,
         }),
       },
       {
@@ -294,6 +280,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             },
           ],
           editors: [progenitor],
+          state: SysState.Alive,
         }),
       },
       {
@@ -304,6 +291,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             { name: "prototype", content: "{pointers to the prototypes}", content_type: "text/markdown" },
           ],
           editors: [progenitor],
+          state: SysState.Alive,
         }),
       },
       {
@@ -314,6 +302,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             { name: "votes", content: "{record of the votes taken}", content_type: "text/plain" },
           ],
           editors: [progenitor],
+          state: SysState.Alive,
         }),
       },
       {
@@ -324,6 +313,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             { name: "discussion", content: "{results of the consensus discussion}", content_type: "text/plain" },
           ],
           editors: [progenitor],
+          state: SysState.Alive,
         }),
       },
       {
@@ -334,6 +324,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             { name: "people", content: "{list of people who will decide}", content_type: "text/plain" },
           ],
           editors: [progenitor],
+          state: SysState.Alive,
         }),
       },
       {
@@ -344,6 +335,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             { name: "fiat", content: "{record of who declared this by fiat}", content_type: "text/plain" },
           ],
           editors: [progenitor],
+          state: SysState.Alive,
         }),
       },
     ],

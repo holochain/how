@@ -23,7 +23,6 @@ export default async (orchestrator) => {
       path_abbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
       required_sections: [],
-      status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
       history: {},
       meta: {}
@@ -35,7 +34,6 @@ export default async (orchestrator) => {
       path_abbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
       required_sections: [],
-      status: 0,
       processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
       history: {},
       meta: {}

@@ -20,7 +20,6 @@ pub struct Alignment {
     pub path_abbreviation: String, // max 10 char
     pub required_sections: Vec<Section>,  // content field contains description of what should be in the content
     pub stewards: Vec<AgentPubKeyB64>,  // people who can change this document
-    pub status: i8, // index of current process
     pub processes: Vec<(ProcessType,ProcessName)>, // paths to processes to use
     pub history: BTreeMap<String, EntryHashB64>,
     pub meta: BTreeMap<String, String>, // for UI to do things    pub name: String,

@@ -30,6 +30,7 @@ impl Section {
 #[derive(Clone)]
 pub struct Document {
     pub document_type: String, // DOC_TEMPLATE, DOC_DOCUMENT, DOC_COMMENT, ...
+    pub state: String, // name of current process
     pub editors: Vec<AgentPubKeyB64>,  // people who can change this document, if empty anyone can
     pub content: Vec<Section>, // semantically identified content components
     pub meta: BTreeMap<String, String>, // semantically identified meta data including state

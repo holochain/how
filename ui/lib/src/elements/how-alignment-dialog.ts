@@ -118,7 +118,6 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       short_name: this._titleField.value,
       required_sections: [],
       stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
-      status: 0,
       processes,
       history: {},
       meta: {},

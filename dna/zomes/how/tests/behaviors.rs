@@ -43,7 +43,6 @@ pub async fn test_basics() {
         short_name: "Conductor".into(),
         stewards: vec![],  // people who can change this document
         required_sections: vec![], 
-        status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
@@ -61,7 +60,6 @@ pub async fn test_basics() {
         short_name: "Application API".into(), // max 10 char
         stewards: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document
         required_sections: vec![], 
-        status: 0,
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // paths to process template to use
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
@@ -89,6 +87,7 @@ pub async fn test_basics() {
       document_type: String::from(DOC_TEMPLATE), // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
       editors: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document, if empty anyone can
       content, // semantically identified content components
+      state: "".into(),
       meta: BTreeMap::new(), // semantically identified meta
     };
 

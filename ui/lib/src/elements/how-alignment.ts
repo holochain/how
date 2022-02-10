@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import {Alignment, howContext, STAUTS_COMPLETED} from "../types";
+import {Alignment, howContext} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -81,13 +81,15 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     /** the list of documents for this alignment */
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
-    const documents = docs ? docs.map(doc => {
-      const title = doc.content.getDocumentSection("title")
+    const documents = docs ? docs.map(docOutput => {
+      const doc = docOutput.content
+      const title = doc.getDocumentSection("title")
       return html`
       <ul class="document">
         ${title ? html`<div class="document-title">${this.renderType(title.content_type,title.content)}</div>` : ""}
-        <div class="document-tye">${doc.content.document_type}</div>
-        ${alignment.status == STAUTS_COMPLETED ? html`<mwc-button icon="visibility" @click=${()=>this.openDoc(doc.hash, false)}>View</mwc-button>` : html`<mwc-button icon="edit"  @click=${()=>this.openDoc(doc.hash, true)}>Edit</mwc-button>` }
+        <div class="document-type">Type: ${doc.document_type}</div>
+        <div class="document-state">State: ${doc.state}</div>
+        ${doc.isAlive()? html`<mwc-button icon="visibility" @click=${()=>this.openDoc(docOutput.hash, false)}>View</mwc-button>` : html`<mwc-button icon="edit"  @click=${()=>this.openDoc(docOutput.hash, true)}>Edit</mwc-button>` }
         
       </ul>`
     }) : ""
@@ -107,7 +109,6 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
        <li> Path Abbrev: ${alignment.path_abbreviation}</li>
        <li> Name: ${alignment.short_name}</li>
        <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
-       <li> Status: ${alignment.status == STAUTS_COMPLETED ? "Completed" : alignment.processes[alignment.status][1]}
        ${processes}
        <li> Documents:
         ${documents} 

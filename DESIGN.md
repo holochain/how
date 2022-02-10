@@ -74,10 +74,8 @@ struct Alignment {
   parent: Vec<String>,                   // full paths to parent nodes (remember it's a DAG)
   path_abbreviation: String,             // max 10 char
   short_name: String,                    // max 25 char
-  title: String,
-  summary: String,
+  required_sections: Vec<Section>,  // content field contains description of what should be in the content
   stewards: Vec<AgentPubKey>,            // people who can change this document
-  status: i8,                            // index of current process
   processes: Vec<(ProcessType, String)>, // paths to process template to use
   history: BtreeMap<(ProcessType, String), EntryHash>,
   meta: BTreeMap<String, String>,        // for UI to do things
@@ -86,6 +84,7 @@ struct Alignment {
 struct Document {
   document_type: String,             // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
   editors: Vec<AgentPubKey>,         // people who can change this document, if empty anyone can
+  state: String,                     // current process name
   content: BTreeMap<String, String>, // semantically identified content components
   meta: BTreeMap<String, String>,    // semantically identified meta
 }
