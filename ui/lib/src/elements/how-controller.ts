@@ -6,7 +6,7 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Alignment, Dictionary, Initialization} from "../types";
+import {howContext, Alignment, Dictionary, Initialization, DocumentOutput} from "../types";
 import { HowStore } from "../how.store";
 import { HowAlignment } from "./how-alignment";
 import { HowTree } from "./how-tree";
@@ -53,6 +53,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
   _alignmentsPath = new StoreSubscriber(this, () => this._store.alignmentsPath);
+  _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
   /** Private properties */
 
@@ -64,6 +65,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   @state() _currentAlignmentEh = "";
   @state() _currentDocumentEh = "";
+  @state() _treeType = "tree";
 
   private initialized = false;
   private initializing = false;
@@ -210,17 +212,23 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   private async handleAlignmentSelect(alignmentEh: string): Promise<void> {
-    this._currentAlignmentEh = alignmentEh;
-    this.alignmentElem.currentAlignmentEh = alignmentEh;
-    this._tree.currentNode = alignmentEh;
+    if (this._alignments.value[alignmentEh]) {
+      this._currentAlignmentEh = alignmentEh;
+      this.alignmentElem.currentAlignmentEh = alignmentEh;
+      this._tree.currentNode = alignmentEh;
+      await this._store.pullDocuments(this.getPath())
+      const docs = this.getAlignmentDocuments()
+      this._currentDocumentEh = docs && docs[0] ? docs[0].hash : ""
+    }
+  }
+
+  getAlignmentDocuments(): Array<DocumentOutput> {
+    const docs = this._documentPaths.value[this.getPath()]
+    return docs
   }
 
   handleNodeSelected(event: any) {
-    const alignmentEh = event.detail
-    if (this._alignments.value[alignmentEh]) {
-      this.handleAlignmentSelect(alignmentEh)
-      this._store.pullDocuments(this.getPath())
-    }
+    this.handleAlignmentSelect(event.detail)
   }
 
   handleAddChild(event: any) {
@@ -246,8 +254,33 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         break;
     }
   }
-
+  private isTreeType() : boolean {
+    if (!this._tree) return false
+    return this._treeType == "tree"
+  }
+  toggleTreeType() {
+    this._tree.treeType = this._tree.treeType == "tree"?"file-tree":"tree"
+    this._treeType = this._tree.treeType
+  }
   render() {
+
+    const tree = html`      
+      <how-tree id="tree"
+        .treeType=${this._treeType}
+        @node-selected=${this.handleNodeSelected}
+        @add-child=${this.handleAddChild}>
+      </how-tree>`
+    const alignment = html`
+    <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
+        @document-added=${(e:any)=>{this.refresh();}}
+        @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
+        @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}>
+      </how-alignment>`
+     const document = this._currentDocumentEh ? 
+     html`<how-document .currentDocumentEh=${this._currentDocumentEh}
+          .path=${this.getPath()}
+     >
+    </how-document>` : ""
     return html`
 <!--  DRAWER -->
 <mwc-drawer type="dismissible" id="my-drawer">
@@ -269,6 +302,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <mwc-top-app-bar id="app-bar" dense style="position: relative;">
       <mwc-icon-button icon="menu" slot="navigationIcon"></mwc-icon-button>
       <div slot="title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].short_name}` : ''}</div>
+      <mwc-icon-button slot="actionItems" icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
       <mwc-icon-button slot="actionItems" icon="autorenew" @click=${() => this.refresh()} ></mwc-icon-button>
       <mwc-icon-button id="menu-button" slot="actionItems" icon="more_vert" @click=${() => this.openTopMenu()}></mwc-icon-button>
       <mwc-menu id="top-menu" corner="BOTTOM_LEFT" @click=${this.handleMenuSelect}>
@@ -276,23 +310,28 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       </mwc-menu>
     </mwc-top-app-bar>
 
-    <div class="appBody">
-      <div class="top-pane">
-      <how-tree id="tree"
-      @node-selected=${this.handleNodeSelected}
-      @add-child=${this.handleAddChild}
-      ></how-tree>
-      <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
-        @document-added=${(e:any)=>{this.refresh();}}
-        @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
-        @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}>
-      </how-alignment>
+    <div class="appBody column">
+      ${this.isTreeType() ?
+      html`
+      <div class="column">
+        ${tree}
       </div>
-      <div class="bottom-pane">
-      ${this._currentDocumentEh ? html`
-      <how-document .currentDocumentEh="${this._currentDocumentEh}">
-      </how-document>` : ""}
-      <div>
+      <div class="column">
+        ${alignment}
+        ${document}
+      </div>`
+      :
+      html`
+      <div class="row">
+        ${tree}
+        <div class="column">
+          ${alignment}
+          ${document}
+        </div>
+      </div>
+      `
+      }
+      
     </div>
     <how-alignment-dialog id="alignment-dialog"
                         .myProfile=${this._myProfile.value}
@@ -338,17 +377,13 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         .mdc-drawer__header {
           display:none;
         }
-        .appBody {
+        .column {
           display: flex;
           flex-direction: column;
         }
-        .top-pane {
+        .row {
           display: flex;
           flex-direction: row;
-        }
-        .bottom-pane {
-          display: flex;
-          padding: 10px;
         }
 
         mwc-top-app-bar {

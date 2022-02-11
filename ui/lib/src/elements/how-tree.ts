@@ -60,7 +60,6 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
 }
   render() {
     return html`
-        <p @click=${() => this.treeType = this.treeType == "tree"?"file-tree":"tree"}>Tree Type: ${this.treeType}</p>
 <ul class="${this.treeType}">${this.buildTree(this._tree.value)}</ul>
           `
   }

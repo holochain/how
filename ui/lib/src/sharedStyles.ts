@@ -15,13 +15,4 @@ export const sharedStyles = css`
     padding: 0 2px 0 2px;
     border-radius: 0.2em;
   }
-
-  .section {
-    border: 1px solid black;
-    border-radius: 5px;
-    padding: 10px;
-  }
-  .section-name {
-    margin-bottom: 0px;
-  }
 `;

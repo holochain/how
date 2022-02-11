@@ -184,8 +184,18 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         return [
           sharedStyles,
           css`
-          :host {--mdc-dialog-max-width:1000px}
-          `
-        ]
+            :host {
+              --mdc-dialog-max-width: 1000px;
+            }
+            .section {
+              border: 1px solid black;
+              border-radius: 5px;
+              padding: 10px;
+            }
+            .section-name {
+              margin-bottom: 0px;
+            }
+          `,
+        ];
     }
 }

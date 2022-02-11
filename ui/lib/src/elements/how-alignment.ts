@@ -90,18 +90,9 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       const doc = docOutput.content
       const title = doc.getDocumentSection("title")
       return html`
-      <ul class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
-        ${title ? html`<div class="document-title">${this.renderType(title.content_type,title.content)}</div>` : ""}
-        <div class="document-type">Type: ${doc.document_type}</div>
-        <div class="document-state">State: ${doc.state}</div>
-        ${doc.isAlive()? html`<mwc-button icon="visibility" @click=${()=>this.openDoc(docOutput.hash, false)}>View</mwc-button>` : html`<mwc-button icon="edit"  @click=${()=>this.openDoc(docOutput.hash, true)}>Edit</mwc-button>` }
-        <div>
-          Move to: 
-          ${doc.nextStates().map(state => 
-          html `<mwc-button @click=${()=>alert("not implmented")}>${state}</mwc-button>`
-        )}
-        </div>
-      </ul>`
+      <div class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
+        <div class="document-title">${title ? this.renderType(title.content_type,title.content):docOutput.hash}</div>
+    </div>`
     }) : ""
 
     const processes = []
@@ -124,8 +115,6 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         ${documents} 
       </li>
       </div>
-      <how-document-dialog id="document-dialog">
-      </how-document-dialog>
     `;
   }
 
