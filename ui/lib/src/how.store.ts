@@ -181,7 +181,6 @@ export class HowStore {
     for (const s of documents) {
       this.updateDocuments(path, s)
     }
-    console.log("pull after update")
     return get(this.documentPathStore)[path]
   }
 

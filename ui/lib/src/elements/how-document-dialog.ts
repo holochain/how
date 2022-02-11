@@ -1,6 +1,5 @@
 import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
-import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import {StoreSubscriber} from "lit-svelte-stores";
 import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@holochain-open-dev/context";
@@ -15,7 +14,7 @@ import {
   TextArea,
 } from "@scoped-elements/material-web";
 import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
-import {Marked} from "@ts-stack/markdown";
+import {sectionValue} from "./utils";
 
 /**
  * @element how-alignment-dialog
@@ -141,14 +140,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
             </mwc-textarea>`
       } 
     }
-    private sectionValue(section: Section, index: number) {
-      switch (section.content_type) {
-        case "text/markdown":
-          return html`<div class="section">${unsafeHTML(Marked.parse(section.content))}</div>`
-        default: 
-          return html`<div class="section">${section.content}</div>`
-      }
-    }
+    
     render() {
         return html`
 <mwc-dialog id="document-dialog" heading="${this.isNew ? "New" : this.editable? "Edit":"View"} Document" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
@@ -166,7 +158,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
   include-myself></search-agent>
   `
   :
-  html`${this.sections.map((section, index) => html`<h4 class="section-name">${section.name}</h4><div>${this.sectionValue(section, index)}</div>`)}
+  html`${this.sections.map((section, index) => html`<h4 class="section-name">${section.name}</h4><div>${sectionValue(section, index)}</div>`)}
   <hr />Editors: ${Object.entries(this._editors).map(([key,nickname])=> html`${nickname} `)}
  `
   }
@@ -193,14 +185,6 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
           sharedStyles,
           css`
           :host {--mdc-dialog-max-width:1000px}
-          .section {
-            border: 1px solid black;
-            border-radius: 5px;
-            padding: 10px;
-          }
-          .section-name {
-            margin-bottom: 0px;
-          }
           `
         ]
     }

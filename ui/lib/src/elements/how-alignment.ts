@@ -48,8 +48,13 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   }
 
   handleNodelink(path: string) {
-    console.log("clicked on", path)
+    console.log("clicked on aligment:", path)
     this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
+  }
+
+  handleDocumentClick(hash: string) {
+    console.log("clicked on document", hash)
+    this.dispatchEvent(new CustomEvent('select-document', { detail: hash, bubbles: true, composed: true }));
   }
 
   getPath() : string {
@@ -85,7 +90,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       const doc = docOutput.content
       const title = doc.getDocumentSection("title")
       return html`
-      <ul class="document">
+      <ul class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
         ${title ? html`<div class="document-title">${this.renderType(title.content_type,title.content)}</div>` : ""}
         <div class="document-type">Type: ${doc.document_type}</div>
         <div class="document-state">State: ${doc.state}</div>

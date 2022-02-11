@@ -14,6 +14,8 @@ import { initialTree } from "../init";
 import { HowAlignmentDialog } from "./how-alignment-dialog";
 import { SlAvatar } from '@scoped-elements/shoelace';
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
+import {HowDocument } from "./how-document";
+
 import {
   ListItem,
   Select,
@@ -61,6 +63,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   private _tree!: HowTree;
 
   @state() _currentAlignmentEh = "";
+  @state() _currentDocumentEh = "";
 
   private initialized = false;
   private initializing = false;
@@ -274,13 +277,22 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     </mwc-top-app-bar>
 
     <div class="appBody">
+      <div class="top-pane">
       <how-tree id="tree"
       @node-selected=${this.handleNodeSelected}
       @add-child=${this.handleAddChild}
       ></how-tree>
       <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
-      @document-added=${(e:any)=>{this.refresh();}}
-      @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}></how-alignment>
+        @document-added=${(e:any)=>{this.refresh();}}
+        @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
+        @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}>
+      </how-alignment>
+      </div>
+      <div class="bottom-pane">
+      ${this._currentDocumentEh ? html`
+      <how-document .currentDocumentEh="${this._currentDocumentEh}">
+      </how-document>` : ""}
+      <div>
     </div>
     <how-alignment-dialog id="alignment-dialog"
                         .myProfile=${this._myProfile.value}
@@ -310,6 +322,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "how-alignment": HowAlignment,
       "how-tree": HowTree,
       "mwc-formfield": Formfield,
+      "how-document": HowDocument,
       'sl-avatar': SlAvatar,
     };
   }
@@ -324,6 +337,18 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
         .mdc-drawer__header {
           display:none;
+        }
+        .appBody {
+          display: flex;
+          flex-direction: column;
+        }
+        .top-pane {
+          display: flex;
+          flex-direction: row;
+        }
+        .bottom-pane {
+          display: flex;
+          padding: 10px;
         }
 
         mwc-top-app-bar {
