@@ -23,6 +23,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   }
 
   @property() currentNode = "";
+  @property() treeType = "tree";
 
   @contextProvided({ context: howContext })
   _store!: HowStore;
@@ -46,7 +47,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   buildTree(node: Node):any {
     const nodeId = this.getNodeId(node)
     return html`
-    <li>
+    <li class="${this.treeType}">
       <span class="${nodeId == this.currentNode ? "current" : ""}" @click=${()=>this.select(nodeId)}>
         ${node.id=="0" ? "Holochain Community Standards" : node.val.name} : ${node.val.documents.length}
         <mwc-button icon="add_circle" @click=${
@@ -58,7 +59,9 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
     </li>`
 }
   render() {
-    return html`<ul class="tree">${this.buildTree(this._tree.value)}</ul>
+    return html`
+        <p @click=${() => this.treeType = this.treeType == "tree"?"file-tree":"tree"}>Tree Type: ${this.treeType}</p>
+<ul class="${this.treeType}">${this.buildTree(this._tree.value)}</ul>
           `
   }
 
@@ -75,6 +78,67 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
       mwc-button {
         width: 30px;
       }
+      .file-tree mwc-button {
+        height: 0px;
+      }
+      .file-tree span.current {
+          background-color: palegreen;
+        }
+
+        .file-tree {
+          font:normal normal 13px/1.4 Segoe,"Segoe UI",Calibri,Helmet,FreeSans,Sans-Serif;
+        }
+        .file-tree,
+        .file-tree ul {
+          margin: 0 0 0 1em; /* indentation */
+          padding: 0;
+          list-style: none;
+          color: black;
+          position: relative;
+        }
+
+        .file-tree ul {
+          margin-left: 0.5em;
+        } /* (indentation/2) */
+
+        .file-tree:before,
+        .file-tree ul:before {
+          content: "";
+          display: block;
+          width: 0;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          border-left: 1px solid;
+        }
+
+        .file-tree li {
+          margin: 0;
+          padding: 0 1em; /* indentation + .5em */
+          line-height: 2em;
+          position: relative;
+        }
+
+        .file-tree li:before {
+          content: "";
+          display: block;
+          width: 10px; /* same with indentation */
+          height: 0;
+          border-top: 1px solid;
+          margin-top: -1px; /* border top width */
+          position: absolute;
+          top: 1em; /* (line-height/2) */
+          left: 0;
+        }
+
+        .file-tree li:last-child:before {
+          height: auto;
+          top: 1em; /* (line-height/2) */
+          bottom: 0;
+        }
+
+
 /* It's supposed to look like a tree diagram */
 .tree, .tree ul, .tree li {
     list-style: none;
