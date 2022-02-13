@@ -56,12 +56,11 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       this.document_type = document_type
       this.sections = this._store.getRequiredSectionsForPath(path)
 
-      // also  get the sections from the process template
+      // also  get the sections from the process templates
       const docs = this._documentPaths.value[document_type]
       for (const doc of docs) {
-        if (doc.content.document_type == DocType.Template) {
-          this.sections = this.sections.concat(doc.content.content)
-        } 
+        const templates = doc.content.getTemplates()
+        this.sections = this.sections.concat(templates)
       }
       console.log(docs)
 

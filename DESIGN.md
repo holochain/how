@@ -74,7 +74,7 @@ struct Alignment {
   parent: Vec<String>,                   // full paths to parent nodes (remember it's a DAG)
   path_abbreviation: String,             // max 10 char
   short_name: String,                    // max 25 char
-  required_sections: Vec<Section>,  // content field contains description of what should be in the content
+  required_sections: Vec<Section>,       // content field contains description of what should be in the content
   stewards: Vec<AgentPubKey>,            // people who can change this document
   processes: Vec<(ProcessType, String)>, // paths to process template to use
   history: BtreeMap<(ProcessType, String), EntryHash>,
@@ -82,16 +82,17 @@ struct Alignment {
 }
 
 struct Document {
-  document_type: String,             // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
+  document_type: String,             // "_document" or "_comment" "_reply" (or other reserved types which start with _)
   editors: Vec<AgentPubKey>,         // people who can change this document, if empty anyone can
   state: String,                     // current process name
   content: BTreeMap<String, String>, // semantically identified content components
-  meta: BTreeMap<String, String>,    // semantically identified meta
+  meta: BTreeMap<String, String>,    // semantically identified meta data.
 }
 ```
 
 ### Document Meta Data
 - See below for using meta data for comments and replies
+- Used to mark sections as templates
 - Used for marking approvals, ratings, votes.
 - Used for influencing UI layout or other rendering hints
 - Used for instructions on how to use processes (because the content contains templates for other documents)

@@ -88,7 +88,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.map(docOutput => {
       const doc = docOutput.content
-      const title = doc.getDocumentSection("title")
+      const title = doc.getSection("title")
       return html`
       <div class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
         <div class="document-title">${title ? this.renderType(title.content_type,title.content):docOutput.hash}</div>

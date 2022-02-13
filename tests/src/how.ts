@@ -23,7 +23,7 @@ export default async (orchestrator) => {
       path_abbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
       required_sections: [],
-      processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
+      processes: [["soc_proto.procs.define","petition"]], // state-machine definition
       history: {},
       meta: {}
     };
@@ -34,7 +34,7 @@ export default async (orchestrator) => {
       path_abbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
       required_sections: [],
-      processes: [["soc_proto.procs.define","petition"]], // paths to process template to use
+      processes: [["soc_proto.procs.define","petition"]], // state-machine definition
       history: {},
       meta: {}
     };
@@ -42,11 +42,12 @@ export default async (orchestrator) => {
     let document = {
       path: "",
       document: {  
-        document_type: "_template",
+        document_type: "_document",
         content: [
           {name: "title", content: "ROOT NODE DOC", content_type:"text/plain"},
           {name: "summary", content: "{}", content_type:"text/plain"}
         ],
+        state: "define",
         editors: [],
         meta: {}
       }

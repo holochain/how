@@ -71,8 +71,11 @@ import {sectionValue} from "./utils";
           </div>
           ${doc.content.map(
             (section, index) =>
-              html`<h4 class="section-name">${section.name}</h4>
-                <div>${sectionValue(section, index)}</div>`
+              html`
+                <div class="section">
+                    <div class="section-name">${section.name} ${doc.isTemplate(section.name)?html`<span class="template-marker">Template</span>`:""}</div>
+                    <div>${sectionValue(section, index)}</div>
+                </div>`
           )}
           <hr />
           Editors:
@@ -98,8 +101,19 @@ import {sectionValue} from "./utils";
             .section {
               padding: 10px;
             }
+            .section-content p {
+                margin: 0;
+            }
+            .template-marker {
+                font-weight: normal;
+                border: solid .1em #666;
+                border-radius: .1em;
+                font-size: 76%;
+                padding: 0 3px 0 3px;
+            }
             .section-name {
-              margin-bottom: 0px;
+              font-weight: bold;
+              margin-bottom: 2px;
             }
             .document-header {
               border: solid .1em #666;

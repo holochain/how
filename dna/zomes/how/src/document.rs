@@ -5,9 +5,8 @@ pub use hdk::prelude::Path;
 use crate::error::*;
 use crate::tree::*;
 
-pub const DOC_TEMPLATE:&str = "T";
-pub const DOC_DOCUMENT:&str = "D";
-pub const DOC_COMMENT:&str = "C";
+pub const DOC_DOCUMENT:&str = "_document";
+pub const DOC_COMMENT:&str = "_comment";
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Section {

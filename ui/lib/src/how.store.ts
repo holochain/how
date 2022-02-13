@@ -109,12 +109,9 @@ export class HowStore {
       await this.pullDocuments(walk)
       const docs = get(this.documentPaths)[walk]
       if (docs) {
-        console.log("found", docs)
         for (const doc of docs) {
-          if (doc.content.document_type == DocType.Template) {
-            console.log("found templates", doc.content.content)
-
-            sections = sections.concat(doc.content.content)
+          if (doc.content.document_type == DocType.Document) {
+            sections = sections.concat(doc.content.getTemplates())
           } 
         }
       }
@@ -202,7 +199,7 @@ export class HowStore {
         console.log("docs", get(this.documentPathStore), docs, `soc_proto.process.${n.val.name}`)
 
         if (docs) {
-          const doc  = docs.find(doc=>doc.content.document_type == DocType.Template)
+          const doc  = docs.find(doc=>doc.content.document_type == DocType.Document)
           console.log("doc", doc)
           if (doc) {
             processes.push({path: `soc_proto.process.${n.val.name}`, name: n.val.name})
@@ -249,7 +246,7 @@ export class HowStore {
     await this.pullDocuments(processPath)
     doc.content = doc.content.concat(await this.getSectionsForProcess(processPath))
 
-    doc.setDocumentSection("title", alignment.short_name)
+    doc.setSection("title", alignment.short_name)
     const path = `${alignment.parents[0]}.${alignment.path_abbreviation}`
     await this.addDocument(path, doc)
   }

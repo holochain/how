@@ -33,9 +33,8 @@ export interface AlignmentOutput {
 }
 
 export enum DocType {
-  Template = "Template",
-  Document = "Document",
-  Comment = "Comment"
+  Document = "_document",
+  Comment = "_comment"
 }
 
 export interface Section {
@@ -50,7 +49,7 @@ export enum SysState {
 }
 
 export class Document {
-  document_type: string = "" // template path (i.e. a process template) or "_comment" "_reply", "_template"(or other reserved types which start with _)
+  document_type: string = ""
   editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
@@ -62,24 +61,46 @@ export class Document {
     [SysState.Defunct]: [],
     [SysState.Alive]: [SysState.Defunct]
    }
+   protected sectionsMap: Dictionary<number> = {}
+
   constructor(init?: Partial<Document> ) {
     Object.assign(this, init);
+    if (init && init.content) {
+      init.content.forEach((section, index) =>this.sectionsMap[section.name] = index)
+    }
   }
-  public getDocumentSection(sectionName: string) : Section {
-    return this.content.filter(({name, content, content_type})=>name == sectionName)[0]
+  public getSection(sectionName: string) : Section {
+    return this.content[this.sectionsMap[sectionName]]
   }
-  public setDocumentSection(sectionName: string, content: string ) {
-    const section = this.content.filter(({name, content, content_type})=>name == sectionName)[0]
+
+  public setSection(sectionName: string, content: string ) {
+    const section = this.getSection(sectionName)
     if (section != null) {
       console.log("SETTING", sectionName, content)
       section.content = content
     }
   }
+
   public isAlive() : boolean {
     return this.state == SysState.Alive
   }
   public nextStates() : Array<string> {
     return Object.values(this.machine[this.state])
+  }
+
+  public isTemplate(name: string) : boolean {
+    if (this.meta.templates) {
+      const templates : Array<string> = JSON.parse(this.meta.templates)
+      return templates.includes(name)
+    }
+    return false
+  }
+  public getTemplates() : Array<Section> {
+    if (this.meta.templates) {
+      const templates : Array<string> = JSON.parse(this.meta.templates)
+      return templates.map(name => this.getSection(name))
+    }
+    return []
   }
 }
 
