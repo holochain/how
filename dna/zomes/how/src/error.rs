@@ -17,6 +17,8 @@ pub enum HowError {
     Timestamp(#[from] TimestampError),
     #[error("Tree path does not exist")]
     MissingPath,
+    #[error("Document not found")]
+    DocumentNotFound,
 }
 
 pub type HowResult<T> = Result<T, HowError>;

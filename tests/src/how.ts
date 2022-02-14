@@ -39,18 +39,20 @@ export default async (orchestrator) => {
       meta: {}
     };
 
-    let document = {
+    const rootDoc = {  
+      document_type: "_document",
+      content: [
+        {name: "title", content: "ROOT NODE DOC", content_type:"text/plain"},
+        {name: "summary", content: "{}", content_type:"text/plain"}
+      ],
+      state: "define",
+      editors: [],
+      meta: {}
+    }
+
+    const documentSpec = {
       path: "",
-      document: {  
-        document_type: "_document",
-        content: [
-          {name: "title", content: "ROOT NODE DOC", content_type:"text/plain"},
-          {name: "summary", content: "{}", content_type:"text/plain"}
-        ],
-        state: "define",
-        editors: [],
-        meta: {}
-      }
+      document: rootDoc
     }
     a_and_b_conductor.setSignalHandler((signal) => {
       console.log("Received Signal:",signal)
@@ -63,7 +65,7 @@ export default async (orchestrator) => {
     const [alice_how] = alice_how_happ.cells
 //    const [bobbo_how] = bobbo_how_happ.cells
 
-    await alice_how.call('how', 'initialize', {alignments: [root], documents:[document]} );
+    await alice_how.call('how', 'initialize', {alignments: [root], documents:[documentSpec]} );
 
     const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1 );
     t.ok(alignment1_hash)
@@ -72,20 +74,34 @@ export default async (orchestrator) => {
     const alignments = await alice_how.call('how', 'get_alignments', null );
     t.deepEqual(alignments, [{hash: alignments[0].hash, content: root}, {hash: alignment1_hash, content: alignment1}]);
 
-    const tree = await alice_how.call('how', 'get_tree', null );
+    let tree = await alice_how.call('how', 'get_tree', null );
     console.log("Rust tree", tree);
-    console.log("JS tree", buildTree(tree.tree,tree.tree[0]))
+    let jsTree = buildTree(tree.tree,tree.tree[0])
+    console.log("JS tree", jsTree)
+
+    const rootDocHash = jsTree.val.documents[0]
+    const newData = "Update Root node content"
+    rootDoc.content[0].content = newData
+    const newDocHash = await alice_how.call('how', 'update_document', {hash: rootDocHash, document: rootDoc, path: ""} );
+
+    tree = await alice_how.call('how', 'get_tree', null );
+    jsTree = buildTree(tree.tree,tree.tree[0])
+    t.equal(newDocHash, jsTree.val.documents[1])
+
+    const docs = await alice_how.call('how', 'get_documents', "" );
+    console.log("DOCS:", docs)
+
   })
 }
 
 type RustNode = {
   idx: number,
-  val: string,
+  val: any,
   parent: null | number,
   children: Array<number>
 }
 type Node = {
-  val: string,
+  val: any,
   children: Array<Node>
 }
 

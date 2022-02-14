@@ -111,6 +111,7 @@ export interface DocumentInput {
 
 export interface DocumentOutput {
   hash: EntryHashB64,
+  updated: boolean,
   content: Document,
 }
 

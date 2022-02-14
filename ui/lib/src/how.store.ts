@@ -174,6 +174,7 @@ export class HowStore {
     documents.forEach(doc => {
       doc.content = new Document(doc.content)
     })
+    documents = documents.filter(doc => doc.updated)
     console.log("pull got", documents)
     for (const s of documents) {
       this.updateDocuments(path, s)
