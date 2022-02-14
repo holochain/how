@@ -150,7 +150,7 @@ export class HowStore {
     return get(this.alignmentsStore)
   }
 
-  private updateDocuments(path: string, doc: DocumentOutput)  {
+  private updateDocumentStores(path: string, doc: DocumentOutput)  {
     console.log("updating doc for ",path, "to", doc)
     this.documentPathStore.update(documents => {
       if (!documents[path]) {
@@ -177,10 +177,19 @@ export class HowStore {
     documents = documents.filter(doc => doc.updated)
     console.log("pull got", documents)
     for (const s of documents) {
-      this.updateDocuments(path, s)
+      this.updateDocumentStores(path, s)
     }
     return get(this.documentPathStore)[path]
   }
+
+  async updateDocument(hash: EntryHashB64, document: Document) {
+    const path = this.getDocumentPath(hash)
+    if (path) {
+      this.service.updateDocument({hash, document, path})
+      this.pullDocuments(path)
+    }
+  }
+
 
   buildTree(tree: Array<RustNode>, node: RustNode): Node {
     let t: Node = {val: node.val, children: [], id: `${node.idx}`}
@@ -274,5 +283,11 @@ export class HowStore {
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
     return await this.service.createDocument({path, document})
+  }
+
+  getDocumentPath(hash: EntryHashB64) : string | null {
+    Object.entries(get(this.documentPaths)).forEach(([path, docOutputs]) => 
+    docOutputs.forEach((docO) => {if (docO.hash == hash) {return path}}))
+    return null;
   }
 }

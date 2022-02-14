@@ -115,6 +115,13 @@ export interface DocumentOutput {
   content: Document,
 }
 
+export interface UpdateDocumentInput {
+  hash: EntryHashB64,
+  path: string,
+  document: Document,
+}
+
+
 export type Signal =
   | {
     alignmentHash: EntryHashB64, message: {type: "NewAlignment", content:  Alignment}
