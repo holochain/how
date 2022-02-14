@@ -25,6 +25,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() path = ""
     @property() isNew = false
     @property() editable = false
+    @property() hash = ""
 
     @state() sections: Array<Section> = []
 
@@ -62,7 +63,6 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         const templates = doc.content.getTemplates()
         this.sections = this.sections.concat(templates)
       }
-      console.log(docs)
 
       const dialog = this.shadowRoot!.getElementById("document-dialog") as Dialog
       dialog.open = true
@@ -72,6 +72,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       this.isNew = false
       this.editable = editable
       this.path = path
+      this.hash = hash
       const document = this._documents.value[hash]
       this.document_type = document.document_type
       this.sections = document.content
@@ -96,8 +97,8 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         });
     
         // - Add alignment to commons
-        const newDocument = await this._store.addDocument(this.path, document);
-        this.dispatchEvent(new CustomEvent('document-added', { detail: newDocument, bubbles: true, composed: true }));
+        const newDocumentHash = await this._store.updateDocument(this.hash, document);
+        this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
         // - Clear all fields
         // this.resetAllFields();
         // - Close dialog

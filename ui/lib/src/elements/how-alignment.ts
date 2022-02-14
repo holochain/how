@@ -86,7 +86,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     /** the list of documents for this alignment */
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
-    const documents = docs ? docs.map(docOutput => {
+    const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
       const doc = docOutput.content
       const title = doc.getSection("title")
       return html`

@@ -29,7 +29,7 @@ export class HowService {
   }
 
   async updateDocument(input: UpdateDocumentInput): Promise<EntryHashB64> {
-    return this.callZome('create_document', input);
+    return this.callZome('update_document', input);
   }
 
   async getDocuments(path: string): Promise<Array<DocumentOutput>> {

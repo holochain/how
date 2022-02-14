@@ -88,7 +88,7 @@ export default async (orchestrator) => {
     jsTree = buildTree(tree.tree,tree.tree[0])
     t.equal(newDocHash, jsTree.val.documents[1])
 
-    const docs = await alice_how.call('how', 'get_documents', "" );
+    let docs = await alice_how.call('how', 'get_documents', "" );
     console.log("DOCS:", docs)
 
   })

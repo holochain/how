@@ -168,13 +168,23 @@ export class HowStore {
       return documents
     })
   }
+
+  private markDocumentUpdated(path: string, hash: EntryHashB64) {
+    const docs = get(this.documentPathStore)[path]
+    if (docs) {
+      let doc = docs.find(e=>e.hash == hash)
+      if (doc) {
+        doc.updated = true
+      }
+    }
+  }
   
   async pullDocuments(path: string) : Promise<Array<DocumentOutput>> {
     let documents = await this.service.getDocuments(path)
     documents.forEach(doc => {
       doc.content = new Document(doc.content)
     })
-    documents = documents.filter(doc => doc.updated)
+    documents = documents.filter(doc => !doc.updated)
     console.log("pull got", documents)
     for (const s of documents) {
       this.updateDocumentStores(path, s)
@@ -182,12 +192,15 @@ export class HowStore {
     return get(this.documentPathStore)[path]
   }
 
-  async updateDocument(hash: EntryHashB64, document: Document) {
+  async updateDocument(hash: EntryHashB64, document: Document) : Promise<EntryHashB64> {
     const path = this.getDocumentPath(hash)
+    let newHash: EntryHashB64 = ""
     if (path) {
-      this.service.updateDocument({hash, document, path})
+      newHash = await this.service.updateDocument({hash, document, path})
+      this.markDocumentUpdated(path, hash)
       this.pullDocuments(path)
     }
+    return newHash
   }
 
 
@@ -252,11 +265,12 @@ export class HowStore {
     const processPath = `${proc[0]}.${proc[1]}`
     const doc = new Document({document_type: DocType.Document})
 
-    doc.content = this.getRequiredSectionsForPath(alignment.parents[0])
+    doc.appendSections(this.getRequiredSectionsForPath(alignment.parents[0]))
     await this.pullDocuments(processPath)
-    doc.content = doc.content.concat(await this.getSectionsForProcess(processPath))
+    doc.appendSections(await this.getSectionsForProcess(processPath))
 
     doc.setSection("title", alignment.short_name)
+    console.log("ADDING DOC", doc)
     const path = `${alignment.parents[0]}.${alignment.path_abbreviation}`
     await this.addDocument(path, doc)
   }
@@ -286,8 +300,11 @@ export class HowStore {
   }
 
   getDocumentPath(hash: EntryHashB64) : string | null {
-    Object.entries(get(this.documentPaths)).forEach(([path, docOutputs]) => 
-    docOutputs.forEach((docO) => {if (docO.hash == hash) {return path}}))
+    for (let [path, docOutputs] of Object.entries(get(this.documentPaths))) {
+      for (const docO of docOutputs) {
+        if (docO.hash == hash) {return path}
+      }
+    }
     return null;
   }
 }

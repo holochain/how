@@ -69,6 +69,16 @@ export class Document {
       init.content.forEach((section, index) =>this.sectionsMap[section.name] = index)
     }
   }
+
+  public appendSections(sections: Array<Section>) {
+    let sectionsCount = this.content.length
+    this.content = this.content.concat(sections)
+    for (const section of sections) {
+      this.sectionsMap[section.name] = sectionsCount
+      sectionsCount += 1
+    }
+  }
+
   public getSection(sectionName: string) : Section {
     return this.content[this.sectionsMap[sectionName]]
   }

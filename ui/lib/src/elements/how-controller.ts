@@ -62,6 +62,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   @query('#tree')
   private _tree!: HowTree;
+  @query('#document')
+  private _document!: HowDocument;
 
   @state() _currentAlignmentEh = "";
   @state() _currentDocumentEh = "";
@@ -217,8 +219,16 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       this.alignmentElem.currentAlignmentEh = alignmentEh;
       this._tree.currentNode = alignmentEh;
       await this._store.pullDocuments(this.getPath())
-      const docs = this.getAlignmentDocuments()
-      this._currentDocumentEh = docs && docs[0] ? docs[0].hash : ""
+      let docs = this.getAlignmentDocuments()
+      if (docs) {
+        docs = docs.filter(doc => !doc.updated)
+        if (docs.length > 0) {
+          this._currentDocumentEh = docs[docs.length-1].hash
+        }
+      }
+      else {
+        this._currentDocumentEh = ""
+      }
     }
   }
 
@@ -272,12 +282,13 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       </how-tree>`
     const alignment = html`
     <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
-        @document-added=${(e:any)=>{this.refresh();}}
+        @document-updated=${(e:any)=>{this._currentDocumentEh = e.detail}}
         @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
         @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}>
       </how-alignment>`
      const document = this._currentDocumentEh ? 
-     html`<how-document .currentDocumentEh=${this._currentDocumentEh}
+     html`<how-document id="document" .currentDocumentEh=${this._currentDocumentEh}
+          @document-updated=${(e:any)=>{this.requestUpdate(); console.log("FISH", e)}}
           .path=${this.getPath()}
      >
     </how-document>` : ""
