@@ -18,6 +18,9 @@ import {
 } from "@scoped-elements/material-web";
 import {sectionValue} from "./utils";
 
+// @ts-ignore
+import {WcMermaid} from "wc-mermaid"
+
 /**
  * @element how-document
  */
@@ -51,42 +54,60 @@ import {sectionValue} from "./utils";
           return;
         }
         const doc = this._documents.value[this.currentDocumentEh]
+        const graph  = `graph LR;
+        define --> refine --> align --> _alive;
+        define --> _defunct;
+        refine --> _defunct;
+        align --> _defunct;        
+        _alive --> _defunct;
+
+        style ${doc.state}  fill:#f9f,stroke:#333,stroke-width:4px`
         return html`
           <div class="document-header row">
             <div class="column" style="padding:5px">
-                <span>Type: ${doc.document_type}</span><span> State: ${doc.state}</span>
-            </div>  
+            <wc-mermaid>
+                  ${graph}
+            </wc-mermaid>
+            </div>
             <div class="document-controls row">
-              ${doc.isAlive()
-                ? ""
-                : html`<mwc-button
-                    icon="edit"
-                    @click=${() => this.openDoc(this.currentDocumentEh, true)}
-                    >Edit</mwc-button
-                  >`}
-              <div class="column" style="align-items:center">
-              <div >Move to:</div>
-
-              <div class="row">
-              ${doc
-                .nextStates()
-                .map(
-                  (state) =>
-                    html`<mwc-button @click=${async () => this.stateChange(state)}
-                      >${state}</mwc-button
+              ${
+                doc.isAlive()
+                  ? ""
+                  : html`<mwc-button
+                      icon="edit"
+                      @click=${() => this.openDoc(this.currentDocumentEh, true)}
+                      >Edit</mwc-button
                     >`
-                )}
+              }
+              <div class="column" style="align-items:center">
+                <div>Move to:</div>
+
+                <div class="row">
+                  ${doc
+                    .nextStates()
+                    .map(
+                      (state) =>
+                        html`<mwc-button
+                          @click=${async () => this.stateChange(state)}
+                          >${state}</mwc-button
+                        >`
+                    )}
                 </div>
-                </div>
+              </div>
+            </mwc-button>
             </div>
           </div>
           ${doc.content.map(
             (section, index) =>
-              html`
-                <div class="section">
-                    <div class="section-name">${section.name} ${doc.isTemplate(section.name)?html`<span class="template-marker">Template</span>`:""}</div>
-                    <div>${sectionValue(section, index)}</div>
-                </div>`
+              html` <div class="section">
+                <div class="section-name">
+                  ${section.name}
+                  ${doc.isTemplate(section.name)
+                    ? html`<span class="template-marker">Template</span>`
+                    : ""}
+                </div>
+                <div>${sectionValue(section, index)}</div>
+              </div>`
           )}
           <hr />
           Editors:
@@ -103,6 +124,7 @@ import {sectionValue} from "./utils";
         return {
           "mwc-button": Button,
           "how-document-dialog": HowDocumentDialog,
+          "wc-mermaid": WcMermaid
         };
       }
     static get styles() {

@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "scripts": {
+  "typings": "./dist/index.d.ts",
+    "scripts": {
     "build": "rimraf dist && rollup -c",
     "build:watch": "run-singleton \"rollup -c -w\"",
     "analyze": "lit-analyzer src --failFast"
@@ -39,6 +40,7 @@
     "svelte": "^3.42.4",
     "lodash": "^4.17.21",
     "@ts-stack/markdown": "^1.4.0",
-    "@types/sanitize-html": "^2.6.2"
-  }
+    "@types/sanitize-html": "^2.6.2",
+    "wc-mermaid": "github:guillemcordoba/wc-mermaid#patch-1"
+    }
 }
