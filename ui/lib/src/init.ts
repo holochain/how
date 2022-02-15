@@ -321,7 +321,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             {
               name: "title",
               content_type: "text/plain",
-              content: "Defition by declaration",
+              content: "Definition by declaration",
             },
             {
               name: "summary",
