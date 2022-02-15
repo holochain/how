@@ -10,7 +10,7 @@ import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 
 const std_procs: Array<[ProcessType, ProcessName]> = [
   ["soc_proto.process.define", "declaration"],
-  ["soc_proto.process.refine", "prototyped"],
+  ["soc_proto.process.refine", "comment_period"],
   ["soc_proto.process.align", "consensus"],
 ];
 
@@ -295,7 +295,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             {
               name: "title",
               content_type: "text/plain",
-              content: "Defition by petition",
+              content: "Definition by petition",
             },
             {
               name: "summary",

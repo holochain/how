@@ -100,20 +100,21 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         const path = `${procType}.${procName}`
         const elems = procType.split(".")
         const typeName = elems[elems.length-1]
-        processes.push(html`<li>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></li>`)
+        processes.push(html`<p>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></p>`)
       }
 
     /** Render layout */
     return html`
-      <div class="alignment">
-       <li> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</li>
-       <li> Path Abbrev: ${alignment.path_abbreviation}</li>
-       <li> Name: ${alignment.short_name}</li>
-       <li> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</li>
-       ${processes}
-       <li> Documents:
+      <div class="alignment row">
+        <div class="column">
+         <p> <b>${alignment.short_name}</b> (${alignment.path_abbreviation})</p>
+         <p> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</p>
+         <p> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</p>
+        </div>
+       <div class="column">${processes}</div>
+       <div class="column"> Documents:
         ${documents} 
-      </li>
+       </div>
       </div>
     `;
   }
@@ -130,18 +131,19 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       sharedStyles,
       css`
       .alignment {
-        border: solid .1em #666;
-        border-radius: .2em;
-        margin-left: 20px;
+        border-top: solid .1em #666;
         padding: 10px;
       }
       .alignment h4 {
         margin-top: 0px;
         margin-bottom: 5px;
       }
-      .alignment li {
-        list-style: none;
+      .alignment p {
         line-height: 1.5em;
+        margin: 0;
+      }
+      .alignment div {
+        margin-right: 20px;
       }
       .node-link {
         cursor: pointer;

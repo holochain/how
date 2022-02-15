@@ -64,7 +64,10 @@ import {sectionValue} from "./utils";
                     @click=${() => this.openDoc(this.currentDocumentEh, true)}
                     >Edit</mwc-button
                   >`}
-              Move to:
+              <div class="column" style="align-items:center">
+              <div >Move to:</div>
+
+              <div class="row">
               ${doc
                 .nextStates()
                 .map(
@@ -73,6 +76,8 @@ import {sectionValue} from "./utils";
                       >${state}</mwc-button
                     >`
                 )}
+                </div>
+                </div>
             </div>
           </div>
           ${doc.content.map(
@@ -122,9 +127,9 @@ import {sectionValue} from "./utils";
               margin-bottom: 2px;
             }
             .document-header {
-              border: solid .1em #666;
-              border-radius: .2em;
+              border-bottom: solid .1em #666;
               padding: 5px;
+              margin: 0
             }
           `,
         ];
