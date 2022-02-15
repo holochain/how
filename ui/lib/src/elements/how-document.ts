@@ -40,6 +40,12 @@ import {sectionValue} from "./utils";
         this._documentDialogElem.open(this.path, documentEh, editable);
     }
 
+    private async stateChange(state: string) {
+
+        const newDocumentHash = await this._store.changeDocumentState(this.currentDocumentEh, state)
+        this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+
+    } 
     render() {
         if (!this.currentDocumentEh) {
           return;
@@ -63,7 +69,7 @@ import {sectionValue} from "./utils";
                 .nextStates()
                 .map(
                   (state) =>
-                    html`<mwc-button @click=${() => alert("not implmented")}
+                    html`<mwc-button @click=${async () => this.stateChange(state)}
                       >${state}</mwc-button
                     >`
                 )}

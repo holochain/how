@@ -28,9 +28,9 @@ export class HowStore {
   private profiles: ProfilesStore
   
   /** AlignmentEh -> Alignment */
-  private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});
+  private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});   // maps alignment hash to alignment
   private documentsStore: Writable<Dictionary<Document>> = writable({});
-  private alignmentsPathStore: Writable<Dictionary<string>> = writable({});
+  private alignmentsPathStore: Writable<Dictionary<string>> = writable({});  // maps alignment hash to path
   private treeStore: Writable<Node> = writable({val:{name:"T", alignments: [], documents: []}, children:[], id:"0"});
   private documentPathStore: Writable<Dictionary<Array<DocumentOutput>>> = writable({});
 
@@ -202,6 +202,17 @@ export class HowStore {
     }
     return newHash
   }
+  async changeDocumentState(hash: EntryHashB64, state: string) : Promise<EntryHashB64> {
+    let newHash: EntryHashB64 = ""
+    let doc = cloneDeep(get(this.documents)[hash])
+    doc.state = state
+
+    const processPath = this.getProcessPathForState(hash, state)
+    doc.appendSections(await this.getSectionsForProcess(processPath))
+    const newDocumentHash = await this.updateDocument(hash, doc);
+
+    return newDocumentHash
+  }
 
 
   buildTree(tree: Array<RustNode>, node: RustNode): Node {
@@ -307,4 +318,33 @@ export class HowStore {
     }
     return null;
   }
+
+  private getDocumentAligment(hash: string) : Alignment | null {
+    // TODO this will break once we get versions because there will be
+    // more that one aligment per path
+    const path = this.getDocumentPath(hash)
+    for (let [alignmentPath, alignmentEh] of Object.entries(get(this.alignmentsPath))) {
+      if (alignmentPath == path) {
+        return this.alignment(alignmentEh)
+      }
+    }
+    return null
+  }
+
+  private getProcessPathForState(hash: EntryHashB64, state: string) : string {
+    const alignment = this.getDocumentAligment(hash)
+    // TODO: convert to use state machine...
+    let idx = 0;
+    switch (state) {
+      case "refine": idx = 1; break;
+      case "align": idx = 2; break;
+      default: return ""
+    }
+    let proc = alignment?.processes[idx]
+    if (proc) {
+      return `${proc[0]}.${proc[1]}`
+    }
+    return ""
+  }
+
 }

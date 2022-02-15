@@ -406,6 +406,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
               content_type: "text/markdown",
               content: "The Consensus aligment variant specifies an outcome of consensus decision that a group has taken",
             },
+            { name: "outcome", content: "{results of the consensus decision}", content_type: "text/markdown" },
           ],
           editors: [progenitor],
           state: SysState.Alive,
