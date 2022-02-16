@@ -1,5 +1,5 @@
 import { CellClient } from '@holochain-open-dev/cell-client';
-import { serializeHash, EntryHashB64, AgentPubKeyB64, Header } from '@holochain-open-dev/core-types';
+import { serializeHash, EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
 import { Alignment, AlignmentOutput, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput} from './types';
 
 export class HowService {

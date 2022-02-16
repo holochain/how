@@ -3,7 +3,7 @@ manifest_version: "1"
 name: how
 description: ~
 roles:
-  - id: how-role
+  - id: how
     provisioning:
       strategy: create
       deferred: false
