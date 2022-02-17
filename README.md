@@ -17,6 +17,7 @@ For more details read the [design documents](DESIGN.md).
 1. Install the holochain dev environment: https://developer.holochain.org/docs/install/
 2. Clone this repo: `git clone https://github.com/lightningrodlabs/how && cd ./how`
 3. Enter the nix shell: `nix-shell`
+4. Install the dependencies with: `npm install`
 
 ## Building the DNA
 
