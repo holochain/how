@@ -20,6 +20,7 @@ import {sectionValue} from "./utils";
 
 // @ts-ignore
 import {WcMermaid} from "wc-mermaid"
+import { AgentAvatar } from "@holochain-open-dev/profiles";
 
 /**
  * @element how-document
@@ -112,7 +113,7 @@ import {WcMermaid} from "wc-mermaid"
           <hr />
           Editors:
           ${Object.entries(doc.editors).map(
-            ([key, nickname]) => html`${nickname} `
+            ([key, pubkey]) => html`<agent-avatar agent-pub-key="${pubkey}"></agent-avatar>`
           )}
 
           <how-document-dialog id="document-dialog"> </how-document-dialog>
@@ -124,7 +125,8 @@ import {WcMermaid} from "wc-mermaid"
         return {
           "mwc-button": Button,
           "how-document-dialog": HowDocumentDialog,
-          "wc-mermaid": WcMermaid
+          "wc-mermaid": WcMermaid,
+          "agent-avatar": AgentAvatar
         };
       }
     static get styles() {
