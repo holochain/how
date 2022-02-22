@@ -50,6 +50,26 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         meta: {},
       },
       {
+        parents: [], // full paths to parent nodes (remember it's a DAG)
+        path_abbreviation: "hApps", // max 10 char
+        short_name: "hApp Standards", // max 25 char
+        required_sections: [],
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        history: {},
+        meta: {},
+      },
+      {
+        parents: ["hApps"], // full paths to parent nodes (remember it's a DAG)
+        path_abbreviation: "ERC721_interop", // max 10 char
+        short_name: "ERC721 Interoperability Statandard", // max 25 char
+        required_sections: [],
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        history: {},
+        meta: {},
+      },
+      {
         parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "process", // max 10 char
         short_name: "How Processes", // max 25 charAgent
@@ -189,7 +209,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
     ],
     documents: [
       {
-        path: "",
+        path: "hApps.",
         document: new Document( {
           document_type: DocType.Document,
           content: [
@@ -208,6 +228,73 @@ export function initialTree(progenitor: AgentPubKeyB64) {
           state: SysState.Alive
         })
       },
+      {
+        path: "hApps.ERC721_interop",
+        document: new Document( {
+          document_type: DocType.Document,
+          content: [
+            {
+              name: "title",
+              content_type: "text/plain",
+              content: "ERC721 Interoperation Standard",
+            },
+            {
+              name: "summary",
+              content_type: "text/markdown",
+              content: "An agent or agents in a Holochain DHT commit an entry who’s HRL will be used as the referenced in the minted NFT. The minted NFT’s id a hash of the minter plus Holochain entry hash. This id then is used on the Holochain side to create a baseless link to the NFT entry. The validation rules of that link ensure the trustability of any returned value for off-ethereum-chain reference by third parties. This creates a simple, fully-decentralized mechanism to provide a non-oracle based provenance of an NFT’s resource by preventing front-running.",
+            },
+            {
+              name: "context",
+              content_type: "text/markdown",
+              content: `
+### Story  (notes)
+
+Blockchain lives in a bubble.  There's no reasonable way in blockchain land to reference the state-of-afairs outside in the world without going through a trusted party.  Thus this goes counter to what blockchains are all about "trust-lessness".  Holochain DLTs are bound to the "real-world" through agency and accountability.  
+
+In the blockchain world chain-of-custody is a non-fungible token that you watch move from place to place.  In the Holochain world chain-of-custody is by the agents accountable from it along the way signing for it.
+
+The way we looking at NFTs right now is that the low hanging fruit is to replace IPFS for payloads rather than to try and replace the token spec, which is why we put up a PR to add ethereum compatible hashing algos, which would allow us to align NFT ids with validation logic on the DHT. Why go after the consensus mechanism (generally accepted as working fine, and difficult to do on holochain) rather than the payload hosting (generally accepted as very problematic and easy to do on holochain)?
+
+### Problem/question:
+
+Not require an oracle to secure/validate some form of economic activity, but have the participants able to provide adequate proof on their own. Oracles can be gamed and be incented to lie.
+
+Having an NFT on the blockchain is not enough in general. Even having an IPFS hash of an NFT (off chain) isn't enough because IPFS has not context for proving validation of the hash.
+
+The original minter of an NFT is often eligible for royalties, or may have extra admin permissions, etc.
+
+It is important that as well as the opaque hash in the NFT lining up with the location in the holochain CAS, the minter needs to line up with the minter specified on the holochain side.
+
+Specifying a minter on holochain might be optional, as the private data already affords security for as long as the private data remains private.
+
+The issue is that for some use cases there may be economic incentive for a participant to leak the data early:
+
+- Maybe they lost a game and are a sore loser and want to grief the winner
+- Maybe they will get access to royalites or other economic incentives that they shouldn't have, simply participating in a session doesn't necessarily mean you should own the resulting NFT
+
+So what we want is a way to specify on holochain who can mint, and have the cryptography match on both sides.
+
+The smart contract logic is probably the limiting/driving factor here as the \`msg.sender\` in an evm contract is already the address that the signature of the transaction has been validated against. There isn't functionality in the evm to efficiently support other signature schemes because gas etc.
+
+So somehow holochain has to mimic whatever results in \`msg.sender\` that has to be in a validatable state for any entries that could inform an NFT mint and also be included in whatever is hashed.
+
+### End Goal
+
+You can write a regular happ, and then by following this standard you can get NFT id that points to some snapshot of a hApps state (like a game result)
+
+Furthermore we must:
+1. Prevent pre-miniting of something by an attacker, i.e. only the winner of a game can mint, not the first one to try and mint.
+2. Prevent attacker from blocking a mint, i.e. the loser of a game can't prevent the winner from minting.
+3. Prevent non participants from doing either 1 or 2.
+4. Prevent someone on the holochain side pretending to be someone they aren't on the ETH side
+`,
+            },
+          ],
+          editors: [progenitor],
+          state: SysState.Alive
+        })
+      },
+     
       {
         path: "soc_proto.process.define",
         document: new Document( {
