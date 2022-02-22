@@ -291,7 +291,7 @@ Furthermore we must:
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive
+          state: "define"
         })
       },
      
