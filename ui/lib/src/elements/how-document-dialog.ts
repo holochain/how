@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@holochain-open-dev/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Document, howContext, Dictionary, Section, DocType, DocumentOutput} from "../types";
+import {Document, howContext, Dictionary, Section, DocType, DocumentOutput, SectionType} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -21,7 +21,7 @@ import {sectionValue} from "./utils";
  */
 export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() _editors: Dictionary<string> = {};
-    @property() document_type = ""
+    @property() document_type: DocType = DocType.Document
     @property() path = ""
     @property() isNew = false
     @property() editable = false
@@ -50,7 +50,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     /**
      *
      */
-    new(path: string, document_type: string) {
+    new(path: string, document_type: DocType) {
       this.isNew = true
       this.editable = true
       this.path = path
@@ -60,7 +60,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       // also  get the sections from the process templates
       const docs = this._documentPaths.value[document_type]
       for (const doc of docs) {
-        const templates = doc.content.getTemplates()
+        const templates = doc.content.getSectionsByType(SectionType.Process)
         this.sections = this.sections.concat(templates)
       }
 

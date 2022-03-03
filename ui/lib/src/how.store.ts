@@ -14,6 +14,7 @@ import {
   Process,
   DocType,
   Section,
+  SectionType,
 } from './types';
 import {
   ProfilesStore,
@@ -111,7 +112,7 @@ export class HowStore {
       if (docs) {
         for (const doc of docs) {
           if (doc.content.document_type == DocType.Document) {
-            sections = sections.concat(doc.content.getTemplates())
+            sections = sections.concat(doc.content.getSectionsByType(SectionType.Process))
           } 
         }
       }

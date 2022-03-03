@@ -82,7 +82,7 @@ pub async fn test_basics() {
     assert_eq!(alignments.len(), 2);
     debug!("{:#?}", alignments);
 
-    let content  = vec![Section::new("summary", "text/markdown", "blah blah")];
+    let content  = vec![Section::new("summary", "p", "text/markdown", "blah blah")];
     let document = Document {
       document_type: String::from(DOC_DOCUMENT),
       editors: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document, if empty anyone can

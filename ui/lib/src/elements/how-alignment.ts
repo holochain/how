@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import {Alignment, howContext} from "../types";
+import {Alignment, DocType, howContext} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -65,7 +65,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
   }
 
-  addDoc(document_type: string ) {
+  addDoc(document_type: DocType ) {
     this._documentDialogElem.new(this.getPath(), document_type);
   }
 

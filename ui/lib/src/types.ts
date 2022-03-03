@@ -37,8 +37,15 @@ export enum DocType {
   Comment = "_comment"
 }
 
+export enum SectionType {
+  Process = "p",
+  Requirement = "r",
+  Content = "",
+}
+
 export interface Section {
   name: string,
+  section_type: SectionType,
   content_type: string,
   content: string,    
 }
@@ -49,7 +56,7 @@ export enum SysState {
 }
 
 export class Document {
-  document_type: string = ""
+  document_type: DocType = DocType.Document
   editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
@@ -99,18 +106,15 @@ export class Document {
   }
 
   public isTemplate(name: string) : boolean {
-    if (this.meta.templates) {
-      const templates : Array<string> = JSON.parse(this.meta.templates)
-      return templates.includes(name)
+    const section: Section|null = this.getSection(name)
+    if (!section) {
+      return false
     }
-    return false
+    return section.section_type == SectionType.Process
   }
-  public getTemplates() : Array<Section> {
-    if (this.meta.templates) {
-      const templates : Array<string> = JSON.parse(this.meta.templates)
-      return templates.map(name => this.getSection(name))
-    }
-    return []
+
+  public getSectionsByType(section_type: SectionType) : Array<Section> {
+    return this.content.filter((section) => section.section_type == section_type)
   }
 }
 

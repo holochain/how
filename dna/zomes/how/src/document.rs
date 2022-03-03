@@ -8,16 +8,22 @@ use std::collections::BTreeMap;
 pub const DOC_DOCUMENT: &str = "_document";
 pub const DOC_COMMENT: &str = "_comment";
 
+pub const SECTION_TYPE_PROCESS: &str = "p";
+pub const SECTION_TYPE_REQUIREMENT: &str = "r";
+pub const SECTION_TYPE_CONTENT: &str = "";
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Section {
     pub name: String,
+    pub section_type: String,
     pub content_type: String,
     pub content: String,
 }
 impl Section {
-    pub fn new(name: &str, content_type: &str, content: &str) -> Self {
+    pub fn new(name: &str, section_type: &str, content_type: &str, content: &str) -> Self {
         Section {
             name: name.into(),
+            section_type: section_type.into(),
             content_type: content_type.into(),
             content: content.into(),
         }

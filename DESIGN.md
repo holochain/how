@@ -85,14 +85,20 @@ struct Document {
   document_type: String,             // "_document" or "_comment" "_reply" (or other reserved types which start with _)
   editors: Vec<AgentPubKey>,         // people who can change this document, if empty anyone can
   state: String,                     // current process name
-  content: BTreeMap<String, String>, // semantically identified content components
+  content: Vec<Section>,             // semantically identified content components
   meta: BTreeMap<String, String>,    // semantically identified meta data.
+}
+
+struct Section {                     // content compontents
+    name: String,                    // name 
+    section_type: String,            // section's type (content, process template, required field)
+    content_type: String,            // section's content type e.g. text/plain, text/markdown, number, etc
+    content: String,                 // the actual content of the section
 }
 ```
 
 ### Document Meta Data
 - See below for using meta data for comments and replies
-- Used to mark sections as templates
 - Used for marking approvals, ratings, votes.
 - Used for influencing UI layout or other rendering hints
 - Used for instructions on how to use processes (because the content contains templates for other documents)

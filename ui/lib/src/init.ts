@@ -4,7 +4,8 @@ import {
   ProcessType,
   ProcessName,
   SysState,
-  Document
+  Document,
+  SectionType
 } from "./types";
 import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 
@@ -24,11 +25,13 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         required_sections: [
           {
             name: "title",
+            section_type: SectionType.Content,
             content_type: "text/plain",
             content: "{title of the standard being defined}",
           },
           {
             name: "summary",
+            section_type: SectionType.Content,
             content_type: "text/markdown",
             content:
               "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}",
@@ -76,6 +79,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         required_sections: [
           {
             name: "people story",
+            section_type: SectionType.Content,
             content_type: "text/markdown",
             content:
               "{a description of what this process or process type looks like to people}",
@@ -209,19 +213,43 @@ export function initialTree(progenitor: AgentPubKeyB64) {
     ],
     documents: [
       {
-        path: "hApps.",
+        path: "",
         document: new Document( {
           document_type: DocType.Document,
           content: [
             {
               name: "title",
+              section_type: SectionType.Requirement,
               content_type: "text/plain",
-              content: "Holochain Community Standards",
+              content: "{title of the standard being defined}",
             },
             {
               name: "summary",
+              section_type: SectionType.Requirement,
               content_type: "text/markdown",
-              content: "A standard is something defined in this tree.  ",
+              content: "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}",
+            },
+          ],
+          editors: [progenitor],
+          state: SysState.Alive
+        })
+      },
+      {
+        path: "hApps",
+        document: new Document( {
+          document_type: DocType.Document,
+          content: [
+            {
+              name: "title",
+              section_type: SectionType.Content,
+              content_type: "text/plain",
+              content: "hApp Standards",
+            },
+            {
+              name: "summary",
+              section_type: SectionType.Content,
+              content_type: "text/markdown",
+              content: "Standards for classes of holochain hApps",
             },
           ],
           editors: [progenitor],
@@ -235,16 +263,19 @@ export function initialTree(progenitor: AgentPubKeyB64) {
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "ERC721 Interoperation Standard",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "An agent or agents in a Holochain DHT commit an entry who’s HRL will be used as the referenced in the minted NFT. The minted NFT’s id a hash of the minter plus Holochain entry hash. This id then is used on the Holochain side to create a baseless link to the NFT entry. The validation rules of that link ensure the trustability of any returned value for off-ethereum-chain reference by third parties. This creates a simple, fully-decentralized mechanism to provide a non-oracle based provenance of an NFT’s resource by preventing front-running.",
             },
             {
               name: "context",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: `
 ### Story  (notes)
@@ -302,28 +333,33 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Definition Process Type",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "This process type is used to define some standard in the tree.   All definitions must have a context, as specification and a rationale.",
             },
             {
               name: "context",
+              section_type: SectionType.Process,
               content_type: "text/plain:long",
               content:
                 "{Description of the context and use-case an why it requires a standard. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Holochain ecosystem? What use cases does this standard address?}",
             },
             {
               name: "specification",
+              section_type: SectionType.Process,
               content_type: "text/markdown",
               content:
                 "{**Description** of the syntax, semantics, state diagrams, and workflows of any new feature/protocol/process. The specification should be detailed enough to allow for multiple interoperable implementations.}",
             },
             {
               name: "rationale",
+              section_type: SectionType.Process,
               content_type: "text/plain:long",
               content:
                 "{Description of what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.}",
@@ -331,7 +367,7 @@ Furthermore we must:
           ],
           editors: [progenitor],
           state: SysState.Alive,
-          meta: {templates: `["context","specification","rationale"]`},
+          meta: {},
         }),
       },
       {
@@ -341,11 +377,13 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Refine Process Type",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "This process type is used to refine astandard in the tree.",
             },
@@ -361,11 +399,13 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Align Process Type",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "This process type is used to align on a standard after it has been defined and refined.",
             },
@@ -381,23 +421,26 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Definition by petition",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The petition definition variant allways includes a list of the pettioners",
             },
             {
               name: "pettioners",
               content: "{who is making the petition}",
+              section_type: SectionType.Process,
               content_type: "text/plain",
             },
           ],
           editors: [progenitor],
           state: SysState.Alive,
-          meta: {templates: `["pettioners"]`},
+          meta: {},
         }),
       },
       {
@@ -407,22 +450,26 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Definition by declaration",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The declaration definition variant allways includes the zome signatures and an optional reference implementation",
             },
             {
               name: "zome signatures",
+              section_type: SectionType.Process,
               content_type: "text/json",
               content:
                 "{Machine readable function signatures to expect of zomes that implement this standard.",
             },
             {
               name: "reference implementation",
+              section_type: SectionType.Process,
               content_type: "text/rust",
               content:
                 "{An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification.}",
@@ -430,7 +477,7 @@ Furthermore we must:
           ],
           editors: [progenitor],
           state: SysState.Alive,
-          meta: {templates: `["zome signatures", "reference implementation"]`},
+          meta: {},
         }),
       },
       {
@@ -440,19 +487,25 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Comment Period",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Comment Period refinement variant specifies a timeframe for commenting",
             },
-            { name: "period", content: "{number of weeks in the comment period}", content_type: "text/integer" },
+            { name: "period", 
+              content: "{number of weeks in the comment period}", 
+              section_type: SectionType.Process,
+              content_type: "text/integer" 
+            },
           ],
           editors: [progenitor],
           state: SysState.Alive,
-          meta: {templates: `["period"]`},
+          meta: {},
         }),
       },
       {
@@ -462,20 +515,24 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Votes",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Votes aligment variant specifies a voting group, and a count of those votes",
             },
-            { name: "voters", content: "{list of people who may vote}", content_type: "text/plain" },
-            { name: "votes", content: "{record of the votes taken}", content_type: "text/plain" },
+            { name: "voters", content: "{list of people who may vote}", section_type: SectionType.Process,
+            content_type: "text/plain" },
+            { name: "votes", content: "{record of the votes taken}", section_type: SectionType.Process,
+            content_type: "text/plain" },
           ],
           editors: [progenitor],
           state: SysState.Alive,
-          meta: {templates: `["voters","votes"]`},
+          meta: {},
         }),
       },
       {
@@ -485,19 +542,22 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Consensus",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Consensus aligment variant specifies an outcome of consensus decision that a group has taken",
             },
-            { name: "outcome", content: "{results of the consensus decision}", content_type: "text/markdown" },
+            { name: "outcome", content: "{results of the consensus decision}", section_type: SectionType.Process,
+            content_type: "text/markdown" },
           ],
           editors: [progenitor],
           state: SysState.Alive,
-          meta: {templates: `["outcome"]`},
+          meta: {},
         }),
       },
       {
@@ -507,20 +567,24 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Sortition",
             },
             {
               name: "summary",
+              section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Sortition aligment variant specifies a group of people who will decide on the alignment and it's outcome of consensus decision that a group has taken",
             },
-            { name: "people", content: "{list of people who will decide}", content_type: "text/plain" },
-            { name: "outcome", content: "{results of the sorition decision}", content_type: "text/markdown" },
+            { name: "people", content: "{list of people who will decide}", section_type: SectionType.Process,
+            content_type: "text/plain" },
+            { name: "outcome", content: "{results of the sorition decision}", section_type: SectionType.Process,
+            content_type: "text/markdown" },
           ],
           editors: [progenitor],
           state: SysState.Alive,
-          meta: {templates: `["people","outcome"]`},
+          meta: {},
         }),
       }
     ],

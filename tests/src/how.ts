@@ -42,8 +42,8 @@ export default async (orchestrator) => {
     const rootDoc = {  
       document_type: "_document",
       content: [
-        {name: "title", content: "ROOT NODE DOC", content_type:"text/plain"},
-        {name: "summary", content: "{}", content_type:"text/plain"}
+        {name: "title", content: "ROOT NODE DOC", section_type:"", content_type:"text/plain"},
+        {name: "summary", content: "{}", section_type:"", content_type:"text/plain"}
       ],
       state: "define",
       editors: [],
