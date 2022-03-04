@@ -94,17 +94,18 @@ export class HowStore {
     while (i <= segments.length) {
       const walk = segments.slice(0,i).join(".")
       i += 1
-      console.log(`Pulling (${i}):`,walk)
       // find the sections of the given type at this level and add them into the sections
       await this.pullDocuments(walk)
       const docs = get(this.documentPaths)[walk]
       if (docs) {
         for (const doc of docs) {
           if (doc.content.document_type == DocType.Document) {
-            sections = sections.concat(doc.content.getSectionsByType(section_type))
-            for (const section of sections) {
+            let newSections = doc.content.getSectionsByType(section_type)
+            for (const section of newSections) {
+              section.section_type = SectionType.Content
               section.source = walk
             }
+            sections = sections.concat(newSections)
           } 
         }
       }

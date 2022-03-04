@@ -272,6 +272,11 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this._tree.treeType = this._tree.treeType == "tree"?"file-tree":"tree"
     this._treeType = this._tree.treeType
   }
+  async handleDocumentUpdated(e:any) {
+    console.log("calling handDocUpdate")
+    await this._store.pullDocuments(this.getCurrentPath())
+    this._currentDocumentEh = e.detail
+  }
   render() {
 
     const tree = html`      
@@ -282,13 +287,13 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       </how-tree>`
     const alignment = html`
     <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
-        @document-updated=${(e:any)=>{this._currentDocumentEh = e.detail;}}
+        @document-updated=${this.handleDocumentUpdated}
         @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
         @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}>
       </how-alignment>`
      const document = this._currentDocumentEh ? 
      html`<how-document id="document" .currentDocumentEh=${this._currentDocumentEh}
-          @document-updated=${(e:any)=>{this._currentDocumentEh = e.detail;}}
+          @document-updated=${this.handleDocumentUpdated}
           .path=${this.getCurrentPath()}
      >
     </how-document>` : ""
