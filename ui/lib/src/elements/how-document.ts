@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import {Alignment, howContext} from "../types";
+import {Alignment, howContext, Section, SectionType} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -45,11 +45,18 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
     }
 
     private async stateChange(state: string) {
-
         const newDocumentHash = await this._store.changeDocumentState(this.currentDocumentEh, state)
         this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+    }
 
-    } 
+    private sectionTypeMarker(section: Section) {
+      switch (section.section_type) {
+        case SectionType.Content: return ""; break;
+        case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
+        case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`
+      }
+    }
+
     render() {
         if (!this.currentDocumentEh) {
           return;
@@ -103,9 +110,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
               html` <div class="section">
                 <div class="section-name">
                   ${section.name}
-                  ${doc.isTemplate(section.name)
-                    ? html`<span class="template-marker">Template</span>`
-                    : ""}
+                  ${this.sectionTypeMarker(section)}
                 </div>
                 <div>${sectionValue(section, index)}</div>
               </div>`

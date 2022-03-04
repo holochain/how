@@ -116,7 +116,6 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
       path_abbreviation: this._nameField.value, // max 10 char
       short_name: this._titleField.value,
-      required_sections: [],
       stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
       processes,
       history: {},

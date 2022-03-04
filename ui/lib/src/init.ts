@@ -22,21 +22,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: [], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "", // max 10 char
         short_name: "Holochain Standards", // max 25 char
-        required_sections: [
-          {
-            name: "title",
-            section_type: SectionType.Content,
-            content_type: "text/plain",
-            content: "{title of the standard being defined}",
-          },
-          {
-            name: "summary",
-            section_type: SectionType.Content,
-            content_type: "text/markdown",
-            content:
-              "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}",
-          },
-        ],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -45,8 +30,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       {
         parents: [], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "soc_proto", // max 10 char
-        short_name: "Social Protocols", // max 25 char
-        required_sections: [],
+        short_name: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -56,7 +40,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: [], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "hApps", // max 10 char
         short_name: "hApp Standards", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -66,7 +49,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["hApps"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "ERC721_interop", // max 10 char
         short_name: "ERC721 Interoperability Statandard", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -76,15 +58,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "process", // max 10 char
         short_name: "How Processes", // max 25 charAgent
-        required_sections: [
-          {
-            name: "people story",
-            section_type: SectionType.Content,
-            content_type: "text/markdown",
-            content:
-              "{a description of what this process or process type looks like to people}",
-          },
-        ],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -94,7 +67,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "define", // max 10 char
         short_name: "Proposal procesess", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -104,7 +76,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "declaration", // max 10 char
         short_name: "Declaration", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -114,7 +85,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "petition", // max 10 char
         short_name: "Petition", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -124,7 +94,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "refine", // max 10 char
         short_name: "Refinement Processes", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -134,7 +103,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process.refine"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "comment_period", // max 10 char
         short_name: "Comment Period", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -144,7 +112,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "align", // max 10 char
         short_name: "Alignment Processes", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -154,7 +121,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "vote", // max 10 char
         short_name: "Voting", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -164,7 +130,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "consensus", // max 10 char
         short_name: "Consensus", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -174,7 +139,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "sortition", // max 10 char
         short_name: "Sortition", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -184,7 +148,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: [], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "hc_system", // max 10 char
         short_name: "Holochain System", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -194,7 +157,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "conductor", // max 10 char
         short_name: "Holochain Conductor", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -204,7 +166,6 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["hc_system.conductor"], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "api", // max 10 char
         short_name: "Holochain Conductor API", // max 25 char
-        required_sections: [],
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},

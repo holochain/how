@@ -22,7 +22,6 @@ export default async (orchestrator) => {
       short_name: "API",
       path_abbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
-      required_sections: [],
       processes: [["soc_proto.procs.define","petition"]], // state-machine definition
       history: {},
       meta: {}
@@ -33,7 +32,6 @@ export default async (orchestrator) => {
       short_name: "Holochain Community Standards",
       path_abbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
-      required_sections: [],
       processes: [["soc_proto.procs.define","petition"]], // state-machine definition
       history: {},
       meta: {}

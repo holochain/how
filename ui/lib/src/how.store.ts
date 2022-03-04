@@ -83,36 +83,25 @@ export class HowStore {
     })
   }
 
-  // gather together all of the required sections by walking the tree from the root
-  getRequiredSectionsForPath(path: string): Array<Section> {
-    let sections: Array<Section> = []
-    path = `.${path}` // so we also search the root
-    let walk = ""
-    for (const segment of path.split(".") ) {
-      if (walk != "") { walk += "."}
-      walk += segment
-      const alignmentHash = get(this.alignmentsPath)[walk]
-      const alignment = this.alignment(alignmentHash)
-      sections = sections.concat(alignment.required_sections)
-    }
-    return sections
-  }
-
   // get all of the sections needed for a specific process by getting the template contents
   // for that proccess hierarchy
-  async getSectionsForProcess(path: string): Promise<Array<Section>> {
+  async getSectionsFromHierarcy(path: string, start: number, section_type: SectionType): Promise<Array<Section>> {
+    console.log(`looking for ${section_type} in ${path}`)
+    path = `.${path}`
     let sections: Array<Section> = []
     let segments = path.split(".")
-    let walk = segments.shift()!
-    for (const segment of segments) {
-      walk += "." + segment
-      // find the templates at this level and add them into the sections
+    let i = start+1
+    while (i <= segments.length) {
+      const walk = segments.slice(0,i).join(".")
+      i += 1
+      console.log(`Pulling (${i}):`,walk)
+      // find the sections of the given type at this level and add them into the sections
       await this.pullDocuments(walk)
       const docs = get(this.documentPaths)[walk]
       if (docs) {
         for (const doc of docs) {
           if (doc.content.document_type == DocType.Document) {
-            sections = sections.concat(doc.content.getSectionsByType(SectionType.Process))
+            sections = sections.concat(doc.content.getSectionsByType(section_type))
           } 
         }
       }
@@ -202,6 +191,7 @@ export class HowStore {
       this.pullDocuments(path)
     }
     return newHash
+
   }
   async changeDocumentState(hash: EntryHashB64, state: string) : Promise<EntryHashB64> {
     let newHash: EntryHashB64 = ""
@@ -209,7 +199,7 @@ export class HowStore {
     doc.state = state
 
     const processPath = this.getProcessPathForState(hash, state)
-    doc.appendSections(await this.getSectionsForProcess(processPath))
+    doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
     const newDocumentHash = await this.updateDocument(hash, doc);
 
     return newDocumentHash
@@ -277,9 +267,9 @@ export class HowStore {
     const processPath = `${proc[0]}.${proc[1]}`
     const doc = new Document({document_type: DocType.Document})
 
-    doc.appendSections(this.getRequiredSectionsForPath(alignment.parents[0]))
+    doc.appendSections(await this.getSectionsFromHierarcy(alignment.parents[0], 0, SectionType.Requirement))
     await this.pullDocuments(processPath)
-    doc.appendSections(await this.getSectionsForProcess(processPath))
+    doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
 
     doc.setSection("title", alignment.short_name)
     console.log("ADDING DOC", doc)

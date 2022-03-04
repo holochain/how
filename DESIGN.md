@@ -74,7 +74,6 @@ struct Alignment {
   parent: Vec<String>,                   // full paths to parent nodes (remember it's a DAG)
   path_abbreviation: String,             // max 10 char
   short_name: String,                    // max 25 char
-  required_sections: Vec<Section>,       // content field contains description of what should be in the content
   stewards: Vec<AgentPubKey>,            // people who can change this document
   processes: Vec<(ProcessType, String)>, // paths to process template to use
   history: BtreeMap<(ProcessType, String), EntryHash>,
@@ -91,7 +90,7 @@ struct Document {
 
 struct Section {                     // content compontents
     name: String,                    // name 
-    section_type: String,            // section's type (content, process template, required field)
+    section_type: String,            // section's type (content, process template, required section)
     content_type: String,            // section's content type e.g. text/plain, text/markdown, number, etc
     content: String,                 // the actual content of the section
 }

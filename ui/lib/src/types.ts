@@ -20,7 +20,6 @@ export interface Alignment {
   parents: Array<string>,
   path_abbreviation: string,
   short_name: string,
-  required_sections: Array<Section>,
   stewards: Array<AgentPubKeyB64>,
   processes: Array<[ProcessType, ProcessName]>,
   history: Dictionary<EntryHashB64>,
@@ -103,14 +102,6 @@ export class Document {
   }
   public nextStates() : Array<string> {
     return Object.values(this.machine[this.state])
-  }
-
-  public isTemplate(name: string) : boolean {
-    const section: Section|null = this.getSection(name)
-    if (!section) {
-      return false
-    }
-    return section.section_type == SectionType.Process
   }
 
   public getSectionsByType(section_type: SectionType) : Array<Section> {

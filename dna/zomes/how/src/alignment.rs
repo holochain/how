@@ -6,7 +6,6 @@ use holo_hash::{EntryHashB64, AgentPubKeyB64};
 use crate::error::*;
 use crate::signals::*;
 use crate::tree::*;
-use crate::document::Section;
 
 type ProcessType = String;
 type ProcessName = String;
@@ -18,7 +17,6 @@ pub struct Alignment {
     pub parents: Vec<String>, // full paths to parent nodes (remember it's a DAG)
     pub short_name: String,
     pub path_abbreviation: String, // max 10 char
-    pub required_sections: Vec<Section>,  // content field contains description of what should be in the content
     pub stewards: Vec<AgentPubKeyB64>,  // people who can change this document
     pub processes: Vec<(ProcessType,ProcessName)>, // paths to processes to use
     pub history: BTreeMap<String, EntryHashB64>,

@@ -42,7 +42,6 @@ pub async fn test_basics() {
         path_abbreviation: "conductor".into(), // max 10 char
         short_name: "Conductor".into(),
         stewards: vec![],  // people who can change this document
-        required_sections: vec![], 
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // initial implementation of state machine
         history: BTreeMap::new(),
         meta: BTreeMap::new(),
@@ -59,7 +58,6 @@ pub async fn test_basics() {
         path_abbreviation: "app".into(), // max 10 char
         short_name: "Application API".into(), // max 10 char
         stewards: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document
-        required_sections: vec![], 
         processes: vec![("soc_proto.process.define".into(),"petition".into())], // initial implementation of state machine
         history: BTreeMap::new(),
         meta: BTreeMap::new(),

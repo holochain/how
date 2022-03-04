@@ -50,12 +50,12 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     /**
      *
      */
-    new(path: string, document_type: DocType) {
+    async new(path: string, document_type: DocType) {
       this.isNew = true
       this.editable = true
       this.path = path
       this.document_type = document_type
-      this.sections = this._store.getRequiredSectionsForPath(path)
+      this.sections = await this._store.getSectionsFromHierarcy(path, 0, SectionType.Requirement)
 
       // also  get the sections from the process templates
       const docs = this._documentPaths.value[document_type]
