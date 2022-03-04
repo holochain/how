@@ -15,6 +15,7 @@ import {
 } from "@scoped-elements/material-web";
 import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
 import {sectionValue} from "./utils";
+import { HowNewSectionDialog } from "./how-new-section.dialog";
 
 /**
  * @element how-alignment-dialog
@@ -28,7 +29,9 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() hash = ""
 
     @state() sections: Array<Section> = []
-
+    @query('how-new-section-dialog')
+    private newSectionDialog!: HowNewSectionDialog;
+  
     @contextProvided({ context: howContext })
     _store!: HowStore;
   
@@ -140,35 +143,79 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
             </mwc-textarea>`
       } 
     }
-    
+    private addSection(e: any) {
+
+      const section: Section = {
+        name: e.detail.name, 
+        content_type: e.detail.content_type, 
+        section_type:e.detail.section_type,
+        content: ""
+      }
+      this.sections.push(section)
+      this.requestUpdate();
+    }
     render() {
         return html`
-<mwc-dialog id="document-dialog" heading="${this.isNew ? "New" : this.editable? "Edit":"View"} Document" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
-  <div> Path: ${this.path} </div>
-  <div> Type: ${this.document_type} </div>
-  ${this.editable ?
-  html`
-    ${this.sections.map((section, index) => {return html `${this.sectionWidget(section, index)}`})}
-  <h4>Editors:</h4>
-  <search-agent
-  @closing=${(e:any)=>e.stopPropagation()}
-  @agent-selected="${this.addEditor}"
-  clear-on-select
-  style="margin-bottom: 16px;"
-  include-myself></search-agent>
-  `
-  :
-  html`${this.sections.map((section, index) => html`<h4 class="section-name">${section.name}</h4><div>${sectionValue(section, index)}</div>`)}
-  <hr />Editors: ${Object.entries(this._editors).map(([key,nickname])=> html`${nickname} `)}
- `
-  }
-
-  ${this.editable ? html`
-  <mwc-button id="primary-action-button" slot="primaryAction" @click=${this.handleOk}>ok</mwc-button>
-  <mwc-button slot="secondaryAction"  dialogAction="cancel">cancel</mwc-button>` :
-  html`<mwc-button id="primary-action-button" slot="primaryAction" dialogAction="cancel">close</mwc-button>`}
-</mwc-dialog>
- `
+          <mwc-dialog
+            id="document-dialog"
+            heading="${this.isNew
+              ? "New"
+              : this.editable
+              ? "Edit"
+              : "View"} Document"
+            @closing=${this.handleDialogClosing}
+            @opened=${this.handleDialogOpened}
+          >
+            <div>Path: ${this.path}</div>
+            <div>Type: ${this.document_type}</div>
+            ${this.editable
+              ? html`
+                  ${this.sections.map((section, index) => {
+                    return html`${this.sectionWidget(section, index)}`;
+                  })}
+                  <mwc-button icon="add_cirlce" @click=${() => this.newSectionDialog.open()}>New Section</mwc-button>
+                  <h4>Editors:</h4>
+                  <search-agent
+                    @closing=${(e: any) => e.stopPropagation()}
+                    @agent-selected="${this.addEditor}"
+                    clear-on-select
+                    style="margin-bottom: 16px;"
+                    include-myself
+                  ></search-agent>
+                `
+              : html`${this.sections.map(
+                    (section, index) =>
+                      html`<h4 class="section-name">${section.name}</h4>
+                        <div>${sectionValue(section, index)}</div>`
+                  )}
+                  
+                  <hr />
+                  Editors:
+                  ${Object.entries(this._editors).map(
+                    ([key, nickname]) => html`${nickname} `
+                  )} `}
+            ${this.editable
+              ? html` <mwc-button
+                    id="primary-action-button"
+                    slot="primaryAction"
+                    @click=${this.handleOk}
+                    >ok</mwc-button
+                  >
+                  <mwc-button slot="secondaryAction" dialogAction="cancel"
+                    >cancel</mwc-button
+                  >`
+              : html`<mwc-button
+                  id="primary-action-button"
+                  slot="primaryAction"
+                  dialogAction="cancel"
+                  >close</mwc-button
+                >`}
+          </mwc-dialog>
+          <how-new-section-dialog
+            .takenNames = ${this.sections.map((s)=>s.name)}
+            @add-section=${this.addSection}
+          ></how-new-section-dialog>
+        `;
     }
 
     static get scopedElements() {
@@ -178,6 +225,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
           "mwc-textfield": TextField,
           "mwc-textarea": TextArea,
           "search-agent": SearchAgent,
+          "how-new-section-dialog": HowNewSectionDialog,
         };
       }
       static get styles() {
