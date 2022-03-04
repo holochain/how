@@ -5,7 +5,8 @@ import {
   ProcessName,
   SysState,
   Document,
-  SectionType
+  SectionType,
+  SourceManual
 } from "./types";
 import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 
@@ -180,12 +181,14 @@ export function initialTree(progenitor: AgentPubKeyB64) {
           content: [
             {
               name: "title",
+              source: SourceManual,
               section_type: SectionType.Requirement,
               content_type: "text/plain",
               content: "{title of the standard being defined}",
             },
             {
               name: "summary",
+              source: SourceManual,
               section_type: SectionType.Requirement,
               content_type: "text/markdown",
               content: "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}",
@@ -202,12 +205,14 @@ export function initialTree(progenitor: AgentPubKeyB64) {
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "hApp Standards",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "Standards for classes of holochain hApps",
@@ -224,18 +229,21 @@ export function initialTree(progenitor: AgentPubKeyB64) {
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "ERC721 Interoperation Standard",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "An agent or agents in a Holochain DHT commit an entry who’s HRL will be used as the referenced in the minted NFT. The minted NFT’s id a hash of the minter plus Holochain entry hash. This id then is used on the Holochain side to create a baseless link to the NFT entry. The validation rules of that link ensure the trustability of any returned value for off-ethereum-chain reference by third parties. This creates a simple, fully-decentralized mechanism to provide a non-oracle based provenance of an NFT’s resource by preventing front-running.",
             },
             {
               name: "context",
+              source: "soc_proto.process.define.declaration",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: `
@@ -294,18 +302,21 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Definition Process Type",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "This process type is used to define some standard in the tree.   All definitions must have a context, as specification and a rationale.",
             },
             {
               name: "context",
+              source: "soc_proto.process.define.declaration",
               section_type: SectionType.Process,
               content_type: "text/plain:long",
               content:
@@ -313,6 +324,7 @@ Furthermore we must:
             },
             {
               name: "specification",
+              source: "soc_proto.process.define.declaration",
               section_type: SectionType.Process,
               content_type: "text/markdown",
               content:
@@ -320,6 +332,7 @@ Furthermore we must:
             },
             {
               name: "rationale",
+              source: "soc_proto.process.define.declaration",
               section_type: SectionType.Process,
               content_type: "text/plain:long",
               content:
@@ -338,12 +351,14 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Refine Process Type",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "This process type is used to refine astandard in the tree.",
@@ -360,12 +375,14 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Align Process Type",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "This process type is used to align on a standard after it has been defined and refined.",
@@ -382,12 +399,14 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Definition by petition",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The petition definition variant allways includes a list of the pettioners",
@@ -395,6 +414,7 @@ Furthermore we must:
             {
               name: "pettioners",
               content: "{who is making the petition}",
+              source: SourceManual,
               section_type: SectionType.Process,
               content_type: "text/plain",
             },
@@ -411,18 +431,21 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Definition by declaration",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The declaration definition variant allways includes the zome signatures and an optional reference implementation",
             },
             {
               name: "zome signatures",
+              source: SourceManual,
               section_type: SectionType.Process,
               content_type: "text/json",
               content:
@@ -430,6 +453,7 @@ Furthermore we must:
             },
             {
               name: "reference implementation",
+              source: SourceManual,
               section_type: SectionType.Process,
               content_type: "text/rust",
               content:
@@ -448,18 +472,21 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Comment Period",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Comment Period refinement variant specifies a timeframe for commenting",
             },
             { name: "period", 
               content: "{number of weeks in the comment period}", 
+              source: SourceManual,
               section_type: SectionType.Process,
               content_type: "text/integer" 
             },
@@ -476,20 +503,22 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Votes",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Votes aligment variant specifies a voting group, and a count of those votes",
             },
             { name: "voters", content: "{list of people who may vote}", section_type: SectionType.Process,
-            content_type: "text/plain" },
+            content_type: "text/plain", source: SourceManual },
             { name: "votes", content: "{record of the votes taken}", section_type: SectionType.Process,
-            content_type: "text/plain" },
+            content_type: "text/plain", source: SourceManual },
           ],
           editors: [progenitor],
           state: SysState.Alive,
@@ -503,18 +532,20 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Consensus",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Consensus aligment variant specifies an outcome of consensus decision that a group has taken",
             },
             { name: "outcome", content: "{results of the consensus decision}", section_type: SectionType.Process,
-            content_type: "text/markdown" },
+            content_type: "text/markdown", source: SourceManual },
           ],
           editors: [progenitor],
           state: SysState.Alive,
@@ -528,20 +559,22 @@ Furthermore we must:
           content: [
             {
               name: "title",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/plain",
               content: "Sortition",
             },
             {
               name: "summary",
+              source: "",
               section_type: SectionType.Content,
               content_type: "text/markdown",
               content: "The Sortition aligment variant specifies a group of people who will decide on the alignment and it's outcome of consensus decision that a group has taken",
             },
             { name: "people", content: "{list of people who will decide}", section_type: SectionType.Process,
-            content_type: "text/plain" },
+            content_type: "text/plain", source: SourceManual },
             { name: "outcome", content: "{results of the sorition decision}", section_type: SectionType.Process,
-            content_type: "text/markdown" },
+            content_type: "text/markdown", source: SourceManual },
           ],
           editors: [progenitor],
           state: SysState.Alive,

@@ -12,19 +12,26 @@ pub const SECTION_TYPE_PROCESS: &str = "p";
 pub const SECTION_TYPE_REQUIREMENT: &str = "r";
 pub const SECTION_TYPE_CONTENT: &str = "";
 
+pub const SECTION_SRC_PROCESS: &str = "p";
+pub const SECTION_SRC_REQUIREMENT: &str = "r";
+pub const SECTION_SRC_MANUAL: &str = "m";
+
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Section {
     pub name: String,
     pub section_type: String,
     pub content_type: String,
+    pub source: String,
     pub content: String,
 }
 impl Section {
-    pub fn new(name: &str, section_type: &str, content_type: &str, content: &str) -> Self {
+    pub fn new(name: &str, section_type: &str, content_type: &str, source: &str, content: &str) -> Self {
         Section {
             name: name.into(),
             section_type: section_type.into(),
             content_type: content_type.into(),
+            source: source.into(),
             content: content.into(),
         }
     }

@@ -108,7 +108,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
           ${doc.content.map(
             (section, index) =>
               html` <div class="section">
-                <div class="section-name">
+                <div class="section-name" title="source: ${section.source == "" ? "_root" : section.source}">
                   ${section.name}
                   ${this.sectionTypeMarker(section)}
                 </div>

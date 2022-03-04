@@ -102,6 +102,9 @@ export class HowStore {
         for (const doc of docs) {
           if (doc.content.document_type == DocType.Document) {
             sections = sections.concat(doc.content.getSectionsByType(section_type))
+            for (const section of sections) {
+              section.source = walk
+            }
           } 
         }
       }

@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import {contextProvided} from "@holochain-open-dev/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Document, howContext, Dictionary, Section, DocType, DocumentOutput, SectionType} from "../types";
+import {Document, howContext, Dictionary, Section, DocType, DocumentOutput, SectionType, SourceManual} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -29,6 +29,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() hash = ""
 
     @state() sections: Array<Section> = []
+    @state() sources: Dictionary<String> = {}
     @query('how-new-section-dialog')
     private newSectionDialog!: HowNewSectionDialog;
   
@@ -79,6 +80,9 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       const document = this._documents.value[hash]
       this.document_type = document.document_type
       this.sections = document.content
+      if (document.meta["sources"]) {
+        this.sources = JSON.parse(document.meta["sources"])
+      }
       const dialog = this.shadowRoot!.getElementById("document-dialog") as Dialog
       dialog.open = true
     }
@@ -149,6 +153,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         name: e.detail.name, 
         content_type: e.detail.content_type, 
         section_type:e.detail.section_type,
+        source: SourceManual,
         content: ""
       }
       this.sections.push(section)

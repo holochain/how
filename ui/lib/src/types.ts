@@ -42,10 +42,13 @@ export enum SectionType {
   Content = "",
 }
 
+export const SourceManual: string = "_manual"
+
 export interface Section {
   name: string,
   section_type: SectionType,
   content_type: string,
+  source: string,
   content: string,    
 }
 
