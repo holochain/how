@@ -61,9 +61,26 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     refine: new StoreSubscriber(this, () => this._store.refineProcesses)
   };
 
+  private takenNames: Array<string> = []
   /**
    *
    */
+
+  firstUpdated() {
+    this._nameField.validityTransform = (newValue: string) => {
+      this.requestUpdate();
+      if (this.takenNames.includes(this._nameField.value)) {
+        this._nameField.setCustomValidity(`Path abbreviation already exists`);
+        return {
+          valid: false,
+        };
+      } 
+
+      return {
+        valid: true,
+      };
+    };
+  }
   open(parentEh: EntryHashB64) {
     this._parent = this._store.alignment(parentEh);
     const dialog = this.shadowRoot!.getElementById("alignment-dialog") as Dialog

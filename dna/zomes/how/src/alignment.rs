@@ -67,10 +67,10 @@ pub fn create_alignment(input: Alignment) -> ExternResult<EntryHashB64> {
     let path = get_alignments_path();
     path.ensure()?;
     let anchor_hash = path.path_entry_hash()?;
-    create_link(anchor_hash, hash.clone(), ())?;   
+    create_link(anchor_hash, hash.clone(), ())?;
     for path in tree_paths {
         path.ensure()?;
-        create_link(path.path_entry_hash()?, hash.clone(), LinkTag::new("alignment"))?;   
+        create_link(path.path_entry_hash()?, hash.clone(), LinkTag::new("alignment"))?;
     }
     Ok(hash.into())
 }
