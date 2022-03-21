@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import {Alignment, howContext, Section, SectionType} from "../types";
+import {Comment, howContext, Section, SectionType} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -36,6 +36,11 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
     @contextProvided({ context: howContext })
     _store!: HowStore;
     _documents = new StoreSubscriber(this, () => this._store.documents);
+    _comments: Comment[] = [
+      { section: 'summary', authorHash: 'fry', commentText: "Who said that? SURE you can die! You want to die?! Why would I want to know that? Ok, we'll go deliver this crate like professionals, and then we'll go ride the bumper cars. Ooh, name it after me! Moving along…", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() },
+      { section: 'context', authorHash: 'bender', commentText: "We can't compete with Mom! Her company is big and evil! Ours is small and neutral!", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() },
+      { section: 'specification', authorHash: 'leela', commentText: "It's just like the story of the grasshopper and the octopus. All year long, the grasshopper kept burying acorns for winter, while the octopus mooched off his girlfriend and watched TV. But then the winter came, and the grasshopper died, and the octopus ate all his acorns. Also he got a race car. Is any of this getting through to you?", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() }
+    ]
 
     @query('#document-dialog')
     _documentDialogElem!: HowDocumentDialog;
@@ -55,6 +60,32 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
         case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`
       }
+    }
+
+    private commentBubble(comment: Comment) {
+      const result = html `
+        <div class="comment-bubble-container">
+          <div class="comment-header">
+            <div class="comment-avitar">
+              <img class="img-avitar" src="./assets/fry.jps">
+            </div>
+            <div class="comment-authortimestamp">
+              <div class="author-name">${comment.authorHash}</div>
+              <div class="comment-timestamp">${comment.timestamp.toLocaleDateString()} ${comment.timestamp.toLocaleTimeString()}</div>
+            </div>
+            <div class="comment-button-container">
+              <div class="comment-resolve-button-container">
+              </div>
+              <div class="comment-dropdown-menu-container">
+              </div>
+            </div>
+          </div>
+          <div class="comment-text-container">${comment.commentText}</div>
+        </div>
+      `
+
+      console.log("commentBubble", result);
+      return result;
     }
 
     render() {
@@ -105,16 +136,26 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
             </mwc-button>
             </div>
           </div>
-          ${doc.content.map(
-            (section, index) =>
-              html` <div class="section">
-                <div class="section-name" title="source: ${section.source == "" ? "_root" : section.source}">
-                  ${section.name}
-                  ${this.sectionTypeMarker(section)}
-                </div>
-                <div>${sectionValue(section, index)}</div>
-              </div>`
-          )}
+          <div class="document-container">
+            <div class="section-container">
+            ${doc.content.map(
+              (section, index) =>
+                html` <div class="section">
+                  <div class="section-name" title="source: ${section.source == "" ? "_root" : section.source}">
+                    ${section.name}
+                    ${this.sectionTypeMarker(section)}
+                  </div>
+                  <div>${sectionValue(section, index)}</div>
+                </div>`
+            )}
+            </div>
+            <div class="comment-container">
+            ${this._comments.map((comment) => {
+              return this.commentBubble(comment)
+              // return html `<h1>Comment bubble</h1>`
+            })}
+            </div>
+          </div>
           <hr />
           Editors:
           ${Object.entries(doc.editors).map(
@@ -159,6 +200,94 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
               border-bottom: solid .1em #666;
               padding: 5px;
               margin: 0
+            }
+            .document-container {
+              display: flex;
+            }
+            .section-container {
+              width: 80%;
+            }
+            .comment-container {
+              width: 20%;
+              background-color: lightgrey;
+            }
+            .debug-comment-container {
+              width: 85%;
+              height: 20rem;
+              background-color: orange;
+            }
+            .comment-bubble-container {
+              border-radius: 0.5rem;
+              border-width: 1px;
+              border-style: solid;
+              overflow-y: auto;
+              overflow-x: hidden;
+              cusor: pointer;
+              display: flex;
+              flex-direction: column;
+              width: 75%;
+              padding: 1rem;
+              background-color: white;
+              margin: 0.5rem 0 0.5rem 0.75rem;
+            }
+            .comment-header {
+              display: flex;
+              height: 2.5rem;
+              margin-bottom: 0.5rem;
+            }
+            .comment-avitar {
+              height: 2.375rem;
+              width: 2.25rem;
+              max-width: 2.25rem;
+              margin-top: 2px;
+            }
+            .img-avitar {
+              border-radius: 50%;
+              margin-left: 2px;
+              margin-top: 2px;
+              width: 2rem;
+              height: 2rem;
+            }
+            .comment-authortimestamp {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              padding-left: 0.625rem;
+              overflow: hidden;
+              whitespace: nowrap;
+              text-overflow: ellipsis
+            }
+            .author-name {
+              color: #3c4043;
+              font-weight: 500;
+              font-size: 0.875rem;
+              letter-spacing: 0.25px;
+              line-height: 1.25rem;
+              margin-top: 0px;
+              align-self: stretch;
+              height: 1.125rem;
+              overflow: hidden;
+              text-overflow: ellipsis
+            }
+            .comment-timestamp {
+              color: #3c4043;
+              font-weight: 400;
+              align-self: stretch;
+              line-height: 1rem;
+              letter-spacing: 0.3px;
+              font-size: 0.75rem;
+            }
+            .comment-text-container {
+              display: block;
+              font-size: 0.875rem;
+              white-space: normal;
+              cursor: default;
+              margin: 6px 0;
+              text-align: left;
+              word-wrap: break-word;
+              line-height: 20px;
+              letter-spacing: 0.2px;
+              width: 100%;
             }
           `,
         ];

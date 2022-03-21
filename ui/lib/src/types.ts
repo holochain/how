@@ -57,6 +57,17 @@ export enum SysState {
   Defunct = "_defunct"
 }
 
+export class Comment {
+  documentHash: EntryHashB64 = ''
+  section: string = ''
+  start_index: number = 0
+  end_index: number = 0
+  authorHash: AgentPubKeyB64 = ''
+  commentText: string = ''
+  isResolved: boolean = false
+  timestamp: Date = new Date()
+}
+
 export class Document {
   document_type: DocType = DocType.Document
   editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
