@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "run-singleton \"tsc -w --incremental --preserveWatchOutput\"",
-    "start": "concurrently --names tsc,dev-server \"npm run build:watch\" \"web-dev-server --config ./web-dev-server.config.mjs\"",
+    "start": "concurrently --names tsc,dev-server \"npm run build:watch\" \"web-dev-server --host 0.0.0.0  --disable-host-check --useLocalIp --config ./web-dev-server.config.mjs\"",
     "package": "rimraf ui.zip && rimraf dist && rollup --config rollup.config.js && cd ./dist && bestzip ../ui.zip * "
   },
   "devDependencies": {

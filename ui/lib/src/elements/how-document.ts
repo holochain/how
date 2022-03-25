@@ -37,9 +37,9 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
     _store!: HowStore;
     _documents = new StoreSubscriber(this, () => this._store.documents);
     _comments: Comment[] = [
-      { section: 'summary', authorHash: 'fry', commentText: "Who said that? SURE you can die! You want to die?! Why would I want to know that? Ok, we'll go deliver this crate like professionals, and then we'll go ride the bumper cars. Ooh, name it after me! Moving along…", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() },
-      { section: 'context', authorHash: 'bender', commentText: "We can't compete with Mom! Her company is big and evil! Ours is small and neutral!", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() },
-      { section: 'specification', authorHash: 'leela', commentText: "It's just like the story of the grasshopper and the octopus. All year long, the grasshopper kept burying acorns for winter, while the octopus mooched off his girlfriend and watched TV. But then the winter came, and the grasshopper died, and the octopus ate all his acorns. Also he got a race car. Is any of this getting through to you?", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() }
+      { section: 'summary', authorHash: 'fry', profileImg: './assets/fry.jpg', commentText: "Who said that? SURE you can die! You want to die?! Why would I want to know that? Ok, we'll go deliver this crate like professionals, and then we'll go ride the bumper cars. Ooh, name it after me! Moving along…", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() },
+      { section: 'context', authorHash: 'bender', profileImg: './assets/bender.jpg', commentText: "We can't compete with Mom! Her company is big and evil! Ours is small and neutral!", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() },
+      { section: 'specification', authorHash: 'leela', profileImg: './assets/leela.jpg', commentText: "It's just like the story of the grasshopper and the octopus. All year long, the grasshopper kept burying acorns for winter, while the octopus mooched off his girlfriend and watched TV. But then the winter came, and the grasshopper died, and the octopus ate all his acorns. Also he got a race car. Is any of this getting through to you?", documentHash: '', start_index: 0, end_index: 0, isResolved: false, timestamp: new Date() }
     ]
 
     @query('#document-dialog')
@@ -67,7 +67,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         <div class="comment-bubble-container">
           <div class="comment-header">
             <div class="comment-avitar">
-              <img class="img-avitar" src="./assets/fry.jps">
+              <img class="img-avitar" src="${comment.profileImg}">
             </div>
             <div class="comment-authortimestamp">
               <div class="author-name">${comment.authorHash}</div>

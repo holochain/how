@@ -66,6 +66,7 @@ export class Comment {
   commentText: string = ''
   isResolved: boolean = false
   timestamp: Date = new Date()
+  profileImg: string = ''
 }
 
 export class Document {
