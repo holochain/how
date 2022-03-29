@@ -189,13 +189,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   async addHardcodedAlignments() {
+    console.log("how-controller->addHardcodedAlignments");
     const init:Initialization = initialTree(this._store.myAgentPubKey)
     await this._store.initilize(init);
     this._store.pullDocuments("soc_proto.process.define.declaration")
   }
 
   async refresh() {
-    console.log("refresh: Pulling data from DHT")
+    console.log("how-controller->refresh: Pulling data from DHT")
     await this._store.pullAlignments();
     await this._store.pullTree();
     await this._profiles.fetchAllProfiles()
@@ -214,6 +215,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   private async handleAlignmentSelect(alignmentEh: string): Promise<void> {
+    console.log("how-controller->handleAlignmentSelect: " + alignmentEh);
     if (this._alignments.value[alignmentEh]) {
       this._currentAlignmentEh = alignmentEh;
       this.alignmentElem.currentAlignmentEh = alignmentEh;
@@ -273,7 +275,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this._treeType = this._tree.treeType
   }
   async handleDocumentUpdated(e:any) {
-    console.log("calling handDocUpdate")
+    console.log("how-controller->handleDocumentUpdated calling handDocUpdate")
     await this._store.pullDocuments(this.getCurrentPath())
     this._currentDocumentEh = e.detail
   }

@@ -71,7 +71,7 @@ export class HowStore {
       if (! areEqual(cellClient.cellId[0],signal.data.cellId[0]) || !areEqual(cellClient.cellId[1], signal.data.cellId[1])) {
         return
       }
-      console.log("SIGNAL",signal)
+      console.log("how-store->addSignalHandler",signal)
       const payload = signal.data.payload
       switch(payload.message.type) {
       case "NewAlignment":
@@ -86,7 +86,7 @@ export class HowStore {
   // get all of the sections needed for a specific process by getting the template contents
   // for that proccess hierarchy
   async getSectionsFromHierarcy(path: string, start: number, section_type: SectionType): Promise<Array<Section>> {
-    console.log(`looking for ${section_type} in ${path}`)
+    console.log(`how-store->getSectionsFromHierarcy looking for ${section_type} in ${path}`)
     path = `.${path}`
     let sections: Array<Section> = []
     let segments = path.split(".")
@@ -125,6 +125,7 @@ export class HowStore {
   }
 
   private updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment) {
+    console.log("how-store->updateAlignmentFromEntry", hash, alignment)
     this.alignmentsPathStore.update(alignments => {
       const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
       alignments[path] = hash
@@ -137,6 +138,7 @@ export class HowStore {
   }
 
   async pullAlignments() : Promise<Dictionary<Alignment>> {
+    console.log("how-store->pullAlignments")
     const alignments = await this.service.getAlignments();
     for (const s of alignments) {
       this.updateAlignmentFromEntry(s.hash, s.content)
@@ -145,7 +147,7 @@ export class HowStore {
   }
 
   private updateDocumentStores(path: string, doc: DocumentOutput)  {
-    console.log("updating doc for ",path, "to", doc)
+    console.log("how-store->updateDocumentStores updating doc for ",path, "to", doc)
     this.documentPathStore.update(documents => {
       if (!documents[path]) {
         documents[path] = [doc]
@@ -164,6 +166,7 @@ export class HowStore {
   }
 
   private markDocumentUpdated(path: string, hash: EntryHashB64) {
+    console.log("how-store->markDocumentUpdated")
     const docs = get(this.documentPathStore)[path]
     if (docs) {
       let doc = docs.find(e=>e.hash == hash)
@@ -179,7 +182,7 @@ export class HowStore {
       doc.content = new Document(doc.content)
     })
     documents = documents.filter(doc => !doc.updated)
-    console.log("pull got", documents)
+    console.log("how-store->pullDocuments got", documents)
     for (const s of documents) {
       this.updateDocumentStores(path, s)
     }
@@ -187,6 +190,7 @@ export class HowStore {
   }
 
   async updateDocument(hash: EntryHashB64, document: Document) : Promise<EntryHashB64> {
+    console.log("how-store->updateDocument")
     const path = this.getDocumentPath(hash)
     let newHash: EntryHashB64 = ""
     if (path) {
@@ -198,6 +202,7 @@ export class HowStore {
 
   }
   async changeDocumentState(hash: EntryHashB64, state: string) : Promise<EntryHashB64> {
+    console.log("how-store->changeDocumentState")
     let newHash: EntryHashB64 = ""
     let doc = cloneDeep(get(this.documents)[hash])
     doc.state = state
@@ -219,7 +224,7 @@ export class HowStore {
   }
 
   private getProcesses(tree: Node) : Array<Process> {
-    console.log("GET PROCS", tree)
+    console.log("how-store->getProcesses", tree)
     const node = this.find(tree,"soc_proto.process".split("."))
     let processes : Array<Process> = []
     if (node) {
@@ -256,16 +261,19 @@ export class HowStore {
   }
 
   async pullTree() : Promise<Node> {
+    
     const rtree: Array<RustNode> = await this.service.getTree();
     const node: Node = this.buildTree(rtree, rtree[0])
     this.treeStore.update(tree => {
       tree = node
       return tree
     })
+    console.log("how-store->pullTree", get(this.treeStore))
     return get(this.treeStore)
   }
 
   async initializeAlignment(algnmentEh: EntryHashB64) : Promise<void>  {
+    console.log("how-store->initializeAlignment", algnmentEh)
     const alignment = this.alignment(algnmentEh)
     const proc = alignment.processes[0]
     const processPath = `${proc[0]}.${proc[1]}`
@@ -282,6 +290,7 @@ export class HowStore {
   }
 
   async addAlignment(alignment: Alignment) : Promise<EntryHashB64> {
+    console.log("how-store->addAlignment", alignment)
     const alignmentEh: EntryHashB64 = await this.service.createAlignment(alignment)
     this.alignmentsStore.update(alignments => {
       alignments[alignmentEh] = alignment
@@ -302,6 +311,7 @@ export class HowStore {
   }
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
+    console.log("how-store->addDocument: " + path, document)
     return await this.service.createDocument({path, document})
   }
 
@@ -315,6 +325,7 @@ export class HowStore {
   }
 
   private getDocumentAligment(hash: string) : Alignment | null {
+    console.log("how-store->getDocumentAligment: " + hash)
     // TODO this will break once we get versions because there will be
     // more that one aligment per path
     const path = this.getDocumentPath(hash)
