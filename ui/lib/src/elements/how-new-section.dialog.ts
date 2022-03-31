@@ -17,7 +17,6 @@ import {
   Select,
   ListItem,
 } from "@scoped-elements/material-web";
-import { sectionValue } from "./utils";
 
 /**
  * @element how-alignment-dialog

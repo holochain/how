@@ -6,18 +6,13 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import {Comment, howContext, Section, SectionType} from "../types";
+import {Comment, howContext, Section} from "../types";
 import {HowStore} from "../how.store";
-import {HowDocumentDialog } from "./how-document-dialog";
-import {HowDocumentComment } from "./how-document-comment";
+import {HowDocumentDialog} from "./how-document-dialog";
+import {HowDocumentComment} from "./how-document-comment";
+import {HowDocumentSection} from "./how-document-section";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import {
-  Button,
-  IconButton,
-  TextField,
-  TextArea,
-} from "@scoped-elements/material-web";
-import {sectionValue} from "./utils";
+import {Button,IconButton} from "@scoped-elements/material-web";
 
 // @ts-ignore
 import {WcMermaid} from "wc-mermaid"
@@ -53,14 +48,6 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
     private async stateChange(state: string) {
         const newDocumentHash = await this._store.changeDocumentState(this.currentDocumentEh, state)
         this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
-    }
-
-    private sectionTypeMarker(section: Section) {
-      switch (section.section_type) {
-        case SectionType.Content: return ""; break;
-        case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
-        case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`
-      }
     }
 
     render() {
@@ -113,19 +100,12 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
           </div>
           <div class="document-container">
             <div class="section-container">
-            ${doc.content.map(
-              (section, index) =>
-                html` <div class="section">
-                  <div class="section-name" title="source: ${section.source == "" ? "_root" : section.source}">
-                    ${section.name}
-                    ${this.sectionTypeMarker(section)}
-                  </div>
-                  <div>${sectionValue(section, index)}</div>
-                </div>`
-            )}
+              ${doc.content.map((section: Section, index: number) => {
+                return html `<how-document-section .section=${section} .index=${index}></how-document-section>`
+              })}
             </div>
             <div class="comment-container">
-              ${this._comments.map((comment) => {
+              ${this._comments.map((comment: Comment) => {
                 return html `<how-document-comment .comment=${comment}></how-document-comment>`
               })}
             </div>
@@ -147,6 +127,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
           "mwc-icon-button": IconButton,
           "how-document-dialog": HowDocumentDialog,
           "how-document-comment": HowDocumentComment,
+          "how-document-section": HowDocumentSection,
           "wc-mermaid": WcMermaid,
           "agent-avatar": AgentAvatar
         };
@@ -155,23 +136,6 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         return [
           sharedStyles,
           css`
-            .section {
-              padding: 10px;
-            }
-            .section-content p {
-                margin: 0;
-            }
-            .template-marker {
-                font-weight: normal;
-                border: solid .1em #666;
-                border-radius: .1em;
-                font-size: 76%;
-                padding: 0 3px 0 3px;
-            }
-            .section-name {
-              font-weight: bold;
-              margin-bottom: 2px;
-            }
             .document-header {
               border-bottom: solid .1em #666;
               padding: 5px;
@@ -182,6 +146,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
             }
             .section-container {
               width: 80%;
+              padding: 1.5rem;
             }
             .comment-container {
               width: 20%;

@@ -14,7 +14,7 @@ import {
   TextArea,
 } from "@scoped-elements/material-web";
 import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
-import {sectionValue} from "./utils";
+import {sectionValue} from "./how-document-section";
 import { HowNewSectionDialog } from "./how-new-section.dialog";
 
 /**
