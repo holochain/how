@@ -1,9 +1,11 @@
 import {css, html, LitElement} from "lit";
+import {ref, createRef} from 'lit/directives/ref.js';
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {property} from "lit/decorators.js";
 import {Section, SectionType} from "../types";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import {Marked} from "@ts-stack/markdown";
+import {IconButton} from "@scoped-elements/material-web";
 
 /**
  * @element how-document-section
@@ -17,32 +19,45 @@ import {Marked} from "@ts-stack/markdown";
       super();
     }
 
+    commentControlRef = <any> createRef<HTMLDivElement>();
+    sectionRef = <any> createRef<HTMLDivElement>();
+
     render() {
         return html`
-        <div class="section">
+        <div class="section" id="section-${this.section?.name}" ${ref(this.sectionRef)}>
             <div class="section-name" title="source: ${this.section?.source == "" ? "_root" : this.section?.source}">
                 ${this.section?.name}
                 ${this.sectionTypeMarker()}
             </div>
             <div @pointerup=${this.onEndSelection}>${sectionValue(this.section, this.index)}</div>
-            <template id="template${this.index}"><span class="addCommentControl" id="addCommentControl"></span></template>
+            <div ${ref(this.commentControlRef)} class="add-comment-bubble">
+                <mwc-icon-button class="add-comment-button" id="add-comment-button-${this.index}" icon="speaker_notes" @click=${() => this.onAddComment()}></mwc-icon-button>
+            </div>
         </div>`
     }
 
+    private onAddComment() {
+        this.commentControlRef.value.style.display = 'none'
+        console.log("onAddComment");
+    }
+
     private onEndSelection() {
-        const template = document.querySelector('#template'+this.index)
-        const control = document.importNode((<any> template).content, true)?.childNodes[0];
+        // const template = document.querySelector('#template'+this.index)
+        // console.log("onEndSelection", this.templateRef.value)
+        // const control = document.importNode((<any> this.commentControlRef.value).content, true)?.childNodes[0]
         const selection = document.getSelection()
-        const text = selection?.toString();
+        const text = selection?.toString()
         if (text) {
-            let rect = selection?.getRangeAt(0).getBoundingClientRect();
-            control.style.top = `calc(${rect?.top}px - 48px)`;
-            control.style.left = `calc(${rect?.left}px + calc(${rect?.width}px / 2) - 40px)`;
-            control['text']= text; 
-            document.body.appendChild(control);
+            let rect2 = selection?.getRangeAt(0).getBoundingClientRect()
+            let rect = this.sectionRef.value.getBoundingClientRect()
+            console.log("selection rect: " + this.sectionRef.value.id, rect, rect2 )
+            const commentTop = (rect2 ? rect2.top : 0) - rect?.top
+            this.commentControlRef.value.style.top = `calc(calc(${commentTop}px) - 40px)`
+            this.commentControlRef.value.style.left = `calc(calc(${rect?.width}px) - 40px)`
+            this.commentControlRef.value.style.display = 'block'
         }
 
-        console.log("onEndSelection: " + text);
+        console.log("onEndSelection: " + text, this.commentControlRef.value)
     }
 
     private sectionTypeMarker() {
@@ -57,6 +72,7 @@ import {Marked} from "@ts-stack/markdown";
     css`
         .section {
             padding: 10px;
+            position: relative;
         }
         .section-content p {
             margin: 0;
@@ -72,26 +88,32 @@ import {Marked} from "@ts-stack/markdown";
             font-weight: bold;
             margin-bottom: 2px;
         }
-        .addCommentControl {
-            background-image: url("data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width='40px' height='40px'><foreignObject width='40px' height='40px'><div xmlns='http://www.w3.org/1999/xhtml' style='width:40px;height:40px;line-height:40px;text-align:center;color:transparent;text-shadow: 0 0 yellow, 2px 4px black, -1px -1px black;font-size:35px;'>💬</div></foreignObject></svg>");
+        .add-comment-bubble {
+            border: 1px solid #eee;
+            box-shadow: 0 3px 3px rgba(0,0,0,0.05);
+            border-radius: 2.5rem;
+            width: 2.75rem;
+            text-align: center;
+            z-index: 101;
+            transition: opacity .25s ease-in-out;
+            transform: translate(-50%,-50%);
+            display: none;
             cursor: pointer;
             position: absolute;
-            width: 40px;
-            height: 40px;
+            background-color: white;
+            color: cadetblue;
+            padding: 0.15rem;
         }
-        .addCommentControl::before{
-            background-color: black;
-            color: white;
-            content: " add comment ";
-            display: block;
-            font-weight: bold;
-            margin-left: 37px;
-            margin-top: 6px;
-            padding: 2px;
-            width: max-content;
-            height: 20px;
-        }        
-    `    
+        .add-comment-button {
+            margin-left: -0.1rem;
+        }
+    `
+
+    static get scopedElements() {
+        return {
+          "mwc-icon-button": IconButton
+        }
+    }    
 }
 
 export function sectionValue(section?: Section, index?: number) {
