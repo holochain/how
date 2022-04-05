@@ -154,7 +154,8 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         content_type: e.detail.content_type, 
         section_type:e.detail.section_type,
         source: SourceManual,
-        content: ""
+        content: "",
+        state: {editable: "true"}
       }
       this.sections.push(section)
       this.requestUpdate();

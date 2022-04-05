@@ -24,6 +24,7 @@ pub struct Section {
     pub content_type: String,
     pub source: String,
     pub content: String,
+    pub state: BTreeMap<String, String>,
 }
 impl Section {
     pub fn new(name: &str, section_type: &str, content_type: &str, source: &str, content: &str) -> Self {
@@ -33,6 +34,7 @@ impl Section {
             content_type: content_type.into(),
             source: source.into(),
             content: content.into(),
+            state: BTreeMap::new(),
         }
     }
 }

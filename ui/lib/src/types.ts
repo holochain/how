@@ -49,7 +49,8 @@ export interface Section {
   section_type: SectionType,
   content_type: string,
   source: string,
-  content: string,    
+  content: string,
+  state: Dictionary<string>,
 }
 
 export enum SysState {
@@ -97,6 +98,7 @@ export class Document {
     for (const section of sections) {
       this.sectionsMap[section.name] = sectionsCount
       sectionsCount += 1
+      section.state["editible"] = "true";
     }
   }
 
