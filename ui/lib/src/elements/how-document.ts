@@ -61,12 +61,15 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         if (!this.currentDocumentEh) {
           return;
         }
+        const define = "define"
+        const refine = "refine"
+        const align = "align"
         const doc = this._documents.value[this.currentDocumentEh]
         const graph  = `graph LR;
-        define --> refine --> align --> _alive;
-        define --> _defunct;
-        refine --> _defunct;
-        align --> _defunct;        
+        ${define} --> ${refine} --> ${align} --> _alive;
+        ${define} --> _defunct;
+        ${refine} --> _defunct;
+        ${align} --> _defunct;        
         _alive --> _defunct;
 
         style ${doc.state}  fill:#f9f,stroke:#333,stroke-width:4px`
