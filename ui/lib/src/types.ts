@@ -67,6 +67,10 @@ export class Comment {
   isResolved: boolean = false
   timestamp: Date = new Date()
   profileImg: string = ''
+
+  constructor(init?: Partial<Comment>) {
+    Object.assign(this, init);
+  }
 }
 
 export class Document {

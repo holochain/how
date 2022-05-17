@@ -1,26 +1,29 @@
-import {css, html, LitElement} from "lit";
-import {ref, createRef} from 'lit/directives/ref.js';
-import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import {property} from "lit/decorators.js";
-import {Section, SectionType} from "../types";
-import {unsafeHTML} from "lit/directives/unsafe-html.js";
-import {Marked} from "@ts-stack/markdown";
-import {IconButton} from "@scoped-elements/material-web";
+import { css, html, LitElement } from "lit";
+import { ref, createRef } from 'lit/directives/ref.js';
+import { ScopedElementsMixin } from "@open-wc/scoped-elements";
+import { property } from "lit/decorators.js";
+import { Comment, Section, SectionType } from "../types";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { Marked } from "@ts-stack/markdown";
+import { IconButton } from "@scoped-elements/material-web";
+import { HowStore } from "../how.store";
 
 /**
  * @element how-document-section
  */
- export class HowDocumentSection extends ScopedElementsMixin(LitElement) {
+export class HowDocumentSection extends ScopedElementsMixin(LitElement) {
     @property()
+    store?: HowStore;
     section?: Section;
     index?: number;
+    selectedText?: string;
 
     constructor() {
-      super();
+        super();
     }
 
-    commentControlRef = <any> createRef<HTMLDivElement>();
-    sectionRef = <any> createRef<HTMLDivElement>();
+    commentControlRef = <any>createRef<HTMLDivElement>();
+    sectionRef = <any>createRef<HTMLDivElement>();
 
     render() {
         return html`
@@ -36,8 +39,26 @@ import {IconButton} from "@scoped-elements/material-web";
         </div>`
     }
 
-    private onAddComment() {
-        this.commentControlRef.value.style.display = 'none'
+    private async onAddComment() {
+        this.commentControlRef.value.style.display = 'none';
+        if (!this.section || !this.store) {
+            return;
+        }
+
+        const comment = new Comment({
+            section: this.section.name,
+            authorHash: 'fry',
+            profileImg: './assets/fry.jpg',
+            commentText: '',
+            documentHash: '',
+            start_index: 0,
+            end_index: 0,
+            isResolved: false,
+            timestamp: new Date()
+        })
+
+        await this.store.addDocumentComment('', comment);
+
         console.log("onAddComment");
     }
 
@@ -47,10 +68,12 @@ import {IconButton} from "@scoped-elements/material-web";
         // const control = document.importNode((<any> this.commentControlRef.value).content, true)?.childNodes[0]
         const selection = document.getSelection()
         const text = selection?.toString()
+
         if (text) {
+            this.selectedText = text;
             let rect2 = selection?.getRangeAt(0).getBoundingClientRect()
             let rect = this.sectionRef.value.getBoundingClientRect()
-            console.log("selection rect: " + this.sectionRef.value.id, rect, rect2 )
+            console.log("selection rect: " + this.sectionRef.value.id, rect, rect2)
             const commentTop = (rect2 ? rect2.top : 0) - rect?.top
             this.commentControlRef.value.style.top = `calc(calc(${commentTop}px) - 40px)`
             this.commentControlRef.value.style.left = `calc(calc(${rect?.width}px) - 40px)`
@@ -62,14 +85,14 @@ import {IconButton} from "@scoped-elements/material-web";
 
     private sectionTypeMarker() {
         switch (this.section?.section_type) {
-          case SectionType.Content: return ""; break;
-          case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
-          case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`
+            case SectionType.Content: return ""; break;
+            case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
+            case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`
         }
     }
 
     static styles =
-    css`
+        css`
         .section {
             padding: 10px;
             position: relative;
@@ -111,16 +134,16 @@ import {IconButton} from "@scoped-elements/material-web";
 
     static get scopedElements() {
         return {
-          "mwc-icon-button": IconButton
+            "mwc-icon-button": IconButton
         }
-    }    
+    }
 }
 
 export function sectionValue(section?: Section, index?: number) {
     switch (section?.content_type) {
         case "text/markdown":
-        return html`<div class="section-content markdown" id="section-${index}">${unsafeHTML(Marked.parse(section.content))}</div>`
-        default: 
-        return html`<div class="section-content" id="section-${index}"><p>${section?.content}</p></div>`
+            return html`<div class="section-content markdown" id="section-${index}">${unsafeHTML(Marked.parse(section.content))}</div>`
+        default:
+            return html`<div class="section-content" id="section-${index}"><p>${section?.content}</p></div>`
     }
 }    
