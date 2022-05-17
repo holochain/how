@@ -4,7 +4,7 @@ import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 import { createContext, Context } from "@holochain-open-dev/context";
 import { HowStore } from "./how.store";
 
-export const howContext : Context<HowStore> = createContext('how/service');
+export const howContext: Context<HowStore> = createContext('how/service');
 
 export type Dictionary<T> = { [key: string]: T };
 
@@ -49,8 +49,7 @@ export interface Section {
   section_type: SectionType,
   content_type: string,
   source: string,
-  content: string,
-  state: Dictionary<string>,
+  content: string
 }
 
 export enum SysState {
@@ -76,19 +75,19 @@ export class Document {
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
   state: string = "define"
-  machine: Dictionary<Array<string>> =  {
-    define:["refine", SysState.Defunct],
+  machine: Dictionary<Array<string>> = {
+    define: ["refine", SysState.Defunct],
     refine: ["align", SysState.Defunct],
     align: [SysState.Alive, SysState.Defunct],
     [SysState.Defunct]: [],
     [SysState.Alive]: [SysState.Defunct]
-   }
-   protected sectionsMap: Dictionary<number> = {}
+  }
+  protected sectionsMap: Dictionary<number> = {}
 
-  constructor(init?: Partial<Document> ) {
+  constructor(init?: Partial<Document>) {
     Object.assign(this, init);
     if (init && init.content) {
-      init.content.forEach((section, index) =>this.sectionsMap[section.name] = index)
+      init.content.forEach((section, index) => this.sectionsMap[section.name] = index)
     }
   }
 
@@ -98,15 +97,14 @@ export class Document {
     for (const section of sections) {
       this.sectionsMap[section.name] = sectionsCount
       sectionsCount += 1
-      section.state["editible"] = "true";
     }
   }
 
-  public getSection(sectionName: string) : Section {
+  public getSection(sectionName: string): Section {
     return this.content[this.sectionsMap[sectionName]]
   }
 
-  public setSection(sectionName: string, content: string ) {
+  public setSection(sectionName: string, content: string) {
     const section = this.getSection(sectionName)
     if (section != null) {
       console.log("SETTING", sectionName, content)
@@ -114,14 +112,14 @@ export class Document {
     }
   }
 
-  public isAlive() : boolean {
+  public isAlive(): boolean {
     return this.state == SysState.Alive
   }
-  public nextStates() : Array<string> {
+  public nextStates(): Array<string> {
     return Object.values(this.machine[this.state])
   }
 
-  public getSectionsByType(section_type: SectionType) : Array<Section> {
+  public getSectionsByType(section_type: SectionType): Array<Section> {
     return this.content.filter((section) => section.section_type == section_type)
   }
 }
@@ -146,28 +144,28 @@ export interface UpdateDocumentInput {
 
 export type Signal =
   | {
-    alignmentHash: EntryHashB64, message: {type: "NewAlignment", content:  Alignment}
+    alignmentHash: EntryHashB64, message: { type: "NewAlignment", content: Alignment }
   }
-  
+
 export type Content = {
   name: string,
   alignments: Array<EntryHashB64>,
   documents: Array<EntryHashB64>
 }
 export type RustNode = {
-    idx: number,
-    val: Content,
-    parent: null | number,
-    children: Array<number>
-  }
+  idx: number,
+  val: Content,
+  parent: null | number,
+  children: Array<number>
+}
 export type RustTree = {
   tree: Array<RustNode>
 }
 
 export type Node = {
-    val: Content,
-    id: string,
-    children: Array<Node>
+  val: Content,
+  id: string,
+  children: Array<Node>
 }
 
 export type Process = {

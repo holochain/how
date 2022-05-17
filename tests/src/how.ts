@@ -22,7 +22,7 @@ export default async (orchestrator) => {
       short_name: "API",
       path_abbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
-      processes: [["soc_proto.procs.define","petition"]], // state-machine definition
+      processes: [["soc_proto.procs.define", "petition"]], // state-machine definition
       history: {},
       meta: {}
     };
@@ -32,16 +32,16 @@ export default async (orchestrator) => {
       short_name: "Holochain Community Standards",
       path_abbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
-      processes: [["soc_proto.procs.define","petition"]], // state-machine definition
+      processes: [["soc_proto.procs.define", "petition"]], // state-machine definition
       history: {},
       meta: {}
     };
 
-    const rootDoc = {  
+    const rootDoc = {
       document_type: "_document",
       content: [
-        {name: "title", content: "ROOT NODE DOC", source: "", section_type:"", content_type:"text/plain", state: {}},
-        {name: "summary", content: "{}", source: "", section_type:"", content_type:"text/plain", state: {}}
+        { name: "title", content: "ROOT NODE DOC", source: "", section_type: "", content_type: "text/plain" },
+        { name: "summary", content: "{}", source: "", section_type: "", content_type: "text/plain" }
       ],
       state: "define",
       editors: [],
@@ -53,40 +53,40 @@ export default async (orchestrator) => {
       document: rootDoc
     }
     a_and_b_conductor.setSignalHandler((signal) => {
-      console.log("Received Signal:",signal)
-//      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: alignment1})
+      console.log("Received Signal:", signal)
+      //      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: alignment1})
     })
 
     // install your happs into the conductors and destructuring the returned happ data using the same
     // array structure as you created in your installation array.
     let [alice_how_happ/*, bobbo_how_happ*/] = await installAgents(a_and_b_conductor, ["alice"/*, 'bobbo'*/])
     const [alice_how] = alice_how_happ.cells
-//    const [bobbo_how] = bobbo_how_happ.cells
+    //    const [bobbo_how] = bobbo_how_happ.cells
 
-    await alice_how.call('how', 'initialize', {alignments: [root], documents:[documentSpec]} );
+    await alice_how.call('how', 'initialize', { alignments: [root], documents: [documentSpec] });
 
-    const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1 );
+    const alignment1_hash = await alice_how.call('how', 'create_alignment', alignment1);
     t.ok(alignment1_hash)
     console.log("alignment1_hash", alignment1_hash);
 
-    const alignments = await alice_how.call('how', 'get_alignments', null );
-    t.deepEqual(alignments, [{hash: alignments[0].hash, content: root}, {hash: alignment1_hash, content: alignment1}]);
+    const alignments = await alice_how.call('how', 'get_alignments', null);
+    t.deepEqual(alignments, [{ hash: alignments[0].hash, content: root }, { hash: alignment1_hash, content: alignment1 }]);
 
-    let tree = await alice_how.call('how', 'get_tree', null );
+    let tree = await alice_how.call('how', 'get_tree', null);
     console.log("Rust tree", tree);
-    let jsTree = buildTree(tree.tree,tree.tree[0])
+    let jsTree = buildTree(tree.tree, tree.tree[0])
     console.log("JS tree", jsTree)
 
     const rootDocHash = jsTree.val.documents[0]
     const newData = "Update Root node content"
     rootDoc.content[0].content = newData
-    const newDocHash = await alice_how.call('how', 'update_document', {hash: rootDocHash, document: rootDoc, path: ""} );
+    const newDocHash = await alice_how.call('how', 'update_document', { hash: rootDocHash, document: rootDoc, path: "" });
 
-    tree = await alice_how.call('how', 'get_tree', null );
-    jsTree = buildTree(tree.tree,tree.tree[0])
+    tree = await alice_how.call('how', 'get_tree', null);
+    jsTree = buildTree(tree.tree, tree.tree[0])
     t.equal(newDocHash, jsTree.val.documents[1])
 
-    let docs = await alice_how.call('how', 'get_documents', "" );
+    let docs = await alice_how.call('how', 'get_documents', "");
     console.log("DOCS:", docs)
 
   })
@@ -104,7 +104,7 @@ type Node = {
 }
 
 function buildTree(tree: Array<RustNode>, node: RustNode): Node {
-  let t: Node = {val: node.val, children: []}
+  let t: Node = { val: node.val, children: [] }
   for (const n of node.children) {
     t.children.push(buildTree(tree, tree[n]))
   }
