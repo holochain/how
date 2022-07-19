@@ -25,6 +25,6 @@ pub type HowResult<T> = Result<T, HowError>;
 
 impl From<HowError> for WasmError {
     fn from(c: HowError) -> Self {
-        WasmError::Guest(c.to_string())
+        wasm_error!(WasmErrorInner::Guest(c.to_string()))
     }
 }

@@ -1,10 +1,18 @@
 ---
 manifest_version: "1"
 name: how
-uuid: 00000000-0000-0000-0000-000000000000
-properties: ~
-zomes:
-  - name: how
-    bundled: ../../../target/wasm32-unknown-unknown/release/how.wasm
-  - name: profiles
-    bundled: ../../../target/wasm32-unknown-unknown/release/profiles.wasm
+integrity:
+  uid: 00000000-0000-0000-0000-000000000000
+  properties: ~
+  origin_time: 2022-02-11T23:05:19.470323Z
+  zomes:
+    - name: how_core
+      bundled: ../../../target/wasm32-unknown-unknown/release/how_core.wasm
+  # - name: profiles
+  #   bundled: ../../../target/wasm32-unknown-unknown/release/profiles.wasm
+coordinator:
+  zomes:
+    - name: how
+      bundled: ../../../target/wasm32-unknown-unknown/release/how.wasm
+      dependencies:
+        - name: how_core

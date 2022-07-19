@@ -2,8 +2,8 @@ use crate::error::*;
 use crate::tree::*;
 pub use hdk::prelude::Path;
 pub use hdk::prelude::*;
-use holo_hash::{AgentPubKeyB64, EntryHashB64};
-use std::collections::BTreeMap;
+use holo_hash::{EntryHashB64};
+use how_core::{Document, EntryTypes, LinkTypes};
 
 pub const DOC_DOCUMENT: &str = "_document";
 pub const DOC_COMMENT: &str = "_comment";
@@ -18,37 +18,6 @@ pub const SECTION_SRC_MANUAL: &str = "m";
 
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Section {
-    pub name: String,
-    pub section_type: String,
-    pub content_type: String,
-    pub source: String,
-    pub content: String,
-}
-impl Section {
-    pub fn new(name: &str, section_type: &str, content_type: &str, source: &str, content: &str) -> Self {
-        Section {
-            name: name.into(),
-            section_type: section_type.into(),
-            content_type: content_type.into(),
-            source: source.into(),
-            content: content.into(),
-        }
-    }
-}
-
-/// Document entry definition
-#[hdk_entry(id = "document")]
-#[derive(Clone)]
-pub struct Document {
-    pub document_type: String, // DOC_TEMPLATE, DOC_DOCUMENT, DOC_COMMENT, ...
-    pub state: String,         // name of current process
-    pub editors: Vec<AgentPubKeyB64>, // people who can change this document, if empty anyone can
-    pub content: Vec<Section>, // semantically identified content components
-    pub meta: BTreeMap<String, String>, // semantically identified meta data including state
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct DocumentInput {
     pub path: String,
     pub document: Document,
@@ -56,17 +25,17 @@ pub struct DocumentInput {
 
 fn link_document(hash: EntryHash, path: String) -> ExternResult<()> {
     let path = tree_path(path);
-    if !path.exists()? {
-        return Err(HowError::MissingPath.into());
-    }
+//    if !path.exists()? {
+//        return Err(HowError::MissingPath.into());
+//    }
     let anchor_hash = path.path_entry_hash()?;
-    create_link(anchor_hash, hash, LinkTag::new("document"))?;
+    create_link(anchor_hash, hash, LinkTypes::Document, ())?;
     Ok(())
 }
 
 #[hdk_extern]
 pub fn create_document(input: DocumentInput) -> ExternResult<EntryHashB64> {
-    let _header_hash = create_entry(&input.document)?;
+    let _action_hash = create_entry(EntryTypes::Document(input.document.clone()))?;
     let hash = hash_entry(&input.document)?;
     link_document(hash.clone(), input.path)?;
     Ok(hash.into())
@@ -87,7 +56,7 @@ pub fn get_documents(input: String) -> ExternResult<Vec<DocumentOutput>> {
 }
 
 fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
-    let links = get_links(base, Some(LinkTag::new("document")))?;
+    let links = get_links(base, LinkTypes::Document, None)?;
     let get_input = links
         .into_iter()
         .map(|link| GetInput::new(link.target.into(), GetOptions::default()))
@@ -123,9 +92,9 @@ pub struct UpdateDocumentInput {
 }
 #[hdk_extern]
 pub fn update_document(input: UpdateDocumentInput) -> ExternResult<EntryHashB64> {
-    let element = get(EntryHash::from(input.hash), GetOptions::default())?
-        .ok_or(WasmError::Guest(String::from("Document not found")))?;
-    let _header_hash = update_entry(element.header_address().clone().into(), &input.document)?;
+    let record = get(EntryHash::from(input.hash), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
+    let _action_hash = update_entry(record.action_address().clone().into(), &input.document)?;
     let hash = hash_entry(&input.document)?;
     // TODO validate that old doc had the same path, or get the path some other way?
     link_document(hash.clone(), input.path)?;

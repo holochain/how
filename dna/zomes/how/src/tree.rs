@@ -1,7 +1,8 @@
 pub use hdk::prelude::*;
+pub use hdk::hash_path::path::TypedPath;
 use holo_hash::EntryHashB64;
+use how_core::{TREE_ROOT, LinkTypes};
 
-pub const TREE_ROOT:&str = "T";
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
 pub struct Content {
@@ -10,23 +11,25 @@ pub struct Content {
     documents: Vec<EntryHashB64>,
 }
 
-fn get_entry_hashes(path: &Path, tag: LinkTag) -> ExternResult<Vec<EntryHashB64>> {
-    let links = get_links(path.path_entry_hash()?, Some(tag))?;
-    let entry_hashes = links.into_iter().map(|l| l.target.as_hash().clone().into()).collect();
+fn get_entry_hashes(path: &Path, link_type: LinkTypes) -> ExternResult<Vec<EntryHashB64>> {
+    let links = get_links(path.path_entry_hash()?, link_type, None)?;
+    let entry_hashes = links.into_iter().map(|l| {
+        let e : EntryHash = l.target.as_hash().clone().into();
+        e.into()
+    }).collect();
     Ok(entry_hashes)
 }
 
 fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult<()>{
-
-    for path in path.children_paths()? {
+    for path in path.into_typed(ScopedLinkType::try_from(LinkTypes::Tree)?).children_paths()? {
         let v = path.as_ref();
         let val = Content {
-            name: String::try_from(&v[v.len()-1])?,
-            alignments: get_entry_hashes(&path, LinkTag::new("alignment"))?,
-            documents: get_entry_hashes(&path, LinkTag::new("document"))?,
+            name: String::try_from(&v[v.len()-1]).map_err(|e| wasm_error!(e.into()))?,
+            alignments: get_entry_hashes(&path, LinkTypes::Alignment)?,
+            documents: get_entry_hashes(&path, LinkTypes::Document)?,
         };
         let idx = tree.insert(node, val);
-        build_tree(tree, idx, path)?;
+        build_tree(tree, idx, path.path)?;
     }
     Ok(())
 }
@@ -43,8 +46,8 @@ pub fn get_tree(_input: ()) -> ExternResult<Tree<Content>> {
     let root_path = Path::from(TREE_ROOT);
     let val = Content {
         name: String::from(""),
-        alignments: get_entry_hashes(&root_path, LinkTag::new("alignment"))?,
-        documents: get_entry_hashes(&root_path, LinkTag::new("document"))?,
+        alignments: get_entry_hashes(&root_path, LinkTypes::Alignment)?,
+        documents: get_entry_hashes(&root_path, LinkTypes::Document)?,
     };
     let mut tree = Tree::new(val);
     build_tree(&mut tree, 0, root_path)?;
