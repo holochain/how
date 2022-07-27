@@ -2,7 +2,7 @@ import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
 import {StoreSubscriber} from "lit-svelte-stores";
 import {sharedStyles} from "../sharedStyles";
-import {contextProvided} from "@holochain-open-dev/context";
+import { contextProvided } from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Document, howContext, Dictionary, Section, DocType, DocumentOutput, SectionType, SourceManual} from "../types";
@@ -22,7 +22,7 @@ import { HowNewSectionDialog } from "./how-new-section.dialog";
  */
 export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() _editors: Dictionary<string> = {};
-    @property() document_type: DocType = DocType.Document
+    @property() documentType: DocType = DocType.Document
     @property() path = ""
     @property() isNew = false
     @property() editable = false
@@ -54,15 +54,15 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     /**
      *
      */
-    async new(path: string, document_type: DocType) {
+    async new(path: string, documentType: DocType) {
       this.isNew = true
       this.editable = true
       this.path = path
-      this.document_type = document_type
+      this.documentType = documentType
       this.sections = await this._store.getSectionsFromHierarcy(path, 0, SectionType.Requirement)
 
       // also  get the sections from the process templates
-      const docs = this._documentPaths.value[document_type]
+      const docs = this._documentPaths.value[documentType]
       for (const doc of docs) {
         const templates = doc.content.getSectionsByType(SectionType.Process)
         this.sections = this.sections.concat(templates)
@@ -78,7 +78,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       this.path = path
       this.hash = hash
       const document = this._documents.value[hash]
-      this.document_type = document.document_type
+      this.documentType = document.documentType
       this.sections = document.content
       if (document.meta["sources"]) {
         this.sources = JSON.parse(document.meta["sources"])
@@ -98,7 +98,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         })
         
         const document: Document = new Document ({
-          document_type: this.document_type,
+          documentType: this.documentType,
           editors: Object.keys(this._editors).map((agent)=> agent),  // people who can change this document
           content: this.sections, 
         });
@@ -134,7 +134,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     }
     private sectionWidget(section: Section, index: number) {
       const id = `section-${index}`
-      switch (section.content_type) {
+      switch (section.contentType) {
         case "text/plain":
           return html`
             <mwc-textfield dialogInitialFocus type="text"
@@ -151,8 +151,8 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
 
       const section: Section = {
         name: e.detail.name, 
-        content_type: e.detail.content_type, 
-        section_type:e.detail.section_type,
+        contentType: e.detail.contentType, 
+        sectionType:e.detail.sectionType,
         source: SourceManual,
         content: ""
       }
@@ -172,7 +172,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
             @opened=${this.handleDialogOpened}
           >
             <div>Path: ${this.path}</div>
-            <div>Type: ${this.document_type}</div>
+            <div>Type: ${this.documentType}</div>
             ${this.editable
               ? html`
                   ${this.sections.map((section, index) => {

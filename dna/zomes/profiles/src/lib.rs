@@ -1,1 +1,1 @@
-extern crate hc_zome_profiles;
+extern crate profiles;

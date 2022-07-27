@@ -1,6 +1,7 @@
 import { CellClient } from '@holochain-open-dev/cell-client';
-import { serializeHash, EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
+import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
 import { Alignment, AlignmentOutput, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput} from './types';
+import { serializeHash } from '@holochain-open-dev/utils';
 
 export class HowService {
   constructor(
@@ -9,7 +10,7 @@ export class HowService {
   ) {}
 
   get myAgentPubKey() : AgentPubKeyB64 {
-    return serializeHash(this.cellClient.cellId[1]);
+    return serializeHash(this.cellClient.cell.cell_id[1]);
   }
 
   async initialize(input: Initialization): Promise<EntryHashB64> {

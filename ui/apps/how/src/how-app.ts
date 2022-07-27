@@ -1,4 +1,4 @@
-import { ContextProvider } from "@holochain-open-dev/context";
+import { ContextProvider } from "@lit-labs/context";
 import { state } from "lit/decorators.js";
 import {
   HowController,
@@ -10,8 +10,10 @@ import {
   ProfilePrompt,
   ProfilesStore,
   profilesStoreContext,
+  ProfilesService,
 } from "@holochain-open-dev/profiles";
-import { HolochainClient } from "@holochain-open-dev/cell-client";
+import { HolochainClient, CellClient } from "@holochain-open-dev/cell-client";
+import { AppWebsocket } from "@holochain/client";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html } from "lit";
 
@@ -20,24 +22,32 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
   loaded = false;
 
   async firstUpdated() {
-    const client = await HolochainClient.connect(`ws://localhost:${process.env.HC_PORT}`, "how");
-    console.log("FISH1", client)
-
-    const providerClient = client.forCell(
-      client.cellDataByRoleId('how')!
+    const appWebsocket = await AppWebsocket.connect(
+      `ws://localhost:${process.env.HC_PORT}`
     );
-      console.log("FISH", providerClient)
-    const store = new ProfilesStore(providerClient, {avatarMode: "avatar"})
+
+    const client = new HolochainClient(appWebsocket);
+    const appInfo = await appWebsocket.appInfo({
+      installed_app_id: "how",
+    });
+
+    const cell = appInfo.cell_data[0];
+    const howClient = new CellClient(client, cell);
+
+    const store = new ProfilesStore(new ProfilesService(howClient), {
+      avatarMode: "avatar-required",
+    })
 
     store.fetchAllProfiles()
 
+    new ContextProvider(this, profilesStoreContext, store);
+
     new ContextProvider(
       this,
-      profilesStoreContext,
-      store
+      howContext,
+      new HowStore(howClient, store)
     );
 
-    new ContextProvider(this, howContext, new HowStore(providerClient, store));
 
     this.loaded = true;
   }

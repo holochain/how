@@ -40,10 +40,7 @@ export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
   }
 
   firstUpdated() {
-    console.log("thiasdf", this.takenNames)
     this._nameField.validityTransform = (newValue: string) => {
-        console.log("thiasdf", this.takenNames)
-
       this.requestUpdate();
       if (this.takenNames.includes(this._nameField.value)) {
         this._nameField.setCustomValidity(`Name already exists`);
@@ -66,7 +63,7 @@ export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
     if (!isValid) {
         return
     }
-    this.dispatchEvent(new CustomEvent('add-section', { detail: {name: this._nameField.value, content_type: this._contentTypeSelect.value, section_type: this._sectionTypeSelect.value}, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('add-section', { detail: {name: this._nameField.value, contentType: this._contentTypeSelect.value, sectionType: this._sectionTypeSelect.value}, bubbles: true, composed: true }));
     const dialog = this.shadowRoot!.getElementById("new-section-dialog") as Dialog;
     dialog.close()
 

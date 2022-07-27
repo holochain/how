@@ -1,16 +1,18 @@
 import {css, html, LitElement} from "lit";
 import {property, query} from "lit/decorators.js";
 
-import {contextProvided} from "@holochain-open-dev/context";
+import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
+import { Unsubscriber, Readable, get } from "svelte/store";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
+import { deserializeHash } from "@holochain-open-dev/utils";
 import {Alignment, DocType, howContext} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles";
+import {ProfilesStore, profilesStoreContext, Profile} from "@holochain-open-dev/profiles";
 import {
   Button,
   Dialog,
@@ -34,8 +36,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   @contextProvided({ context: profilesStoreContext })
   _profiles!: ProfilesStore;
 
-  _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
-  _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
+  _myProfile!: Readable<Profile | undefined> ;
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
@@ -44,7 +45,8 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _documentDialogElem!: HowDocumentDialog;
 
   get myNickName(): string {
-    return this._myProfile.value.nickname;
+    const p = get(this._myProfile)
+    return p ? p.nickname : "";
   }
 
   handleNodelink(path: string) {
@@ -62,11 +64,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       return ""
     }
     const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
-    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
+    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.pathAbbreviation}` : alignment.pathAbbreviation
   }
 
-  addDoc(document_type: DocType ) {
-    this._documentDialogElem.new(this.getPath(), document_type);
+  addDoc(documentType: DocType ) {
+    this._documentDialogElem.new(this.getPath(), documentType);
   }
 
   openDoc(documentEh: EntryHashB64, editable: boolean ) {
@@ -91,7 +93,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       const title = doc.getSection("title")
       return html`
       <div class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
-        <div class="document-title">${title ? this.renderType(title.content_type,title.content):docOutput.hash}</div>
+        <div class="document-title">${title ? this.renderType(title.contentType,title.content):docOutput.hash}</div>
     </div>`
     }) : ""
 
@@ -107,9 +109,9 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return html`
       <div class="alignment row">
         <div class="column">
-         <p> <b>${alignment.short_name}</b> (${alignment.path_abbreviation})</p>
+         <p> <b>${alignment.shortName}</b> (${alignment.pathAbbreviation})</p>
          <p> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</p>
-         <p> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._knownProfiles.value[agent].nickname}</span>`)}</p>
+         <p> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._store.getProfileSync(agent)!.nickname}</span>`)}</p>
         </div>
        <div class="column">${processes}</div>
        <div class="column"> Documents:

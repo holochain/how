@@ -2,7 +2,7 @@ import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
-import {contextProvided} from "@holochain-open-dev/context";
+import { contextProvided } from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Alignment, howContext, Dictionary, Node} from "../types";
@@ -131,8 +131,8 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
 
     const alignment: Alignment = {
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
-      path_abbreviation: this._nameField.value, // max 10 char
-      short_name: this._titleField.value,
+      pathAbbreviation: this._nameField.value, // max 10 char
+      shortName: this._titleField.value,
       stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
       processes,
       history: {},
@@ -180,7 +180,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     if (!this._parent) return ``
     let path = ""
     if (this._parent.parents.length > 0) path +=  `${this._parent?.parents[0]}.`
-    path += this._parent?.path_abbreviation
+    path += this._parent?.pathAbbreviation
     return path
   }
 
