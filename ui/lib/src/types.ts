@@ -1,10 +1,10 @@
 // TODO: add globally available interfaces for your elements
 
 import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
-import { createContext, Context } from "@holochain-open-dev/context";
+import { createContext } from "@lit-labs/context";
 import { HowStore } from "./how.store";
 
-export const howContext : Context<HowStore> = createContext('how/service');
+export const howContext = createContext<HowStore>('how/service');
 
 export type Dictionary<T> = { [key: string]: T };
 
@@ -18,8 +18,8 @@ export type ProcessType = string
 
 export interface Alignment {
   parents: Array<string>,
-  path_abbreviation: string,
-  short_name: string,
+  pathAbbreviation: string,
+  shortName: string,
   stewards: Array<AgentPubKeyB64>,
   processes: Array<[ProcessType, ProcessName]>,
   history: Dictionary<EntryHashB64>,
@@ -46,8 +46,8 @@ export const SourceManual: string = "_manual"
 
 export interface Section {
   name: string,
-  section_type: SectionType,
-  content_type: string,
+  sectionType: SectionType,
+  contentType: string,
   source: string,
   content: string,    
 }
@@ -58,7 +58,7 @@ export enum SysState {
 }
 
 export class Document {
-  document_type: DocType = DocType.Document
+  documentType: DocType = DocType.Document
   editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
@@ -107,8 +107,8 @@ export class Document {
     return Object.values(this.machine[this.state])
   }
 
-  public getSectionsByType(section_type: SectionType) : Array<Section> {
-    return this.content.filter((section) => section.section_type == section_type)
+  public getSectionsByType(sectionType: SectionType) : Array<Section> {
+    return this.content.filter((section) => section.sectionType == sectionType)
   }
 }
 

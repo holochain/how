@@ -7,8 +7,8 @@ pub mod alignment;
 pub mod document;
 pub mod tree;
 pub mod signals;
-
-use crate::alignment::{Alignment, create_alignment};
+use how_core::Alignment;
+use crate::alignment::create_alignment;
 use crate::document::{DocumentInput, create_document};
 
 #[hdk_extern]
@@ -24,12 +24,6 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
     })?;
     Ok(InitCallbackResult::Pass)
 }
-
-entry_defs![
-    PathEntry::entry_def(),
-    alignment::Alignment::entry_def(),
-    document::Document::entry_def()
-];
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Initialization {

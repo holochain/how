@@ -1,9 +1,9 @@
 import { html, css, LitElement } from "lit";
 import { state, property, query } from "lit/decorators.js";
 
-import { contextProvided } from "@holochain-open-dev/context";
+import { contextProvided } from "@lit-labs/context";
 import { StoreSubscriber } from "lit-svelte-stores";
-import { Unsubscriber } from "svelte/store";
+import { Unsubscriber, Readable, get } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
 import {howContext, Alignment, Dictionary, Initialization, DocumentOutput} from "../types";
@@ -49,8 +49,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   @contextProvided({ context: profilesStoreContext })
   _profiles!: ProfilesStore;
 
-  _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
-  _knownProfiles = new StoreSubscriber(this, () => this._profiles.knownProfiles);
+  _myProfile!: Readable<Profile | undefined> ;
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
   _alignmentsPath = new StoreSubscriber(this, () => this._store.alignmentsPath);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
@@ -95,17 +94,12 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
 
   get myNickName(): string {
-    if (this._myProfile.value) {
-      return this._myProfile.value.nickname;
-    }
-    return ""
+    const p = get(this._myProfile)
+    return p ? p.nickname : "";
   }
-
   get myAvatar(): string {
-    if (this._myProfile.value) {
-      return this._myProfile.value.fields.avatar;
-    }
-    return ""
+    const p = get(this._myProfile)
+    return p ? p.fields.avatar : "";
   }
 
   getCurrentPath() : string {
@@ -113,17 +107,15 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       return ""
     }
     const alignment: Alignment = this._alignments.value[this._currentAlignmentEh];
-    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
+    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.pathAbbreviation}` : alignment.pathAbbreviation
   }
 
-  private subscribeProfile() {
-    let unsubscribe: Unsubscriber;
-    unsubscribe = this._profiles.myProfile.subscribe(async (profile) => {
-      if (profile) {
+  private async subscribeProfile() {
+
+    this._myProfile = await this._profiles.fetchMyProfile()
+      if (this._myProfile) {
         await this.checkInit();
       }
-      // unsubscribe()
-    });
   }
 
   async firstUpdated() {
@@ -167,7 +159,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
    // this._currentAlignmentEh = this._getFirst(alignments);
 
-    //console.log("   current alignment: ",  alignments[this._currentAlignmentEh].short_name, this._currentAlignmentEh);
+    //console.log("   current alignment: ",  alignments[this._currentAlignmentEh].shortName, this._currentAlignmentEh);
 
     // request the update so the drawer will be findable
     await this.requestUpdate();
@@ -317,7 +309,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <!-- TOP APP BAR -->
     <mwc-top-app-bar id="app-bar" dense style="position: relative;">
       <mwc-icon-button icon="menu" slot="navigationIcon"></mwc-icon-button>
-      <div slot="title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].short_name}` : ''}</div>
+      <div slot="title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].shortName}` : ''}</div>
       <mwc-icon-button slot="actionItems" icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
       <mwc-icon-button slot="actionItems" icon="autorenew" @click=${() => this.refresh()} ></mwc-icon-button>
       <mwc-icon-button id="menu-button" slot="actionItems" icon="more_vert" @click=${() => this.openTopMenu()}></mwc-icon-button>
@@ -350,7 +342,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       
     </div>
     <how-alignment-dialog id="alignment-dialog"
-                        .myProfile=${this._myProfile.value}
+                        .myProfile=${get(this._myProfile)}
                         @alignment-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
     </how-alignment-dialog>
   </div>

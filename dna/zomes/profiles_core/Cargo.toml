@@ -1,0 +1,12 @@
+[package]
+authors = ["eric@harris-braun.com"]
+edition = "2021"
+name = "profiles_core"
+version = "0.0.1-alpha1"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "profiles_core"
+
+[dependencies]
+profiles_core = {git = "https://github.com/holochain-open-dev/profiles", rev = "for-hdk-v0.0.142", package = "hc_zome_profiles_integrity"}

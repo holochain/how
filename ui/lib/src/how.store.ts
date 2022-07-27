@@ -1,4 +1,5 @@
-import { EntryHashB64, HeaderHashB64, AgentPubKeyB64, serializeHash } from '@holochain-open-dev/core-types';
+import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
+import { serializeHash, deserializeHash, HoloHashMap } from '@holochain-open-dev/utils';
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
@@ -18,6 +19,7 @@ import {
 } from './types';
 import {
   ProfilesStore,
+  Profile,
 } from "@holochain-open-dev/profiles";
 
 const areEqual = (first: Uint8Array, second: Uint8Array) =>
@@ -27,7 +29,8 @@ export class HowStore {
   /** Private */
   private service : HowService
   private profiles: ProfilesStore
-  
+  private knownProfiles: Readable<HoloHashMap<Profile>> | undefined
+
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});   // maps alignment hash to alignment
   private documentsStore: Writable<Dictionary<Document>> = writable({});
@@ -63,12 +66,12 @@ export class HowStore {
   profilesStore: ProfilesStore,
   zomeName = 'how'
   ) {
-    this.myAgentPubKey = serializeHash(cellClient.cellId[1]);
+    this.myAgentPubKey = serializeHash(cellClient.cell.cell_id[1]);
     this.profiles = profilesStore;
     this.service = new HowService(cellClient, zomeName);
 
     cellClient.addSignalHandler( signal => {
-      if (! areEqual(cellClient.cellId[0],signal.data.cellId[0]) || !areEqual(cellClient.cellId[1], signal.data.cellId[1])) {
+      if (! areEqual(cellClient.cell.cell_id[0],signal.data.cellId[0]) || !areEqual(cellClient.cell.cell_id[1], signal.data.cellId[1])) {
         return
       }
       console.log("SIGNAL",signal)
@@ -85,8 +88,8 @@ export class HowStore {
 
   // get all of the sections needed for a specific process by getting the template contents
   // for that proccess hierarchy
-  async getSectionsFromHierarcy(path: string, start: number, section_type: SectionType): Promise<Array<Section>> {
-    console.log(`looking for ${section_type} in ${path}`)
+  async getSectionsFromHierarcy(path: string, start: number, sectionType: SectionType): Promise<Array<Section>> {
+    console.log(`looking for ${sectionType} in ${path}`)
     path = `.${path}`
     let sections: Array<Section> = []
     let segments = path.split(".")
@@ -99,10 +102,10 @@ export class HowStore {
       const docs = get(this.documentPaths)[walk]
       if (docs) {
         for (const doc of docs) {
-          if (doc.content.document_type == DocType.Document) {
-            let newSections = doc.content.getSectionsByType(section_type)
+          if (doc.content.documentType == DocType.Document) {
+            let newSections = doc.content.getSectionsByType(sectionType)
             for (const section of newSections) {
-              section.section_type = SectionType.Content
+              section.sectionType = SectionType.Content
               section.source = walk
             }
             sections = sections.concat(newSections)
@@ -121,12 +124,19 @@ export class HowStore {
   }
 
   private others(): Array<AgentPubKeyB64> {
-    return Object.keys(get(this.profiles.knownProfiles)).filter((key)=> key != this.myAgentPubKey)
+    if (this.knownProfiles) {
+      const map : HoloHashMap<Profile> = get(this.knownProfiles)
+      const x: Array<AgentPubKeyB64>  = map.keys().map((key) => serializeHash(key))
+      return x.filter((key) => key != this.myAgentPubKey)
+    }
+    else {
+      return []
+    }
   }
 
   private updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment) {
     this.alignmentsPathStore.update(alignments => {
-      const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.path_abbreviation}` : alignment.path_abbreviation
+      const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.pathAbbreviation}` : alignment.pathAbbreviation
       alignments[path] = hash
       return alignments
     })
@@ -228,7 +238,7 @@ export class HowStore {
         console.log("docs", get(this.documentPathStore), docs, `soc_proto.process.${n.val.name}`)
 
         if (docs) {
-          const doc  = docs.find(doc=>doc.content.document_type == DocType.Document)
+          const doc  = docs.find(doc=>doc.content.documentType == DocType.Document)
           console.log("doc", doc)
           if (doc) {
             processes.push({path: `soc_proto.process.${n.val.name}`, name: n.val.name})
@@ -255,6 +265,19 @@ export class HowStore {
     this.profiles.fetchAllProfiles()
   }
 
+
+  async getProfile(agent: AgentPubKeyB64) : Promise<Profile|undefined> {
+    return get(await this.profiles.fetchAgentProfile(deserializeHash(agent)))  
+  }
+
+  getProfileSync(agent: AgentPubKeyB64) : Profile|undefined {
+    if (this.knownProfiles) {
+      const map : HoloHashMap<Profile> = get(this.knownProfiles)
+      return map.get(deserializeHash(agent))
+    } else {
+      return undefined
+    }
+  }
   async pullTree() : Promise<Node> {
     const rtree: Array<RustNode> = await this.service.getTree();
     const node: Node = this.buildTree(rtree, rtree[0])
@@ -269,15 +292,15 @@ export class HowStore {
     const alignment = this.alignment(algnmentEh)
     const proc = alignment.processes[0]
     const processPath = `${proc[0]}.${proc[1]}`
-    const doc = new Document({document_type: DocType.Document})
+    const doc = new Document({documentType: DocType.Document})
 
     doc.appendSections(await this.getSectionsFromHierarcy(alignment.parents[0], 0, SectionType.Requirement))
     await this.pullDocuments(processPath)
     doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
 
-    doc.setSection("title", alignment.short_name)
+    doc.setSection("title", alignment.shortName)
     console.log("ADDING DOC", doc)
-    const path = `${alignment.parents[0]}.${alignment.path_abbreviation}`
+    const path = `${alignment.parents[0]}.${alignment.pathAbbreviation}`
     await this.addDocument(path, doc)
   }
 

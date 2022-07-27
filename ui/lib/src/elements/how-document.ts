@@ -1,7 +1,7 @@
 import {css, html, LitElement} from "lit";
 import {property, query} from "lit/decorators.js";
 
-import {contextProvided} from "@holochain-open-dev/context";
+import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
@@ -50,7 +50,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
     }
 
     private sectionTypeMarker(section: Section) {
-      switch (section.section_type) {
+      switch (section.sectionType) {
         case SectionType.Content: return ""; break;
         case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
         case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`

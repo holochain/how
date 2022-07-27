@@ -1,7 +1,7 @@
 import {css, html, LitElement} from "lit";
 import {property, query} from "lit/decorators.js";
 
-import {contextProvided} from "@holochain-open-dev/context";
+import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
@@ -31,7 +31,6 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   @contextProvided({ context: profilesStoreContext })
   _profiles!: ProfilesStore;
 
-  _myProfile = new StoreSubscriber(this, () => this._profiles.myProfile);
   _tree = new StoreSubscriber(this, () => this._store.tree);
   _alignments = new StoreSubscriber(this, () => this._store.alignments);
  

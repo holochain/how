@@ -21,8 +21,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
     alignments: [
       {
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "", // max 10 char
-        short_name: "Holochain Standards", // max 25 char
+        pathAbbreviation: "", // max 10 char
+        shortName: "Holochain Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -30,8 +30,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "soc_proto", // max 10 char
-        short_name: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
+        pathAbbreviation: "soc_proto", // max 10 char
+        shortName: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -39,8 +39,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "hApps", // max 10 char
-        short_name: "hApp Standards", // max 25 char
+        pathAbbreviation: "hApps", // max 10 char
+        shortName: "hApp Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -48,8 +48,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["hApps"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "ERC721_interop", // max 10 char
-        short_name: "ERC721 Interoperability Statandard", // max 25 char
+        pathAbbreviation: "ERC721_interop", // max 10 char
+        shortName: "ERC721 Interoperability Statandard", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -57,8 +57,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "process", // max 10 char
-        short_name: "How Processes", // max 25 charAgent
+        pathAbbreviation: "process", // max 10 char
+        shortName: "How Processes", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -66,8 +66,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "define", // max 10 char
-        short_name: "Proposal procesess", // max 25 char
+        pathAbbreviation: "define", // max 10 char
+        shortName: "Proposal procesess", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -75,8 +75,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "declaration", // max 10 char
-        short_name: "Declaration", // max 25 char
+        pathAbbreviation: "declaration", // max 10 char
+        shortName: "Declaration", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -84,8 +84,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "petition", // max 10 char
-        short_name: "Petition", // max 25 char
+        pathAbbreviation: "petition", // max 10 char
+        shortName: "Petition", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -93,8 +93,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "refine", // max 10 char
-        short_name: "Refinement Processes", // max 25 char
+        pathAbbreviation: "refine", // max 10 char
+        shortName: "Refinement Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -102,8 +102,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process.refine"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "comment_period", // max 10 char
-        short_name: "Comment Period", // max 25 char
+        pathAbbreviation: "comment_period", // max 10 char
+        shortName: "Comment Period", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -111,8 +111,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "align", // max 10 char
-        short_name: "Alignment Processes", // max 25 char
+        pathAbbreviation: "align", // max 10 char
+        shortName: "Alignment Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -120,8 +120,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "vote", // max 10 char
-        short_name: "Voting", // max 25 char
+        pathAbbreviation: "vote", // max 10 char
+        shortName: "Voting", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -129,8 +129,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "consensus", // max 10 char
-        short_name: "Consensus", // max 25 char
+        pathAbbreviation: "consensus", // max 10 char
+        shortName: "Consensus", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -138,8 +138,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "sortition", // max 10 char
-        short_name: "Sortition", // max 25 char
+        pathAbbreviation: "sortition", // max 10 char
+        shortName: "Sortition", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -147,8 +147,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "hc_system", // max 10 char
-        short_name: "Holochain System", // max 25 char
+        pathAbbreviation: "hc_system", // max 10 char
+        shortName: "Holochain System", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -156,8 +156,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "conductor", // max 10 char
-        short_name: "Holochain Conductor", // max 25 char
+        pathAbbreviation: "conductor", // max 10 char
+        shortName: "Holochain Conductor", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -165,8 +165,8 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       },
       {
         parents: ["hc_system.conductor"], // full paths to parent nodes (remember it's a DAG)
-        path_abbreviation: "api", // max 10 char
-        short_name: "Holochain Conductor API", // max 25 char
+        pathAbbreviation: "api", // max 10 char
+        shortName: "Holochain Conductor API", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -177,20 +177,20 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       {
         path: "",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: SourceManual,
-              section_type: SectionType.Requirement,
-              content_type: "text/plain",
+              sectionType: SectionType.Requirement,
+              contentType: "text/plain",
               content: "{title of the standard being defined}",
             },
             {
               name: "summary",
               source: SourceManual,
-              section_type: SectionType.Requirement,
-              content_type: "text/markdown",
+              sectionType: SectionType.Requirement,
+              contentType: "text/markdown",
               content: "{a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.}",
             },
           ],
@@ -201,20 +201,20 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       {
         path: "hApps",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "hApp Standards",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "Standards for classes of holochain hApps",
             },
           ],
@@ -225,27 +225,27 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       {
         path: "hApps.ERC721_interop",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "ERC721 Interoperation Standard",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "An agent or agents in a Holochain DHT commit an entry who’s HRL will be used as the referenced in the minted NFT. The minted NFT’s id a hash of the minter plus Holochain entry hash. This id then is used on the Holochain side to create a baseless link to the NFT entry. The validation rules of that link ensure the trustability of any returned value for off-ethereum-chain reference by third parties. This creates a simple, fully-decentralized mechanism to provide a non-oracle based provenance of an NFT’s resource by preventing front-running.",
             },
             {
               name: "context",
               source: "soc_proto.process.define.declaration",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: `
 ### Story  (notes)
 
@@ -292,8 +292,8 @@ Furthermore we must:
             {
               name: "specification",
               source: "soc_proto.process.define.declaration",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: `
 ### Example
 
@@ -390,43 +390,43 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.define",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Definition Process Type",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "This process type is used to define some standard in the tree.   All definitions must have a context, as specification and a rationale.",
             },
             {
               name: "context",
               source: "soc_proto.process.define.declaration",
-              section_type: SectionType.Process,
-              content_type: "text/plain:long",
+              sectionType: SectionType.Process,
+              contentType: "text/plain:long",
               content:
                 "{Description of the context and use-case an why it requires a standard. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Holochain ecosystem? What use cases does this standard address?}",
             },
             {
               name: "specification",
               source: "soc_proto.process.define.declaration",
-              section_type: SectionType.Process,
-              content_type: "text/markdown",
+              sectionType: SectionType.Process,
+              contentType: "text/markdown",
               content:
                 "{**Description** of the syntax, semantics, state diagrams, and workflows of any new feature/protocol/process. The specification should be detailed enough to allow for multiple interoperable implementations.}",
             },
             {
               name: "rationale",
               source: "soc_proto.process.define.declaration",
-              section_type: SectionType.Process,
-              content_type: "text/plain:long",
+              sectionType: SectionType.Process,
+              contentType: "text/plain:long",
               content:
                 "{Description of what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion.}",
             },
@@ -439,20 +439,20 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.refine",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Refine Process Type",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "This process type is used to refine astandard in the tree.",
             },
           ],
@@ -463,20 +463,20 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.align",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Align Process Type",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "This process type is used to align on a standard after it has been defined and refined.",
             },
           ],
@@ -487,28 +487,28 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.define.petition",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Definition by petition",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "The petition definition variant allways includes a list of the pettioners",
             },
             {
               name: "pettioners",
               content: "{who is making the petition}",
               source: SourceManual,
-              section_type: SectionType.Process,
-              content_type: "text/plain",
+              sectionType: SectionType.Process,
+              contentType: "text/plain",
             },
           ],
           editors: [progenitor],
@@ -519,35 +519,35 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.define.declaration",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Definition by declaration",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "The declaration definition variant allways includes the zome signatures and an optional reference implementation",
             },
             {
               name: "zome signatures",
               source: SourceManual,
-              section_type: SectionType.Process,
-              content_type: "text/json",
+              sectionType: SectionType.Process,
+              contentType: "text/json",
               content:
                 "{Machine readable function signatures to expect of zomes that implement this standard.",
             },
             {
               name: "reference implementation",
               source: SourceManual,
-              section_type: SectionType.Process,
-              content_type: "text/rust",
+              sectionType: SectionType.Process,
+              contentType: "text/rust",
               content:
                 "{An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification.}",
             },
@@ -560,27 +560,27 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.refine.comment_period",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Comment Period",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "The Comment Period refinement variant specifies a timeframe for commenting",
             },
             { name: "period", 
               content: "{number of weeks in the comment period}", 
               source: SourceManual,
-              section_type: SectionType.Process,
-              content_type: "text/integer" 
+              sectionType: SectionType.Process,
+              contentType: "text/integer" 
             },
           ],
           editors: [progenitor],
@@ -591,26 +591,26 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.align.vote",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Votes",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "The Votes aligment variant specifies a voting group, and a count of those votes",
             },
-            { name: "voters", content: "{list of people who may vote}", section_type: SectionType.Process,
-            content_type: "text/plain", source: SourceManual },
-            { name: "votes", content: "{record of the votes taken}", section_type: SectionType.Process,
-            content_type: "text/plain", source: SourceManual },
+            { name: "voters", content: "{list of people who may vote}", sectionType: SectionType.Process,
+            contentType: "text/plain", source: SourceManual },
+            { name: "votes", content: "{record of the votes taken}", sectionType: SectionType.Process,
+            contentType: "text/plain", source: SourceManual },
           ],
           editors: [progenitor],
           state: SysState.Alive,
@@ -620,24 +620,24 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.align.consensus",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Consensus",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "The Consensus aligment variant specifies an outcome of consensus decision that a group has taken",
             },
-            { name: "outcome", content: "{results of the consensus decision}", section_type: SectionType.Process,
-            content_type: "text/markdown", source: SourceManual },
+            { name: "outcome", content: "{results of the consensus decision}", sectionType: SectionType.Process,
+            contentType: "text/markdown", source: SourceManual },
           ],
           editors: [progenitor],
           state: SysState.Alive,
@@ -647,26 +647,26 @@ function mintNFT(uint256 memory target_) external {
       {
         path: "soc_proto.process.align.sortition",
         document: new Document( {
-          document_type: DocType.Document,
+          documentType: DocType.Document,
           content: [
             {
               name: "title",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/plain",
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
               content: "Sortition",
             },
             {
               name: "summary",
               source: "",
-              section_type: SectionType.Content,
-              content_type: "text/markdown",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
               content: "The Sortition aligment variant specifies a group of people who will decide on the alignment and it's outcome of consensus decision that a group has taken",
             },
-            { name: "people", content: "{list of people who will decide}", section_type: SectionType.Process,
-            content_type: "text/plain", source: SourceManual },
-            { name: "outcome", content: "{results of the sorition decision}", section_type: SectionType.Process,
-            content_type: "text/markdown", source: SourceManual },
+            { name: "people", content: "{list of people who will decide}", sectionType: SectionType.Process,
+            contentType: "text/plain", source: SourceManual },
+            { name: "outcome", content: "{results of the sorition decision}", sectionType: SectionType.Process,
+            contentType: "text/markdown", source: SourceManual },
           ],
           editors: [progenitor],
           state: SysState.Alive,

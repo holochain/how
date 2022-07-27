@@ -7,6 +7,7 @@ use holochain::sweettest::*;
 use holochain::test_utils::consistency_10s;
 use holo_hash::{EntryHashB64, AgentPubKeyB64};
 
+use how_core::*;
 use how::alignment::*;
 use how::document::*;
 use how::tree::*;
