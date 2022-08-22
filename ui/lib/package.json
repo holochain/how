@@ -11,7 +11,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@holochain/client": "^0.6.0",
+    "@holochain/client": "^0.7.0",
     "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-typescript": "^8.2.5",
@@ -26,10 +26,10 @@
     "watch-cli": "^0.2.3"
   },
   "dependencies": {
-    "@holochain-open-dev/cell-client": "^0.6.1",
-    "@holochain-open-dev/core-types": "^0.4.0",
-    "@holochain-open-dev/utils": "^0.2.4",
-    "@holochain-open-dev/profiles": "^0.4.1",
+    "@holochain-open-dev/cell-client": "^0.7.2",
+    "@holochain-open-dev/core-types": "^0.4.1",
+    "@holochain-open-dev/utils": "^0.3.2",
+    "@holochain-open-dev/profiles": "^0.5.1",
     "@open-wc/scoped-elements": "^2.0.1",
     "@scoped-elements/material-web": "0.0.16",
     "@scoped-elements/shoelace": "0.0.8",

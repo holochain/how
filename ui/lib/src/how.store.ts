@@ -1,5 +1,5 @@
 import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
-import { serializeHash, deserializeHash, HoloHashMap } from '@holochain-open-dev/utils';
+import { serializeHash, deserializeHash, AgentPubKeyMap } from '@holochain-open-dev/utils';
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
@@ -29,7 +29,7 @@ export class HowStore {
   /** Private */
   private service : HowService
   private profiles: ProfilesStore
-  private knownProfiles: Readable<HoloHashMap<Profile>> | undefined
+  private knownProfiles: Readable<AgentPubKeyMap<Profile>> | undefined
 
   /** AlignmentEh -> Alignment */
   private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});   // maps alignment hash to alignment
@@ -125,7 +125,7 @@ export class HowStore {
 
   private others(): Array<AgentPubKeyB64> {
     if (this.knownProfiles) {
-      const map : HoloHashMap<Profile> = get(this.knownProfiles)
+      const map : AgentPubKeyMap<Profile> = get(this.knownProfiles)
       const x: Array<AgentPubKeyB64>  = map.keys().map((key) => serializeHash(key))
       return x.filter((key) => key != this.myAgentPubKey)
     }
@@ -272,7 +272,7 @@ export class HowStore {
 
   getProfileSync(agent: AgentPubKeyB64) : Profile|undefined {
     if (this.knownProfiles) {
-      const map : HoloHashMap<Profile> = get(this.knownProfiles)
+      const map : AgentPubKeyMap<Profile> = get(this.knownProfiles)
       return map.get(deserializeHash(agent))
     } else {
       return undefined
