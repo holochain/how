@@ -262,7 +262,7 @@ export class HowStore {
   }
 
   async pullProfiles() : Promise<void> {
-    this.profiles.fetchAllProfiles()
+    this.knownProfiles = await this.profiles.fetchAllProfiles()
   }
 
 
@@ -318,6 +318,7 @@ export class HowStore {
 
   async initilize(input: Initialization) : Promise<void> {
     await this.service.initialize(input)
+    await this.pullProfiles()
   }
 
   alignment(alignmentEh: EntryHashB64): Alignment {

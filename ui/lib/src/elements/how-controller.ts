@@ -20,7 +20,7 @@ import {
   ListItem,
   Select,
   IconButton,
-  Button, TextField, TopAppBar, Drawer, List, Icon, Switch, Formfield, Menu,
+  Button, TextField, TopAppBar, Drawer, List, Icon, Switch, Formfield,
 } from "@scoped-elements/material-web";
 import {
   profilesStoreContext,
@@ -171,10 +171,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         this._drawer.open = !this._drawer.open;
       });
     }
-    /** Menu */
-    const menu = this.shadowRoot!.getElementById("top-menu") as Menu;
-    const button = this.shadowRoot!.getElementById("menu-button") as IconButton;
-    menu.anchor = button
     // - Done
     this.initializing = false
     this.initialized = true
@@ -238,24 +234,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this.openAlignmentDialog(alignmentEh)
   }
 
-  openTopMenu() {
-    const menu = this.shadowRoot!.getElementById("top-menu") as Menu;
-    menu.open = true;
-  }
-
-  handleMenuSelect(e: any) {
-    const menu = e.currentTarget as Menu;
-    console.log("handleMenuSelect: " + menu)
-    const selected = menu.selected as ListItem;
-    console.log({selected})
-    switch (e.originalTarget.innerHTML) {
-      case "Duplicate Alignment":
-        this.openAlignmentDialog(this._currentAlignmentEh)
-        break;
-      default:
-        break;
-    }
-  }
   private isTreeType() : boolean {
     if (!this._tree) return false
     return this._treeType == "tree"
@@ -293,41 +271,19 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
 
   <div>
-    <!-- TOP APP BAR -->test
-    
-    <mwc-top-app-bar id="app-bar" dense style="position: relative;">
-      <mwc-icon-button icon="menu" slot="navigationIcon"></mwc-icon-button>
-      <div slot="title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].shortName}` : ''}</div>
-      <mwc-icon-button slot="actionItems" icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
-      <mwc-icon-button slot="actionItems" icon="autorenew" @click=${() => this.refresh()} ></mwc-icon-button>
-      <mwc-icon-button id="menu-button" slot="actionItems" icon="more_vert" @click=${() => this.openTopMenu()}></mwc-icon-button>
-      <mwc-menu id="top-menu" corner="BOTTOM_LEFT" @click=${this.handleMenuSelect}>
-        <mwc-list-item graphic="icon" value="fork_alignment"><span>Duplicate Alignment</span><mwc-icon slot="graphic">edit</mwc-icon></mwc-list-item>
-      </mwc-menu>
-    </mwc-top-app-bar>
+    <div id="top-bar" class="row">
+      <div id="top-bar-title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].shortName}` : ''}</div>
+      <mwc-icon-button icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
+      <mwc-icon-button icon="account_circle" @click=${() => {alert("TBD: edit account")}}></mwc-icon-button>
+      <mwc-icon-button icon="settings" @click=${() => {alert("TBD: settings")}}></mwc-icon-button>
+    </div>
 
     <div class="appBody column">
-      ${this.isTreeType() ?
-      html`
-      <div class="column">
-        ${tree}
+      <div class="row"> 
+      ${tree}
+      ${alignment}
       </div>
-      <div class="column">
-        ${alignment}
-        ${document}
-      </div>`
-      :
-      html`
-      <div class="row">
-        ${tree}
-        <div class="column">
-          ${alignment}
-          ${document}
-        </div>
-      </div>
-      `
-      }
-      
+      ${document}    
     </div>
     <how-alignment-dialog id="alignment-dialog"
                         .myProfile=${get(this._myProfile)}
@@ -341,7 +297,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   static get scopedElements() {
     return {
-      "mwc-menu": Menu,
       "mwc-switch": Switch,
       "mwc-top-app-bar": TopAppBar,
       "mwc-textfield": TextField,
@@ -366,31 +321,18 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       css`
         :host {
           margin: 10px;
+          font-family: Roboto,'Open Sans','Helvetica Neue',sans-serif;
         }
 
-        .mdc-drawer__header {
-          display:none;
+        #top-bar {
+          background-color: lightgray;
+          align-items: center;
+          justify-content: flex-end;
         }
-        .column {
-          display: flex;
-          flex-direction: column;
-        }
-        .row {
-          display: flex;
-          flex-direction: row;
-        }
-
-        mwc-top-app-bar {
-          /**--mdc-theme-primary: #00ffbb;*/
-          /**--mdc-theme-on-primary: black;*/
-        }
-
-        #app-bar {
-          /*margin-top: -15px;*/
-        }
-
-        #my-drawer {
-          margin-top: -15px;
+        #top-bar-title {
+          font-size: 1.5em;
+          font-weight: bold;
+          margin-right: auto;
         }
 
         .appBody {

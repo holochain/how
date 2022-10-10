@@ -159,7 +159,8 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
               margin-bottom: 2px;
             }
             .document-header {
-              border-bottom: solid .1em #666;
+              border-top: solid .1em #888;
+              border-bottom: solid .1em #888;
               padding: 5px;
               margin: 0
             }

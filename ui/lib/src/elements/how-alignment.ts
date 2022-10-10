@@ -105,18 +105,17 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
         processes.push(html`<p>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></p>`)
       }
 
-    /** Render layout */
     return html`
       <div class="alignment row">
         <div class="column">
-         <p> <b>${alignment.shortName}</b> (${alignment.pathAbbreviation})</p>
-         <p> Parents: ${alignment.parents.map((path) => html`<span class="node-link" @click=${()=>this.handleNodelink(path)}>${path}</span>`)}</p>
-         <p> Stewards: ${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._store.getProfileSync(agent)!.nickname}</span>`)}</p>
+         <h2>${alignment.shortName}</h2>
+         <div class="alignment-info">${alignment.pathAbbreviation}<div class="alignment-info-name">path</div></div>
+         <div class="alignment-info">10/22/2022<div class="alignment-info-name">created</div></div>
+         <div class="alignment-info">1 month ago<div class="alignment-info-name">modified</div></div>
+         <div class="alignment-info">${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._store.getProfileSync(agent)!.nickname}</span>`)}
+         <div class="alignment-info-name">stweards</div></div>
         </div>
-       <div class="column">${processes}</div>
-       <div class="column"> Documents:
-        ${documents} 
-       </div>
+       <div class="node-element">${processes}</div>
       </div>
     `;
   }
@@ -133,8 +132,17 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       sharedStyles,
       css`
       .alignment {
-        border-top: solid .1em #666;
         padding: 10px;
+      }
+      .alignment-info {
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+      .alignment-info-name {
+        font-size: .9em;
+        color: #999;
+        font-weight: normal;  
       }
       .alignment h4 {
         margin-top: 0px;
