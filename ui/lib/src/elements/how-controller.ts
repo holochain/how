@@ -290,23 +290,11 @@ export class HowController extends ScopedElementsMixin(LitElement) {
      >
     </how-document>` : ""
     return html`
-<!--  DRAWER -->
-<mwc-drawer type="dismissible" id="my-drawer">
+
+
   <div>
-    <mwc-list>
-    <mwc-list-item twoline graphic="avatar" noninteractive>
-      <span>${this.myNickName}</span>
-      <span slot="secondary">${this._profiles.myAgentPubKey}</span>
-      <sl-avatar style="margin-left:-22px;" slot="graphic" .image=${this.myAvatar}></sl-avatar>
-    </mwc-list-item>
-    <li divider role="separator"></li>
-    </mwc-list>
-
-  </div>
-<!-- END DRAWER -->
-
-  <div slot="appContent">
-    <!-- TOP APP BAR -->
+    <!-- TOP APP BAR -->test
+    
     <mwc-top-app-bar id="app-bar" dense style="position: relative;">
       <mwc-icon-button icon="menu" slot="navigationIcon"></mwc-icon-button>
       <div slot="title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].shortName}` : ''}</div>
@@ -346,7 +334,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
                         @alignment-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
     </how-alignment-dialog>
   </div>
-</mwc-drawer>
 
 `;
   }
@@ -356,7 +343,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return {
       "mwc-menu": Menu,
       "mwc-switch": Switch,
-      "mwc-drawer": Drawer,
       "mwc-top-app-bar": TopAppBar,
       "mwc-textfield": TextField,
       "mwc-select": Select,
