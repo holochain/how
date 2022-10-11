@@ -12,13 +12,14 @@ import {Alignment, DocType, howContext} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import {ProfilesStore, profilesStoreContext, Profile} from "@holochain-open-dev/profiles";
+import {ProfilesStore, profilesStoreContext, Profile, AgentAvatar} from "@holochain-open-dev/profiles";
 import {
   Button,
   Dialog,
   TextField,
   TextArea,
 } from "@scoped-elements/material-web";
+import { HowNode } from "./how-node";
 
 /**
  * @element how-alignment
@@ -89,33 +90,36 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
-      const doc = docOutput.content
-      const title = doc.getSection("title")
-      return html`
-      <div class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
-        <div class="document-title">${title ? this.renderType(title.contentType,title.content):docOutput.hash}</div>
-    </div>`
-    }) : ""
-
-    const processes = []
-     for (const [procType, procName] of alignment.processes) {
-        const path = `${procType}.${procName}`
-        const elems = procType.split(".")
-        const typeName = elems[elems.length-1]
-        processes.push(html`<p>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></p>`)
+      return docOutput
+    }) : undefined;
+    // const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
+    //   const doc = docOutput.content
+    //   const title = doc.getSection("title")
+    //   return html`
+    //   <div class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
+    //     <div class="document-title">${title ? this.renderType(title.contentType,title.content):docOutput.hash}</div>
+    // </div>`
+    // }) : ""
+    let stewards = []
+    for (const agentHash of alignment.stewards) {
+      const agent = this._store.getProfileSync(agentHash)
+      if (agent) {
+        stewards.push(html`<agent-avatar agent-pub-key="${agentHash}"></agent-avatar>`)
+      } else {
+        html`<span class="agent" title="${agentHash}">${agentHash}</span>`
       }
-
+    }
     return html`
       <div class="alignment row">
         <div class="column">
          <h2>${alignment.shortName}</h2>
-         <div class="alignment-info">${alignment.pathAbbreviation}<div class="alignment-info-name">path</div></div>
-         <div class="alignment-info">10/22/2022<div class="alignment-info-name">created</div></div>
-         <div class="alignment-info">1 month ago<div class="alignment-info-name">modified</div></div>
-         <div class="alignment-info">${alignment.stewards.map((agent: string)=>html`<span class="agent" title="${agent}">${this._store.getProfileSync(agent)!.nickname}</span>`)}
-         <div class="alignment-info-name">stweards</div></div>
+         <div class="info-item">${alignment.pathAbbreviation}<div class="info-item-name">path</div></div>
+         <div class="info-item">10/22/2022<div class="info-item-name">created</div></div>
+         <div class="info-item">1 month ago<div class="info-item-name">modified</div></div>
+         <div class="info-item">${stewards}
+         <div class="info-item-name">stewards</div></div>
         </div>
-       <div class="node-element">${processes}</div>
+       <div class="node-element"><how-node .alignment=${alignment} .documents=${documents} /></div>
       </div>
     `;
   }
@@ -125,6 +129,8 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return {
       "mwc-button": Button,
       "how-document-dialog": HowDocumentDialog,
+      "how-node": HowNode,
+      "agent-avatar": AgentAvatar,
     };
   }
   static get styles() {
@@ -133,16 +139,6 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       css`
       .alignment {
         padding: 10px;
-      }
-      .alignment-info {
-        font-size: 1.1em;
-        font-weight: bold;
-        margin-bottom: 12px;
-      }
-      .alignment-info-name {
-        font-size: .9em;
-        color: #999;
-        font-weight: normal;  
       }
       .alignment h4 {
         margin-top: 0px;

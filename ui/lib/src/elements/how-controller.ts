@@ -248,7 +248,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this._currentDocumentEh = e.detail
   }
   render() {
-
     const tree = html`      
       <how-tree id="tree"
         .treeType=${this._treeType}

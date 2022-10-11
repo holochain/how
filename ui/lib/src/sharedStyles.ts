@@ -15,4 +15,15 @@ export const sharedStyles = css`
     padding: 0 2px 0 2px;
     border-radius: 0.2em;
   }
+  .info-item {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  .info-item-name {
+    font-size: .9em;
+    color: #999;
+    font-weight: normal;  
+  }
+
 `;
