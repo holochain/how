@@ -1,13 +1,12 @@
 use hdk::prelude::*;
 
 use holo_hash::{EntryHashB64, AgentPubKeyB64};
-use how_core::{Unit};
 
 
 #[derive(Serialize, Deserialize, SerializedBytes, Debug)]
     #[serde(tag = "type", content = "content")]
 pub enum Message {
-    NewUnit(Unit),
+    NewUnit(Record),
 }
 
 #[derive(Serialize, Deserialize, Debug)]

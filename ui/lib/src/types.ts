@@ -26,11 +26,6 @@ export interface Unit {
   meta?: Dictionary<string>;
 }
 
-export interface UnitOutput {
-  hash: EntryHashB64,
-  content: Unit,
-}
-
 export enum DocType {
   Document = "_document",
   Comment = "_comment"

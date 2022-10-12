@@ -1,5 +1,5 @@
 import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
-import { serializeHash, deserializeHash, AgentPubKeyMap } from '@holochain-open-dev/utils';
+import { serializeHash, deserializeHash, AgentPubKeyMap, EntryRecord } from '@holochain-open-dev/utils';
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
@@ -21,6 +21,7 @@ import {
   ProfilesStore,
   Profile,
 } from "@holochain-open-dev/profiles";
+import { Action } from '@holochain/client';
 
 const areEqual = (first: Uint8Array, second: Uint8Array) =>
       first.length === second.length && first.every((value, index) => value === second[index]);
@@ -33,6 +34,7 @@ export class HowStore {
 
   /** UnitEh -> Unit */
   private unitsStore: Writable<Dictionary<Unit>> = writable({});   // maps unit hash to unit
+  private unitsActionStore: Writable<Dictionary<Action>> = writable({});   // maps unit hash to unit
   private documentsStore: Writable<Dictionary<Document>> = writable({});
   private unitsPathStore: Writable<Dictionary<string>> = writable({});  // maps unit hash to path
   private treeStore: Writable<Node> = writable({val:{name:"T", units: [], documents: []}, children:[], id:"0"});
@@ -45,6 +47,7 @@ export class HowStore {
   public units: Readable<Dictionary<Unit>> = derived(this.unitsStore, i => i)
   public documents: Readable<Dictionary<Document>> = derived(this.documentsStore, i => i)
   public unitsPath: Readable<Dictionary<string>> = derived(this.unitsPathStore, i => i)
+  public unitsAction: Readable<Dictionary<Action>> = derived(this.unitsActionStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
   public processes: Readable<Array<Process>> = derived(this.documents, d => this.getProcesses(get(this.treeStore)))
@@ -79,7 +82,7 @@ export class HowStore {
       switch(payload.message.type) {
       case "NewUnit":
         if (!get(this.units)[payload.unitHash]) {
-          this.updateUnitFromEntry(payload.unitHash, payload.message.content)
+          this.updateUnitFromEntry(payload.message.content)
         }
         break;
       }
@@ -134,7 +137,9 @@ export class HowStore {
     }
   }
 
-  private updateUnitFromEntry(hash: EntryHashB64, unit: Unit) {
+  private updateUnitFromEntry(unitRecord: EntryRecord<Unit>) {
+    const unit = unitRecord.entry
+    const hash = serializeHash(unitRecord.entryHash)
     this.unitsPathStore.update(units => {
       const path = unit.parents.length>0 ? `${unit.parents[0]}.${unit.pathAbbreviation}` : unit.pathAbbreviation
       units[path] = hash
@@ -144,12 +149,16 @@ export class HowStore {
       units[hash] = unit
       return units
     })
+    this.unitsActionStore.update(units => {
+      units[hash] = unitRecord.action
+      return units
+    })
   }
 
   async pullUnits() : Promise<Dictionary<Unit>> {
     const units = await this.service.getUnits();
-    for (const s of units) {
-      this.updateUnitFromEntry(s.hash, s.content)
+    for (const record of units.entryRecords) {
+      this.updateUnitFromEntry(record)
     }
     return get(this.unitsStore)
   }

@@ -7,7 +7,7 @@ import { Unsubscriber, Readable, get } from "svelte/store";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import { deserializeHash } from "@holochain-open-dev/utils";
+import { deserializeHash, serializeHash } from "@holochain-open-dev/utils";
 import {Unit, DocType, howContext} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
@@ -20,6 +20,7 @@ import {
   TextArea,
 } from "@scoped-elements/material-web";
 import { HowNode } from "./how-node";
+import { Action } from "@holochain/client";
 
 /**
  * @element how-unit
@@ -39,6 +40,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
 
   _myProfile!: Readable<Profile | undefined> ;
   _units = new StoreSubscriber(this, () => this._store.units);
+  _unitsActions = new StoreSubscriber(this, () => this._store.unitsAction);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
@@ -85,6 +87,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     }
     /** Get current unit*/
     const unit: Unit = this._units.value[this.currentUnitEh]
+    const action: Action = this._unitsActions.value[this.currentUnitEh]
 
     /** the list of documents for this unit */
     const path = this.getPath()
@@ -109,12 +112,15 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         html`<span class="agent" title="${agentHash}">${agentHash}</span>`
       }
     }
+    const created = new Date(action.timestamp)
+    const creatorHash = serializeHash(action.author)
+    const creator = this._store.getProfileSync(creatorHash)
     return html`
       <div class="unit row">
         <div class="column">
          <h2>${unit.shortName}</h2>
          <div class="info-item">${unit.pathAbbreviation}<div class="info-item-name">path</div></div>
-         <div class="info-item">10/22/2022<div class="info-item-name">created</div></div>
+         <div class="info-item" title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}>${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}<div class="info-item-name">created</div></div>
          <div class="info-item">1 month ago<div class="info-item-name">modified</div></div>
          <div class="info-item">${stewards}
          <div class="info-item-name">stewards</div></div>

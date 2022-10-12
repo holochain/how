@@ -1,5 +1,6 @@
 import { ActionHash, DnaSource } from "@holochain/client";
 import { pause, runScenario, Scenario  } from "@holochain/tryorama";
+import { RecordBag, EntryRecord } from '@holochain-open-dev/utils';
 
 import test from "tape-promise/tape.js";
 
@@ -76,7 +77,9 @@ test("how basic tests", async (t) => {
     console.log("unit1_hash", unit1_hash);
 
     const units :Array<any> = await alice_how.callZome({zome_name:'how', fn_name:'get_units'} );
-    t.deepEqual(units, [{hash: units[0].hash, content: root}, {hash: unit1_hash, content: unit1}]);
+    const bag = new RecordBag(units);
+    const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: serializeHash(hash),value}})
+    t.deepEqual(entries, [{hash: entries[0].hash, value: root}, {hash: unit1_hash, value: unit1}]);
 
     try {
     let tree:any = await alice_how.callZome({zome_name:'how', fn_name:'get_tree'} );
