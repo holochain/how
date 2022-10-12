@@ -11,7 +11,7 @@ pub const TREE_ROOT:&str = "T";
 #[hdk_entry_helper]
 #[serde(rename_all = "camelCase")]
 #[derive(Clone)]
-pub struct Alignment {
+pub struct Unit {
     pub parents: Vec<String>, // full paths to parent nodes (remember it's a DAG)
     pub short_name: String,
     pub path_abbreviation: String, // max 10 char
@@ -21,7 +21,7 @@ pub struct Alignment {
     pub meta: BTreeMap<String, String>, // for UI to do things    pub name: String,
 }
 
-impl Alignment {
+impl Unit {
     pub fn tree_paths(&self) -> Vec<Path> {
         let mut paths = Vec::new();
         for parent in &self.parents {
@@ -83,7 +83,7 @@ pub struct Document {
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
     #[entry_def(required_validations = 5)]
-    Alignment(Alignment), 
+    Unitx(Unit), 
     #[entry_def(required_validations = 5)]
     Document(Document), 
 }
@@ -91,7 +91,7 @@ pub enum EntryTypes {
 #[hdk_link_types]
 pub enum LinkTypes {
     Document,
-    Alignment,
+    Unit,
     Tree,
 }
 

@@ -1,26 +1,26 @@
 use hdk::prelude::*;
 
 use holo_hash::{EntryHashB64, AgentPubKeyB64};
-use how_core::{Alignment};
+use how_core::{Unit};
 
 
 #[derive(Serialize, Deserialize, SerializedBytes, Debug)]
     #[serde(tag = "type", content = "content")]
 pub enum Message {
-    NewAlignment(Alignment),
+    NewUnit(Unit),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
     #[serde(rename_all = "camelCase")]
 pub struct SignalPayload {
-    alignment_hash: EntryHashB64,
+    unit_hash: EntryHashB64,
     message: Message,
 }
 
 impl SignalPayload {
-   pub fn new(alignment_hash: EntryHashB64, message: Message) -> Self {
+   pub fn new(unit_hash: EntryHashB64, message: Message) -> Self {
         SignalPayload {
-            alignment_hash,
+            unit_hash,
             message,
         }
     }

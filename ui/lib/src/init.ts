@@ -18,7 +18,7 @@ const std_procs: Array<[ProcessType, ProcessName]> = [
 
 export function initialTree(progenitor: AgentPubKeyB64) {
   const init: Initialization = {
-    alignments: [
+    units: [
       {
         parents: [], // full paths to parent nodes (remember it's a DAG)
         pathAbbreviation: "", // max 10 char
@@ -112,7 +112,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
       {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
         pathAbbreviation: "align", // max 10 char
-        shortName: "Alignment Processes", // max 25 char
+        shortName: "Unit Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
@@ -661,7 +661,7 @@ function mintNFT(uint256 memory target_) external {
               source: "",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
-              content: "The Sortition aligment variant specifies a group of people who will decide on the alignment and it's outcome of consensus decision that a group has taken",
+              content: "The Sortition aligment variant specifies a group of people who will decide on the unit and it's outcome of consensus decision that a group has taken",
             },
             { name: "people", content: "{list of people who will decide}", sectionType: SectionType.Process,
             contentType: "text/plain", source: SourceManual },

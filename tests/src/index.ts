@@ -28,8 +28,8 @@ test("how basic tests", async (t) => {
     const boboAgentKey = serializeHash(bobbo.agentPubKey);
     const aliceAgentKey = serializeHash(alice.agentPubKey);
 
-    // Create a alignment
-    let alignment1 = {
+    // Create a unit
+    let unit1 = {
       parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
       shortName: "API",
       pathAbbreviation: "app", // max 10 char
@@ -66,17 +66,17 @@ test("how basic tests", async (t) => {
     }
  //   a_and_b_conductor.setSignalHandler((signal) => {
  //     console.log("Received Signal:",signal)
-//      t.deepEqual(signal.data.payload.message, { type: 'NewAlignment', content: alignment1})
+//      t.deepEqual(signal.data.payload.message, { type: 'NewUnit', content: unit1})
  //   })
 
-    await alice_how.callZome({zome_name:'how', fn_name:'initialize', payload: {alignments: [root], documents:[documentSpec]}} );
+    await alice_how.callZome({zome_name:'how', fn_name:'initialize', payload: {units: [root], documents:[documentSpec]}} );
 
-    const alignment1_hash = await alice_how.callZome({zome_name:'how', fn_name:'create_alignment', payload: alignment1} );
-    t.ok(alignment1_hash)
-    console.log("alignment1_hash", alignment1_hash);
+    const unit1_hash = await alice_how.callZome({zome_name:'how', fn_name:'create_unit', payload: unit1} );
+    t.ok(unit1_hash)
+    console.log("unit1_hash", unit1_hash);
 
-    const alignments :Array<any> = await alice_how.callZome({zome_name:'how', fn_name:'get_alignments'} );
-    t.deepEqual(alignments, [{hash: alignments[0].hash, content: root}, {hash: alignment1_hash, content: alignment1}]);
+    const units :Array<any> = await alice_how.callZome({zome_name:'how', fn_name:'get_units'} );
+    t.deepEqual(units, [{hash: units[0].hash, content: root}, {hash: unit1_hash, content: unit1}]);
 
     try {
     let tree:any = await alice_how.callZome({zome_name:'how', fn_name:'get_tree'} );

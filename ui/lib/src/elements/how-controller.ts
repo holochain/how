@@ -6,12 +6,12 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber, Readable, get } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Alignment, Dictionary, Initialization, DocumentOutput} from "../types";
+import {howContext, Unit, Dictionary, Initialization, DocumentOutput} from "../types";
 import { HowStore } from "../how.store";
-import { HowAlignment } from "./how-alignment";
+import { HowUnit } from "./how-unit";
 import { HowTree } from "./how-tree";
 import { initialTree } from "../init";
-import { HowAlignmentDialog } from "./how-alignment-dialog";
+import { HowUnitDialog } from "./how-unit-dialog";
 import { SlAvatar } from '@scoped-elements/shoelace';
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
@@ -50,8 +50,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   _profiles!: ProfilesStore;
 
   _myProfile!: Readable<Profile | undefined> ;
-  _alignments = new StoreSubscriber(this, () => this._store.alignments);
-  _alignmentsPath = new StoreSubscriber(this, () => this._store.alignmentsPath);
+  _units = new StoreSubscriber(this, () => this._store.units);
+  _unitsPath = new StoreSubscriber(this, () => this._store.unitsPath);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
   /** Private properties */
@@ -64,7 +64,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   @query('#document')
   private _document!: HowDocument;
 
-  @state() _currentAlignmentEh = "";
+  @state() _currentUnitEh = "";
   @state() _currentDocumentEh = "";
   @state() _treeType = "tree";
 
@@ -103,11 +103,11 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   getCurrentPath() : string {
-    if (!this._currentAlignmentEh) {
+    if (!this._currentUnitEh) {
       return ""
     }
-    const alignment: Alignment = this._alignments.value[this._currentAlignmentEh];
-    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.pathAbbreviation}` : alignment.pathAbbreviation
+    const unit: Unit = this._units.value[this._currentUnitEh];
+    return unit.parents.length > 0 ? `${unit.parents[0]}.${unit.pathAbbreviation}` : unit.pathAbbreviation
   }
 
   private async subscribeProfile() {
@@ -125,14 +125,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this.subscribeProfile()
   }
  
-  private _getFirst(alignments: Dictionary<Alignment>): EntryHashB64 {
-    if (Object.keys(alignments).length == 0) {
+  private _getFirst(units: Dictionary<Unit>): EntryHashB64 {
+    if (Object.keys(units).length == 0) {
       return "";
     }
-    for (let alignmentEh in alignments) {
-//      const alignment = alignments[alignmentEh]
-//      if (alignment.visible) {
-        return alignmentEh
+    for (let unitEh in units) {
+//      const unit = units[unitEh]
+//      if (unit.visible) {
+        return unitEh
 //      }
     }
     return "";
@@ -144,22 +144,22 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       return;
     }
     this.initializing = true  // because checkInit gets call whenever profiles changes...
-    let alignments = await this._store.pullAlignments();
+    let units = await this._store.pullUnits();
     await this._store.pullTree();
 
-    /** load up a alignment if there are none */
-    if (Object.keys(alignments).length == 0) {
-      console.log("no alignments found, initializing")
-      await this.addHardcodedAlignments();
-      alignments = await this._store.pullAlignments();
+    /** load up a unit if there are none */
+    if (Object.keys(units).length == 0) {
+      console.log("no units found, initializing")
+      await this.addHardcodedUnits();
+      units = await this._store.pullUnits();
       await this._store.pullTree();
     }
-    if (Object.keys(alignments).length == 0) {
-      console.error("No alignments found")
+    if (Object.keys(units).length == 0) {
+      console.error("No units found")
     }
-   // this._currentAlignmentEh = this._getFirst(alignments);
+   // this._currentUnitEh = this._getFirst(units);
 
-    //console.log("   current alignment: ",  alignments[this._currentAlignmentEh].shortName, this._currentAlignmentEh);
+    //console.log("   current unit: ",  units[this._currentUnitEh].shortName, this._currentUnitEh);
 
     // request the update so the drawer will be findable
     await this.requestUpdate();
@@ -176,7 +176,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this.initialized = true
   }
 
-  async addHardcodedAlignments() {
+  async addHardcodedUnits() {
     const init:Initialization = initialTree(this._store.myAgentPubKey)
     await this._store.initilize(init);
     this._store.pullDocuments("soc_proto.process.define.declaration")
@@ -184,30 +184,30 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   async refresh() {
     console.log("refresh: Pulling data from DHT")
-    await this._store.pullAlignments();
+    await this._store.pullUnits();
     await this._store.pullTree();
     await this._profiles.fetchAllProfiles()
   }
 
-  get alignmentElem(): HowAlignment {
-    return this.shadowRoot!.getElementById("how-alignment") as HowAlignment;
+  get unitElem(): HowUnit {
+    return this.shadowRoot!.getElementById("how-unit") as HowUnit;
   }
 
-  async openAlignmentDialog(parent?: any) {
-    this.alignmentDialogElem.open(parent);
+  async openUnitDialog(parent?: any) {
+    this.unitDialogElem.open(parent);
   }
 
-  get alignmentDialogElem() : HowAlignmentDialog {
-    return this.shadowRoot!.getElementById("alignment-dialog") as HowAlignmentDialog;
+  get unitDialogElem() : HowUnitDialog {
+    return this.shadowRoot!.getElementById("unit-dialog") as HowUnitDialog;
   }
 
-  private async handleAlignmentSelect(alignmentEh: string): Promise<void> {
-    if (this._alignments.value[alignmentEh]) {
-      this._currentAlignmentEh = alignmentEh;
-      this.alignmentElem.currentAlignmentEh = alignmentEh;
-      this._tree.currentNode = alignmentEh;
+  private async handleUnitSelect(unitEh: string): Promise<void> {
+    if (this._units.value[unitEh]) {
+      this._currentUnitEh = unitEh;
+      this.unitElem.currentUnitEh = unitEh;
+      this._tree.currentNode = unitEh;
       await this._store.pullDocuments(this.getCurrentPath())
-      let docs = this.getAlignmentDocuments()
+      let docs = this.getUnitDocuments()
       if (docs) {
         docs = docs.filter(doc => !doc.updated)
         if (docs.length > 0) {
@@ -220,18 +220,18 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
   }
 
-  getAlignmentDocuments(): Array<DocumentOutput> {
+  getUnitDocuments(): Array<DocumentOutput> {
     const docs = this._documentPaths.value[this.getCurrentPath()]
     return docs
   }
 
   handleNodeSelected(event: any) {
-    this.handleAlignmentSelect(event.detail)
+    this.handleUnitSelect(event.detail)
   }
 
   handleAddChild(event: any) {
-    const alignmentEh = event.detail
-    this.openAlignmentDialog(alignmentEh)
+    const unitEh = event.detail
+    this.openUnitDialog(unitEh)
   }
 
   private isTreeType() : boolean {
@@ -254,12 +254,12 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         @node-selected=${this.handleNodeSelected}
         @add-child=${this.handleAddChild}>
       </how-tree>`
-    const alignment = html`
-    <how-alignment id="how-alignment" .currentAlignmentEh=${this._currentAlignmentEh}
+    const unit = html`
+    <how-unit id="how-unit" .currentUnitEh=${this._currentUnitEh}
         @document-updated=${this.handleDocumentUpdated}
         @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
-        @select-node=${(e: any)=>{const hash = this._alignmentsPath.value[e.detail]; this.handleAlignmentSelect(hash)}}>
-      </how-alignment>`
+        @select-node=${(e: any)=>{const hash = this._unitsPath.value[e.detail]; this.handleUnitSelect(hash)}}>
+      </how-unit>`
      const document = this._currentDocumentEh ? 
      html`<how-document id="document" .currentDocumentEh=${this._currentDocumentEh}
           @document-updated=${this.handleDocumentUpdated}
@@ -271,7 +271,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   <div>
     <div id="top-bar" class="row">
-      <div id="top-bar-title">How ${this._currentAlignmentEh ? ` - ${this._alignments.value[this._currentAlignmentEh].shortName}` : ''}</div>
+      <div id="top-bar-title">How ${this._currentUnitEh ? ` - ${this._units.value[this._currentUnitEh].shortName}` : ''}</div>
       <mwc-icon-button icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
       <mwc-icon-button icon="account_circle" @click=${() => {alert("TBD: edit account")}}></mwc-icon-button>
       <mwc-icon-button icon="settings" @click=${() => {alert("TBD: settings")}}></mwc-icon-button>
@@ -280,14 +280,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <div class="appBody column">
       <div class="row"> 
       ${tree}
-      ${alignment}
+      ${unit}
       </div>
       ${document}    
     </div>
-    <how-alignment-dialog id="alignment-dialog"
+    <how-unit-dialog id="unit-dialog"
                         .myProfile=${get(this._myProfile)}
-                        @alignment-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
-    </how-alignment-dialog>
+                        @unit-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
+    </how-unit-dialog>
   </div>
 
 `;
@@ -305,8 +305,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "mwc-icon": Icon,
       "mwc-icon-button": IconButton,
       "mwc-button": Button,
-      "how-alignment-dialog" : HowAlignmentDialog,
-      "how-alignment": HowAlignment,
+      "how-unit-dialog" : HowUnitDialog,
+      "how-unit": HowUnit,
       "how-tree": HowTree,
       "mwc-formfield": Formfield,
       "how-document": HowDocument,

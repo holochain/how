@@ -8,7 +8,7 @@ import { Unsubscriber, Readable, get } from "svelte/store";
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash } from "@holochain-open-dev/utils";
-import {Alignment, DocType, howContext} from "../types";
+import {Unit, DocType, howContext} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -22,14 +22,14 @@ import {
 import { HowNode } from "./how-node";
 
 /**
- * @element how-alignment
+ * @element how-unit
  */
-export class HowAlignment extends ScopedElementsMixin(LitElement) {
+export class HowUnit extends ScopedElementsMixin(LitElement) {
   constructor() {
     super();
   }
 
-  @property() currentAlignmentEh = "";
+  @property() currentUnitEh = "";
 
   @contextProvided({ context: howContext })
   _store!: HowStore;
@@ -38,7 +38,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   _profiles!: ProfilesStore;
 
   _myProfile!: Readable<Profile | undefined> ;
-  _alignments = new StoreSubscriber(this, () => this._store.alignments);
+  _units = new StoreSubscriber(this, () => this._store.units);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
@@ -61,11 +61,11 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
   }
 
   getPath() : string {
-    if (!this.currentAlignmentEh) {
+    if (!this.currentUnitEh) {
       return ""
     }
-    const alignment: Alignment = this._alignments.value[this.currentAlignmentEh];
-    return alignment.parents.length > 0 ? `${alignment.parents[0]}.${alignment.pathAbbreviation}` : alignment.pathAbbreviation
+    const unit: Unit = this._units.value[this.currentUnitEh];
+    return unit.parents.length > 0 ? `${unit.parents[0]}.${unit.pathAbbreviation}` : unit.pathAbbreviation
   }
 
   addDoc(documentType: DocType ) {
@@ -80,13 +80,13 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return content
   }
   render() {
-    if (!this.currentAlignmentEh) {
+    if (!this.currentUnitEh) {
       return;
     }
-    /** Get current alignment*/
-    const alignment: Alignment = this._alignments.value[this.currentAlignmentEh]
+    /** Get current unit*/
+    const unit: Unit = this._units.value[this.currentUnitEh]
 
-    /** the list of documents for this alignment */
+    /** the list of documents for this unit */
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
     const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
@@ -101,7 +101,7 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     // </div>`
     // }) : ""
     let stewards = []
-    for (const agentHash of alignment.stewards) {
+    for (const agentHash of unit.stewards) {
       const agent = this._store.getProfileSync(agentHash)
       if (agent) {
         stewards.push(html`<agent-avatar agent-pub-key="${agentHash}"></agent-avatar>`)
@@ -110,16 +110,16 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
       }
     }
     return html`
-      <div class="alignment row">
+      <div class="unit row">
         <div class="column">
-         <h2>${alignment.shortName}</h2>
-         <div class="info-item">${alignment.pathAbbreviation}<div class="info-item-name">path</div></div>
+         <h2>${unit.shortName}</h2>
+         <div class="info-item">${unit.pathAbbreviation}<div class="info-item-name">path</div></div>
          <div class="info-item">10/22/2022<div class="info-item-name">created</div></div>
          <div class="info-item">1 month ago<div class="info-item-name">modified</div></div>
          <div class="info-item">${stewards}
          <div class="info-item-name">stewards</div></div>
         </div>
-       <div class="node-element"><how-node .alignment=${alignment} .documents=${documents} /></div>
+       <div class="node-element"><how-node .unit=${unit} .documents=${documents} /></div>
       </div>
     `;
   }
@@ -137,18 +137,18 @@ export class HowAlignment extends ScopedElementsMixin(LitElement) {
     return [
       sharedStyles,
       css`
-      .alignment {
+      .unit {
         padding: 10px;
       }
-      .alignment h4 {
+      .unit h4 {
         margin-top: 0px;
         margin-bottom: 5px;
       }
-      .alignment p {
+      .unit p {
         line-height: 1.5em;
         margin: 0;
       }
-      .alignment div {
+      .unit div {
         margin-right: 20px;
       }
       .node-link {

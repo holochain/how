@@ -4,7 +4,7 @@ import { contextProvided } from "@lit-labs/context";
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash } from "@holochain-open-dev/utils";
-import {Alignment, DocType, howContext, Document, DocumentOutput} from "../types";
+import {Unit, DocType, howContext, Document, DocumentOutput} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { StoreSubscriber } from "lit-svelte-stores";
@@ -50,7 +50,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
   constructor() {
     super();
   }
-  @property() alignment:Alignment|undefined;
+  @property() unit:Unit|undefined;
   @property() documents:DocumentOutput[]|undefined;
 
   @contextProvided({ context: howContext })
@@ -73,7 +73,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
   }
   
   render() {
-    if (!this.alignment) {
+    if (!this.unit) {
       return;
     }
     if (this.documents) {
@@ -81,11 +81,11 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
         const docOutput: DocumentOutput = this.documents[this.documents.length-1]
         const processes = []
         let i = 0;
-        const sweep = 360/this.alignment.processes.length
+        const sweep = 360/this.unit.processes.length
         const stateIndex = ORDER.indexOf(doc.state)
 
         let currentState = ""
-        for (const [procType, procName] of this.alignment.processes) {
+        for (const [procType, procName] of this.unit.processes) {
             //const path = `${procType}.${procName}`
             const elems = procType.split(".")
             const typeName = elems[elems.length-1]
@@ -116,14 +116,14 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
         const r = x*.75
     
         return html`
-        <div>${this.alignment.shortName}</div>
+        <div>${this.unit.shortName}</div>
         ${this.circle([
             {title:"x", color:"#ccc", start:0, end:360},
         ])}    
         `
     }
     // const processes = []
-    // for (const [procType, procName] of this.alignment.processes) {
+    // for (const [procType, procName] of this.unit.processes) {
     //     const path = `${procType}.${procName}`
     //     const elems = procType.split(".")
     //     const typeName = elems[elems.length-1]

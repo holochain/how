@@ -1,4 +1,4 @@
-# Holochain Standards Alignment Protocols (How)
+# Holochain Standards Protocols (How)
 ###### tags: `holochain` `design doc`
 
 ## Intent
@@ -47,9 +47,9 @@ We want this process to maximize collective alignment both on specific needs but
 
 The app implements the social protocol for editing the Tree of standards. [See example Miro board](https://miro.com/app/board/o9J_llxYUr8=/) of possible tree format.
 
-The tree is implemented as holochain paths, where the links off the nodes are `AlignmentBundle` entries.   The names of each segment are abbreviated names with max ~10 chars so we can get 25 levels of depth.  Standards have Short names max 200char which can be stored in a glossary for rendering (stored as a composite path of abbreviated name/Short name and thus retreivable in one get_links).
+The tree is implemented as holochain paths, where the links off the nodes are `Unit` entries.   The names of each segment are abbreviated names with max ~10 chars so we can get 25 levels of depth.  Standards have Short names max 200char which can be stored in a glossary for rendering (stored as a composite path of abbreviated name/Short name and thus retreivable in one get_links).
 
-The link tags to AlignmentBundles follow this format:
+The link tags to Units follow this format:
 
 ```
 [phase]-[version]
@@ -59,7 +59,7 @@ where `phase` is one of:
 - refine (presumed complete ready for review)
 - align (approved)
 
-The protocol for each one of these phases must be named in the bundle and point to the protocol standard on the tree being used.
+The protocol for each one of these phases must be named in the unit and point to the protocol standard on the tree being used.
 
 where `version` is:
 ```
@@ -67,10 +67,10 @@ where `version` is:
 ```
 And version-prefix is a `v` followed by three characters that function as a self-describing pointer to the version protocol besing used.  Initial ones will include `vsem` and `vint`, which are described in the tree as well.
 
-### Alignment Bundle
+### Unit
 
 ```rust=
-struct Alignment {
+struct Unit {
   parent: Vec<String>,                   // full paths to parent nodes (remember it's a DAG)
   path_abbreviation: String,             // max 10 char
   short_name: String,                    // max 25 char
@@ -118,16 +118,16 @@ Templates are documents of type ``"_template"`` which have the required content 
 
 
 ## Zome Calls
-Tree gets built by creating and modifying bundles.  Create checks to make sure path exists before creating.  Update may include changing the parents which requires non-constructively checking that they exist.  To move to as a new child the abbrevation would be copied into the parent with a new abbreviation
-- Crud on Bundles keyed to a path
-- Crud on Documents/Comments/Replies keyed to a bundle
+Tree gets built by creating and modifying units.  Create checks to make sure path exists before creating.  Update may include changing the parents which requires non-constructively checking that they exist.  To move to as a new child the abbrevation would be copied into the parent with a new abbreviation
+- Crud on Units keyed to a path
+- Crud on Documents/Comments/Replies keyed to a unit
 - `init_tree` (can only be called by progenitor)
 - `get_tree` -> Tree
-- `get_bundle`
+- `get_unit`
 - `get_document`
 
 ## Initialization/Treestrapping
-The progenitor must provide some initialization data that includes initial final processes to add to the process part of the tree so that other users can pick processes when creating new `AlignmentBundles` the validation can allow the progenitor to create bundles with an `_init` process which should then be deleted by the init process itself.
+The progenitor must provide some initialization data that includes initial final processes to add to the process part of the tree so that other users can pick processes when creating new `Units` the validation can allow the progenitor to create units with an `_init` process which should then be deleted by the init process itself.
 
 This data is passed in to a `init_tree` zome call which can only be called by the progenitor.
 
@@ -135,8 +135,8 @@ This data is passed in to a `init_tree` zome call which can only be called by th
 This app needs to be able to import all the tree data at Progenitor init time, thus it must either get it from an explicit export, or by bridge call.
 
 ## UI Notes
-- Limit bundle parents to 3 to prevent tree-spam
-- Pick bundle parent from existing tree not by typing
+- Limit unit parents to 3 to prevent tree-spam
+- Pick unit parent from existing tree not by typing
 - Documents with comments should have tabs for comment versions so replies on versions are all visible.
 - Tree auto-layout by creation order (for stability)
 - Feed of recent changes, and or tree hilight like miro

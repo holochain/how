@@ -6,7 +6,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { HowService } from './how.service';
 import {
   Dictionary,
-  Alignment,
+  Unit,
   RustNode,
   Node,
   Initialization,
@@ -31,20 +31,20 @@ export class HowStore {
   private profiles: ProfilesStore
   private knownProfiles: Readable<AgentPubKeyMap<Profile>> | undefined
 
-  /** AlignmentEh -> Alignment */
-  private alignmentsStore: Writable<Dictionary<Alignment>> = writable({});   // maps alignment hash to alignment
+  /** UnitEh -> Unit */
+  private unitsStore: Writable<Dictionary<Unit>> = writable({});   // maps unit hash to unit
   private documentsStore: Writable<Dictionary<Document>> = writable({});
-  private alignmentsPathStore: Writable<Dictionary<string>> = writable({});  // maps alignment hash to path
-  private treeStore: Writable<Node> = writable({val:{name:"T", alignments: [], documents: []}, children:[], id:"0"});
+  private unitsPathStore: Writable<Dictionary<string>> = writable({});  // maps unit hash to path
+  private treeStore: Writable<Node> = writable({val:{name:"T", units: [], documents: []}, children:[], id:"0"});
   private documentPathStore: Writable<Dictionary<Array<DocumentOutput>>> = writable({});
 
   /** Static info */
   myAgentPubKey: AgentPubKeyB64;
 
   /** Readable stores */
-  public alignments: Readable<Dictionary<Alignment>> = derived(this.alignmentsStore, i => i)
+  public units: Readable<Dictionary<Unit>> = derived(this.unitsStore, i => i)
   public documents: Readable<Dictionary<Document>> = derived(this.documentsStore, i => i)
-  public alignmentsPath: Readable<Dictionary<string>> = derived(this.alignmentsPathStore, i => i)
+  public unitsPath: Readable<Dictionary<string>> = derived(this.unitsPathStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
   public processes: Readable<Array<Process>> = derived(this.documents, d => this.getProcesses(get(this.treeStore)))
@@ -77,9 +77,9 @@ export class HowStore {
       console.log("SIGNAL",signal)
       const payload = signal.data.payload
       switch(payload.message.type) {
-      case "NewAlignment":
-        if (!get(this.alignments)[payload.alignmentHash]) {
-          this.updateAlignmentFromEntry(payload.alignmentHash, payload.message.content)
+      case "NewUnit":
+        if (!get(this.units)[payload.unitHash]) {
+          this.updateUnitFromEntry(payload.unitHash, payload.message.content)
         }
         break;
       }
@@ -134,24 +134,24 @@ export class HowStore {
     }
   }
 
-  private updateAlignmentFromEntry(hash: EntryHashB64, alignment: Alignment) {
-    this.alignmentsPathStore.update(alignments => {
-      const path = alignment.parents.length>0 ? `${alignment.parents[0]}.${alignment.pathAbbreviation}` : alignment.pathAbbreviation
-      alignments[path] = hash
-      return alignments
+  private updateUnitFromEntry(hash: EntryHashB64, unit: Unit) {
+    this.unitsPathStore.update(units => {
+      const path = unit.parents.length>0 ? `${unit.parents[0]}.${unit.pathAbbreviation}` : unit.pathAbbreviation
+      units[path] = hash
+      return units
     })
-    this.alignmentsStore.update(alignments => {
-      alignments[hash] = alignment
-      return alignments
+    this.unitsStore.update(units => {
+      units[hash] = unit
+      return units
     })
   }
 
-  async pullAlignments() : Promise<Dictionary<Alignment>> {
-    const alignments = await this.service.getAlignments();
-    for (const s of alignments) {
-      this.updateAlignmentFromEntry(s.hash, s.content)
+  async pullUnits() : Promise<Dictionary<Unit>> {
+    const units = await this.service.getUnits();
+    for (const s of units) {
+      this.updateUnitFromEntry(s.hash, s.content)
     }
-    return get(this.alignmentsStore)
+    return get(this.unitsStore)
   }
 
   private updateDocumentStores(path: string, doc: DocumentOutput)  {
@@ -288,32 +288,32 @@ export class HowStore {
     return get(this.treeStore)
   }
 
-  async initializeAlignment(algnmentEh: EntryHashB64) : Promise<void>  {
-    const alignment = this.alignment(algnmentEh)
-    const proc = alignment.processes[0]
+  async initializeUnit(algnmentEh: EntryHashB64) : Promise<void>  {
+    const unit = this.unit(algnmentEh)
+    const proc = unit.processes[0]
     const processPath = `${proc[0]}.${proc[1]}`
     const doc = new Document({documentType: DocType.Document})
 
-    doc.appendSections(await this.getSectionsFromHierarcy(alignment.parents[0], 0, SectionType.Requirement))
+    doc.appendSections(await this.getSectionsFromHierarcy(unit.parents[0], 0, SectionType.Requirement))
     await this.pullDocuments(processPath)
     doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
 
-    doc.setSection("title", alignment.shortName)
+    doc.setSection("title", unit.shortName)
     console.log("ADDING DOC", doc)
-    const path = `${alignment.parents[0]}.${alignment.pathAbbreviation}`
+    const path = `${unit.parents[0]}.${unit.pathAbbreviation}`
     await this.addDocument(path, doc)
   }
 
-  async addAlignment(alignment: Alignment) : Promise<EntryHashB64> {
-    const alignmentEh: EntryHashB64 = await this.service.createAlignment(alignment)
-    this.alignmentsStore.update(alignments => {
-      alignments[alignmentEh] = alignment
-      return alignments
+  async addUnit(unit: Unit) : Promise<EntryHashB64> {
+    const unitEh: EntryHashB64 = await this.service.createUnit(unit)
+    this.unitsStore.update(units => {
+      units[unitEh] = unit
+      return units
     })
-    await this.initializeAlignment(alignmentEh)
+    await this.initializeUnit(unitEh)
 
-    this.service.notify({alignmentHash:alignmentEh, message: {type:"NewAlignment", content:alignment}}, this.others());
-    return alignmentEh
+    this.service.notify({unitHash:unitEh, message: {type:"NewUnit", content:unit}}, this.others());
+    return unitEh
   }
 
   async initilize(input: Initialization) : Promise<void> {
@@ -321,8 +321,8 @@ export class HowStore {
     await this.pullProfiles()
   }
 
-  alignment(alignmentEh: EntryHashB64): Alignment {
-    return get(this.alignmentsStore)[alignmentEh];
+  unit(unitEh: EntryHashB64): Unit {
+    return get(this.unitsStore)[unitEh];
   }
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
@@ -338,20 +338,20 @@ export class HowStore {
     return null;
   }
 
-  private getDocumentAligment(hash: string) : Alignment | null {
+  private getDocumentAligment(hash: string) : Unit | null {
     // TODO this will break once we get versions because there will be
     // more that one aligment per path
     const path = this.getDocumentPath(hash)
-    for (let [alignmentPath, alignmentEh] of Object.entries(get(this.alignmentsPath))) {
-      if (alignmentPath == path) {
-        return this.alignment(alignmentEh)
+    for (let [unitPath, unitEh] of Object.entries(get(this.unitsPath))) {
+      if (unitPath == path) {
+        return this.unit(unitEh)
       }
     }
     return null
   }
 
   private getProcessPathForState(hash: EntryHashB64, state: string) : string {
-    const alignment = this.getDocumentAligment(hash)
+    const unit = this.getDocumentAligment(hash)
     // TODO: convert to use state machine...
     let idx = 0;
     switch (state) {
@@ -359,7 +359,7 @@ export class HowStore {
       case "align": idx = 2; break;
       default: return ""
     }
-    let proc = alignment?.processes[idx]
+    let proc = unit?.processes[idx]
     if (proc) {
       return `${proc[0]}.${proc[1]}`
     }

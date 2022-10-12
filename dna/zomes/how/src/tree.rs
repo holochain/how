@@ -7,7 +7,7 @@ use how_core::{TREE_ROOT, LinkTypes};
 #[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
 pub struct Content {
     name: String,
-    alignments: Vec<EntryHashB64>,
+    units: Vec<EntryHashB64>,
     documents: Vec<EntryHashB64>,
 }
 
@@ -25,7 +25,7 @@ fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult
         let v = path.as_ref();
         let val = Content {
             name: String::try_from(&v[v.len()-1]).map_err(|e| wasm_error!(e.into()))?,
-            alignments: get_entry_hashes(&path, LinkTypes::Alignment)?,
+            units: get_entry_hashes(&path, LinkTypes::Unit)?,
             documents: get_entry_hashes(&path, LinkTypes::Document)?,
         };
         let idx = tree.insert(node, val);
@@ -46,7 +46,7 @@ pub fn get_tree(_input: ()) -> ExternResult<Tree<Content>> {
     let root_path = Path::from(TREE_ROOT);
     let val = Content {
         name: String::from(""),
-        alignments: get_entry_hashes(&root_path, LinkTypes::Alignment)?,
+        units: get_entry_hashes(&root_path, LinkTypes::Unit)?,
         documents: get_entry_hashes(&root_path, LinkTypes::Document)?,
     };
     let mut tree = Tree::new(val);

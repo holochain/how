@@ -9,14 +9,14 @@ export const howContext = createContext<HowStore>('how/service');
 export type Dictionary<T> = { [key: string]: T };
 
 export interface Initialization {
-  alignments: Array<Alignment>,
+  units: Array<Unit>,
   documents: Array<DocumentInput>,
 }
 
 export type ProcessName = string
 export type ProcessType = string
 
-export interface Alignment {
+export interface Unit {
   parents: Array<string>,
   pathAbbreviation: string,
   shortName: string,
@@ -26,9 +26,9 @@ export interface Alignment {
   meta?: Dictionary<string>;
 }
 
-export interface AlignmentOutput {
+export interface UnitOutput {
   hash: EntryHashB64,
-  content: Alignment,
+  content: Unit,
 }
 
 export enum DocType {
@@ -132,12 +132,12 @@ export interface UpdateDocumentInput {
 
 export type Signal =
   | {
-    alignmentHash: EntryHashB64, message: {type: "NewAlignment", content:  Alignment}
+    unitHash: EntryHashB64, message: {type: "NewUnit", content:  Unit}
   }
   
 export type Content = {
   name: string,
-  alignments: Array<EntryHashB64>,
+  units: Array<EntryHashB64>,
   documents: Array<EntryHashB64>
 }
 export type RustNode = {

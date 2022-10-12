@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import { contextProvided } from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Alignment, howContext, Dictionary, Node} from "../types";
+import {Unit, howContext, Dictionary, Node} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -22,9 +22,9 @@ const PROCESS_TYPES = ['define', 'refine', 'align'] as const;
 type ProcessType = typeof PROCESS_TYPES[number];
 
 /**
- * @element how-alignment-dialog
+ * @element how-unit-dialog
  */
-export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
+export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
 
   @property() myProfile: Profile| undefined = undefined;
 
@@ -50,7 +50,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
   
   @property() _stewards: Dictionary<string> = {};
 
-  @state() _parent?: Alignment;
+  @state() _parent?: Unit;
 
   private static readonly NONE = 'none'; // we need a default value for the mwc-selects because if an empty string is provided, the UI gets broken
   private static readonly PROCESS_PATH = 'soc_proto.process';
@@ -82,8 +82,8 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     };
   }
   open(parentEh: EntryHashB64) {
-    this._parent = this._store.alignment(parentEh);
-    const dialog = this.shadowRoot!.getElementById("alignment-dialog") as Dialog
+    this._parent = this._store.unit(parentEh);
+    const dialog = this.shadowRoot!.getElementById("unit-dialog") as Dialog
     dialog.open = true
     this._store.pullProfiles() // TODO, this won't scale
   }
@@ -103,7 +103,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       .map((processType: ProcessType) => {
         const { value } = this.getProcessSelect(processType)
 
-        return value !== HowAlignmentDialog.NONE ? [`${HowAlignmentDialog.PROCESS_PATH}.${processType}`, value] : null
+        return value !== HowUnitDialog.NONE ? [`${HowUnitDialog.PROCESS_PATH}.${processType}`, value] : null
       })
       .filter(process => !!process)
 
@@ -129,7 +129,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
 
     const processes = this.getProcessesValue()
 
-    const alignment: Alignment = {
+    const unit: Unit = {
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
       pathAbbreviation: this._nameField.value, // max 10 char
       shortName: this._titleField.value,
@@ -139,14 +139,14 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
       meta: {},
     };
 
-    // - Add alignment to commons
-    const newAlignment = await this._store.addAlignment(alignment);
-    this.dispatchEvent(new CustomEvent('alignment-added', { detail: newAlignment, bubbles: true, composed: true }));
+    // - Add unit to commons
+    const newUnit = await this._store.addUnit(unit);
+    this.dispatchEvent(new CustomEvent('unit-added', { detail: newUnit, bubbles: true, composed: true }));
 
     // - Clear all fields
     // this.resetAllFields();
     // - Close dialog
-    const dialog = this.shadowRoot!.getElementById("alignment-dialog") as Dialog;
+    const dialog = this.shadowRoot!.getElementById("unit-dialog") as Dialog;
     dialog.close()
   }
 
@@ -155,19 +155,19 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
     this._nameField.value = ''
     this._titleField.value = ''
     this._summaryField.value = ''
-    this._alignProcessSelect.value = HowAlignmentDialog.NONE
-    this._defineProcessSelect.value = HowAlignmentDialog.NONE
-    this._refineProcessSelect.value = HowAlignmentDialog.NONE
+    this._alignProcessSelect.value = HowUnitDialog.NONE
+    this._defineProcessSelect.value = HowUnitDialog.NONE
+    this._refineProcessSelect.value = HowUnitDialog.NONE
     this._stewards = {}
   }
 
   private async handleDialogOpened(e: any) {
     // if (false) {
-    //   const alignment = this._store.alignment(this._alignmentToPreload);
-    //   if (alignment) {
+    //   const unit = this._store.unit(this._unitToPreload);
+    //   if (unit) {
         
     //   }
-    //   this._alignmentToPreload = undefined;
+    //   this._unitToPreload = undefined;
     // }
    // this.requestUpdate()
   }
@@ -194,7 +194,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
 
   render() {
     return html`
-<mwc-dialog id="alignment-dialog" heading="New alignment" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
+<mwc-dialog id="unit-dialog" heading="New unit" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
   Parent: ${this.parentPath()}
   <mwc-textfield dialogInitialFocus type="text"
                  @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
@@ -213,7 +213,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
         label="Select ${processType} process" 
         @closing=${(e: any) => e.stopPropagation()}
       >
-        <mwc-list-item selected value=${HowAlignmentDialog.NONE}>
+        <mwc-list-item selected value=${HowUnitDialog.NONE}>
           &ltnone&gt
         </mwc-list-item>
 
@@ -259,7 +259,7 @@ export class HowAlignmentDialog extends ScopedElementsMixin(LitElement) {
         mwc-dialog div {
           display: flex;
         }
-        #alignment-dialog {
+        #unit-dialog {
           --mdc-dialog-min-width: 600px;
         }
         mwc-textfield {

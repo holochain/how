@@ -1,6 +1,6 @@
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
-import { Alignment, AlignmentOutput, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput} from './types';
+import { Unit, UnitOutput, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput} from './types';
 import { serializeHash } from '@holochain-open-dev/utils';
 
 export class HowService {
@@ -17,12 +17,12 @@ export class HowService {
     return this.callZome('initialize', input);
   }
 
-  async createAlignment(alignment: Alignment): Promise<EntryHashB64> {
-    return this.callZome('create_alignment', alignment);
+  async createUnit(unit: Unit): Promise<EntryHashB64> {
+    return this.callZome('create_unit', unit);
   }
 
-  async getAlignments(): Promise<Array<AlignmentOutput>> {
-    return this.callZome('get_alignments', null);
+  async getUnits(): Promise<Array<UnitOutput>> {
+    return this.callZome('get_units', null);
   }
 
   async createDocument(input: DocumentInput): Promise<EntryHashB64> {

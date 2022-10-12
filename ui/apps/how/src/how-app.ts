@@ -2,7 +2,7 @@ import { ContextProvider } from "@lit-labs/context";
 import { state } from "lit/decorators.js";
 import {
   HowController,
-  HowAlignment,
+  HowUnit,
   HowStore,
   howContext,
 } from "@how/elements";
@@ -66,7 +66,7 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
     return {
       "profile-prompt": ProfilePrompt,
       "how-controller": HowController,
-      "how-alignment": HowAlignment,
+      "how-unit": HowUnit,
     };
   }
 }

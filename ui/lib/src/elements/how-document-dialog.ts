@@ -18,7 +18,7 @@ import {sectionValue} from "./utils";
 import { HowNewSectionDialog } from "./how-new-section.dialog";
 
 /**
- * @element how-alignment-dialog
+ * @element how-unit-dialog
  */
 export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() _editors: Dictionary<string> = {};
@@ -103,7 +103,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
           content: this.sections, 
         });
     
-        // - Add alignment to commons
+        // - Add unit to commons
         const newDocumentHash = await this._store.updateDocument(this.hash, document);
         this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
         // - Clear all fields
@@ -114,11 +114,11 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     }
     private async handleDialogOpened(e: any) {
     // if (false) {
-    //   const alignment = this._store.alignment(this._alignmentToPreload);
-    //   if (alignment) {
+    //   const unit = this._store.unit(this._unitToPreload);
+    //   if (unit) {
         
     //   }
-    //   this._alignmentToPreload = undefined;
+    //   this._unitToPreload = undefined;
     // }marked
     // this.requestUpdate()
     }

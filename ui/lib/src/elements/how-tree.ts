@@ -32,7 +32,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   _profiles!: ProfilesStore;
 
   _tree = new StoreSubscriber(this, () => this._store.tree);
-  _alignments = new StoreSubscriber(this, () => this._store.alignments);
+  _units = new StoreSubscriber(this, () => this._store.units);
  
   select(id: string) : void {
     this.currentNode = id
@@ -40,7 +40,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   }
 
   getNodeId(node: Node) : string {
-    return node.val.alignments.length>0 ? node.val.alignments[0] : node.id
+    return node.val.units.length>0 ? node.val.units[0] : node.id
   }
 
   buildTree(node: Node):any {

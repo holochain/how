@@ -20,7 +20,7 @@ import {
 import { sectionValue } from "./utils";
 
 /**
- * @element how-alignment-dialog
+ * @element how-new-section-dialog
  */
 export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
     @property()

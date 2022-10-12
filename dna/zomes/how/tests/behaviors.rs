@@ -8,7 +8,7 @@ use holochain::test_utils::consistency_10s;
 use holo_hash::{EntryHashB64, AgentPubKeyB64};
 
 use how_core::*;
-use how::alignment::*;
+use how::unit::*;
 use how::document::*;
 use how::tree::*;
 use how::*;
@@ -38,7 +38,7 @@ pub async fn test_basics() {
     .await;
  */
 
-    let aligment1 = Alignment {
+    let unit1 = Unit {
         parents: vec!["hc_system".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "conductor".into(), // max 10 char
         short_name: "Conductor".into(),
@@ -48,13 +48,13 @@ pub async fn test_basics() {
         meta: BTreeMap::new(),
     };
 
-    let input= Initialization {alignments: vec![aligment1], documents: vec![]};
+    let input= Initialization {units: vec![unit1], documents: vec![]};
 
     let _:() = conductor_alice
         .call(&cell_alice.zome("how"), "initialize", input.clone())
         .await;
 
-    let alignment2 = Alignment {
+    let unit2 = Unit {
         parents: vec!["hc_system.conductor.api".into()], // full paths to parent nodes (remember it's a DAG)
         path_abbreviation: "app".into(), // max 10 char
         short_name: "Application API".into(), // max 10 char
@@ -65,21 +65,21 @@ pub async fn test_basics() {
     };
     
     let hash: EntryHashB64 = conductor_alice
-    .call(&cell_alice.zome("how"), "create_alignment", alignment2.clone())
+    .call(&cell_alice.zome("how"), "create_unit", unit2.clone())
     .await;
 
     consistency_10s(&[&cell_alice, &cell_bob]).await; 
 
-    let alignments : Vec<AlignmentOutput> = conductor_alice
+    let units : Vec<UnitOutput> = conductor_alice
         .call(
             &cell_alice.zome("how"),
-            "get_alignments",
+            "get_units",
             (),
         )
         .await;
-    assert_eq!(alignments[1].hash, hash);
-    assert_eq!(alignments.len(), 2);
-    debug!("{:#?}", alignments);
+    assert_eq!(units[1].hash, hash);
+    assert_eq!(units.len(), 2);
+    debug!("{:#?}", units);
 
     let content  = vec![Section::new("summary", "p", "text/markdown", "m", "blah blah")];
     let document = Document {
