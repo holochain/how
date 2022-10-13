@@ -83,7 +83,7 @@ export class HowStore {
       switch(payload.message.type) {
       case "NewUnit":
         if (!get(this.units)[payload.unitHash]) {
-          this.updateUnitFromEntry(payload.message.content)
+          this.updateUnitFromEntry(new EntryRecord<Unit>(payload.message.content))
         }
         break;
       }

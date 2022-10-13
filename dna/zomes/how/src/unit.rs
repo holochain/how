@@ -11,10 +11,10 @@ fn get_units_path() -> Path {
 
 #[hdk_extern]
 pub fn create_unit(input: Unit) -> ExternResult<EntryHashB64> {
-    let _action_hash = create_entry(EntryTypes::Unitx(input.clone()))?;
+    let action_hash = create_entry(EntryTypes::Unitx(input.clone()))?;
     let tree_paths = input.tree_paths();
     let hash = hash_entry(&input)?;
-    let maybe_record = get(hash.clone(), GetOptions::default())?;
+    let maybe_record = get(action_hash, GetOptions::default())?;
     let record = maybe_record.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
         "Could not get the record created just now"
     ))))?;
