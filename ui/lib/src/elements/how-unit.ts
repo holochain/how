@@ -114,7 +114,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const docs = this._documentPaths.value[path]
     let document
     let documentHash: any
-    const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
+    const documents = docs ? docs.filter(doc => doc.updatedBy.length>0).map(docOutput => {
       return docOutput
     }) : undefined;
     if (documents) {

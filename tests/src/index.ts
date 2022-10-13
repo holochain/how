@@ -81,6 +81,7 @@ test("how basic tests", async (t) => {
     const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: serializeHash(hash),value}})
     t.deepEqual(entries, [{hash: entries[0].hash, value: root}, {hash: unit1_hash, value: unit1}]);
 
+    let newDocHash
     try {
     let tree:any = await alice_how.callZome({zome_name:'how', fn_name:'get_tree'} );
     console.log("Rust tree", tree);
@@ -90,14 +91,17 @@ test("how basic tests", async (t) => {
     const rootDocHash = jsTree.val.documents[0]
     const newData = "Update Root node content"
     rootDoc.content[0].content = newData
-    const newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'update_document', payload: {hash: rootDocHash, document: rootDoc, path: ""}} );
+    newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'update_document', payload: {hash: rootDocHash, document: rootDoc, path: ""}} );
     tree = await alice_how.callZome({zome_name:'how', fn_name:'get_tree',} );
     jsTree = buildTree(tree.tree,tree.tree[0])
     t.equal(newDocHash, jsTree.val.documents[1])
     } catch(e) {console.log("error in get_tree", e)}
 
-    let docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );
+    let docs:any = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );
     console.log("DOCS:", docs)
+    t.equal(docs[0].updatedBy.length, 1)
+    t.equal(serializeHash(docs[0].updatedBy[0]), newDocHash)
+    t.equal(docs[1].updatedBy.length, 0)
 
   })
 })

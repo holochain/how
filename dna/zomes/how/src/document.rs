@@ -42,9 +42,11 @@ pub fn create_document(input: DocumentInput) -> ExternResult<EntryHashB64> {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+
 pub struct DocumentOutput {
     pub hash: EntryHashB64,
-    pub updated: bool,
+    pub updated_by: Vec<EntryHash>,
     pub content: Document,
 }
 
@@ -64,6 +66,8 @@ fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
 
     let document_elements = HDK.with(|hdk| hdk.borrow().get_details(get_input))?;
 
+
+
     let documents: Vec<DocumentOutput> = document_elements
         .into_iter()
         .filter_map(|me| me)
@@ -73,7 +77,7 @@ fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
                 let hash = hash_entry(&doc).ok()?;
                 Some(DocumentOutput {
                     hash: hash.into(),
-                    updated: updates.len() > 0,
+                    updated_by: updates.iter().map(|d| d.action().entry_hash().unwrap().clone()).collect(),
                     content: doc,
                 })
             }

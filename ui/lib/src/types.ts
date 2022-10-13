@@ -1,6 +1,7 @@
 // TODO: add globally available interfaces for your elements
 
 import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
+import { EntryHash, Timestamp } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
 import { HowStore } from "./how.store";
 
@@ -114,7 +115,7 @@ export interface DocumentInput {
 
 export interface DocumentOutput {
   hash: EntryHashB64,
-  updated: boolean,
+  updatedBy: Array<EntryHash>,
   content: Document,
 }
 

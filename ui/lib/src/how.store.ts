@@ -1,5 +1,5 @@
 import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
-import { serializeHash, deserializeHash, AgentPubKeyMap, EntryRecord } from '@holochain-open-dev/utils';
+import { serializeHash, deserializeHash, AgentPubKeyMap, EntryRecord, fakeEntryHash } from '@holochain-open-dev/utils';
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
@@ -182,12 +182,12 @@ export class HowStore {
     })
   }
 
-  private markDocumentUpdated(path: string, hash: EntryHashB64) {
+  private markDocumentUpdated(path: string, hash: EntryHashB64, newHash: EntryHashB64) {
     const docs = get(this.documentPathStore)[path]
     if (docs) {
       let doc = docs.find(e=>e.hash == hash)
       if (doc) {
-        doc.updated = true
+        doc.updatedBy.push(deserializeHash(newHash)); 
       }
     }
   }
@@ -197,8 +197,7 @@ export class HowStore {
     documents.forEach(doc => {
       doc.content = new Document(doc.content)
     })
-    documents = documents.filter(doc => !doc.updated)
-    console.log("pull got", documents)
+    documents = documents.filter(doc => doc.updatedBy.length > 0)
     for (const s of documents) {
       this.updateDocumentStores(path, s)
     }
@@ -210,7 +209,7 @@ export class HowStore {
     let newHash: EntryHashB64 = ""
     if (path) {
       newHash = await this.service.updateDocument({hash, document, path})
-      this.markDocumentUpdated(path, hash)
+      this.markDocumentUpdated(path, hash, newHash)
       this.pullDocuments(path)
     }
     return newHash
