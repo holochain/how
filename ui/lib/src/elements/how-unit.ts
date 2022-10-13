@@ -8,7 +8,7 @@ import { Unsubscriber, Readable, get } from "svelte/store";
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash, serializeHash } from "@holochain-open-dev/utils";
-import {Unit, DocType, howContext} from "../types";
+import {Unit, DocType, howContext, SysState} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -21,6 +21,22 @@ import {
 } from "@scoped-elements/material-web";
 import { HowNode } from "./how-node";
 import { Action } from "@holochain/client";
+import { SvgButton } from "./svg-button";
+
+const getCurrentStateName  = (unit:Unit, documentState:string ): string => {
+  let i = 0;
+
+  let currentState = ""
+  for (const [procType, procName] of unit.processes) {
+      const elems = procType.split(".")
+      const typeName = elems[elems.length-1]
+      if (documentState == typeName) {
+         return procName
+      }
+      i+=1
+  } 
+  return documentState
+}
 
 /**
  * @element how-unit
@@ -92,9 +108,14 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     /** the list of documents for this unit */
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
+    let document
     const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
       return docOutput
     }) : undefined;
+    if (documents) {
+      document = documents[documents.length-1].content  
+    }
+
     // const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
     //   const doc = docOutput.content
     //   const title = doc.getSection("title")
@@ -115,17 +136,44 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const created = new Date(action.timestamp)
     const creatorHash = serializeHash(action.author)
     const creator = this._store.getProfileSync(creatorHash)
+    let state
+    let controls
+    if (document) {
+      if (document.state == SysState.Alive) {
+        controls = html`
+            <svg-button 
+              .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
+              .info=${"add child"}
+              .button=${"plus"}>
+            </svg-button> 
+          </div>
+        `
+        state = html`<div class="info-item">4/18/22<div class="info-item-name">completion time</div></div>`
+      } else {
+        state = html`<div class="info-item">${getCurrentStateName(unit, document.state)}<div class="info-item-name">state: ${document.state}</div></div>`
+      }      
+    } else {
+      state ="Not started.."
+    }
     return html`
       <div class="unit row">
         <div class="column">
-         <h2>${unit.shortName}</h2>
+         <div class="unit-name">${unit.shortName}</div>
          <div class="info-item">${unit.pathAbbreviation}<div class="info-item-name">path</div></div>
          <div class="info-item" title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}>${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}<div class="info-item-name">created</div></div>
          <div class="info-item">1 month ago<div class="info-item-name">modified</div></div>
          <div class="info-item">${stewards}
          <div class="info-item-name">stewards</div></div>
         </div>
-       <div class="node-element"><how-node .unit=${unit} .documents=${documents} /></div>
+        <div class="column">
+          <div class="progress">
+            <how-node .unit=${unit} .document=${document}> </how-node>
+          </div>
+          ${state}
+          <div class="row unit-controls">
+            ${controls}
+          </div>
+        </div>
       </div>
     `;
   }
@@ -137,6 +185,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       "how-document-dialog": HowDocumentDialog,
       "how-node": HowNode,
       "agent-avatar": AgentAvatar,
+      "svg-button": SvgButton,
     };
   }
   static get styles() {
@@ -146,16 +195,15 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       .unit {
         padding: 10px;
       }
-      .unit h4 {
-        margin-top: 0px;
-        margin-bottom: 5px;
+      .unit-name {
+        font-size: 30px;
+        font-weight: bold;
       }
-      .unit p {
-        line-height: 1.5em;
-        margin: 0;
+      .unit-controls {
+        justify-content: flex-end;
       }
-      .unit div {
-        margin-right: 20px;
+      .progress {
+        width: 200px;
       }
       .node-link {
         cursor: pointer;

@@ -146,6 +146,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
             }
             .section-content p {
                 margin: 0;
+                color: #555;
             }
             .template-marker {
                 font-weight: normal;
@@ -155,7 +156,9 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
                 padding: 0 3px 0 3px;
             }
             .section-name {
+              text-transform: capitalize;
               font-weight: bold;
+              font-size: 25px;
               margin-bottom: 2px;
             }
             .document-header {

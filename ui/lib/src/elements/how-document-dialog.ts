@@ -190,7 +190,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
                 `
               : html`${this.sections.map(
                     (section, index) =>
-                      html`<h4 class="section-name">${section.name}</h4>
+                      html`<div class="section-name">${section.name}</div>
                         <div>${sectionValue(section, index)}</div>`
                   )}
                   
@@ -217,7 +217,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
                 >`}
           </mwc-dialog>
           <how-new-section-dialog
-            .takenNames = ${this.sections.map((s)=>s.name)}
+            .takenNames=${this.sections.map((s)=>s.name)}
             @add-section=${this.addSection}
           ></how-new-section-dialog>
         `;
@@ -246,7 +246,10 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
               padding: 10px;
             }
             .section-name {
+              font-size: 25px;
+              font-weight: bold;
               margin-bottom: 0px;
+              text-transform: capitalize;
             }
           `,
         ];

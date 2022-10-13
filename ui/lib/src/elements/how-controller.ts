@@ -258,8 +258,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <how-unit id="how-unit" .currentUnitEh=${this._currentUnitEh}
         @document-updated=${this.handleDocumentUpdated}
         @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
-        @select-node=${(e: any)=>{const hash = this._unitsPath.value[e.detail]; this.handleUnitSelect(hash)}}>
-      </how-unit>`
+        @select-node=${(e: any)=>{const hash = this._unitsPath.value[e.detail]; this.handleUnitSelect(hash)}}
+        @add-child=${this.handleAddChild}
+     />`
      const document = this._currentDocumentEh ? 
      html`<how-document id="document" .currentDocumentEh=${this._currentDocumentEh}
           @document-updated=${this.handleDocumentUpdated}

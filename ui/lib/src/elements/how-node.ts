@@ -51,7 +51,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
     super();
   }
   @property() unit:Unit|undefined;
-  @property() documents:DocumentOutput[]|undefined;
+  @property() document:Document|undefined;
 
   @contextProvided({ context: howContext })
   _store!: HowStore;
@@ -76,13 +76,11 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
     if (!this.unit) {
       return;
     }
-    if (this.documents) {
-        const doc: Document = this.documents[this.documents.length-1].content
-        const docOutput: DocumentOutput = this.documents[this.documents.length-1]
+    if (this.document) {
         const processes = []
         let i = 0;
         const sweep = 360/this.unit.processes.length
-        const stateIndex = ORDER.indexOf(doc.state)
+        const stateIndex = ORDER.indexOf(this.document.state)
 
         let currentState = ""
         for (const [procType, procName] of this.unit.processes) {
@@ -91,56 +89,31 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
             const typeName = elems[elems.length-1]
             //@ts-ignore
             const color: string = i > stateIndex ? "#ccc" : COLORS[typeName]
-            if (doc.state == typeName) {
+            if (this.document.state == typeName) {
                 currentState = procName
             }
             processes.push(
-                {title:procName, color, start:sweep*i+.5, end:sweep*(i+1)-.5}
+                {title:procName, color, start:sweep*i+.75, end:sweep*(i+1)-.75}
             )
             i+=1
         } 
-        const state = doc.state == '_alive'? 
-            html`<div class="info-item">4/18/22<div class="info-item-name">completion time</div></div>` : 
-            html`<div class="info-item">${currentState}<div class="info-item-name">state: ${doc.state}</div></div>`
         return html`
         <div class="circle">${this.circle(processes)}</div>
-        <div class="state">
-            ${state}
-        </div>
         `
 
-    } else {
-        const width = 200
-        const x = width/2
-        const y = width/2
-        const r = x*.75
-    
+    } else {    
         return html`
-        <div>${this.unit.shortName}</div>
         ${this.circle([
-            {title:"x", color:"#ccc", start:0, end:360},
+            {title:"Not Defined", color:"#ccc", start:0, end:360},
         ])}    
         `
     }
-    // const processes = []
-    // for (const [procType, procName] of this.unit.processes) {
-    //     const path = `${procType}.${procName}`
-    //     const elems = procType.split(".")
-    //     const typeName = elems[elems.length-1]
-    //     processes.push(html`<p>${typeName}: <span class="node-link" @click=${()=>this.handleNodelink(path)}>${procName}</span></p>`)
-    //     } 
   }
 
-//   static get scopedElements() {
-//     return {
-//       "how-document-dialog": HowDocumentDialog,
-//     };
-//   }
   static get styles() {
     return [
       sharedStyles,
       css`
-
       `,
     ];
   }
