@@ -19,7 +19,6 @@ import {
 import {sectionValue} from "./utils";
 
 // @ts-ignore
-import {WcMermaid} from "wc-mermaid"
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 
 /**
@@ -61,53 +60,8 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         if (!this.currentDocumentEh) {
           return;
         }
-        const define = "define"
-        const refine = "refine"
-        const align = "align"
         const doc = this._documents.value[this.currentDocumentEh]
-        const graph  = `graph LR;
-        ${define} --> ${refine} --> ${align} --> _alive;
-        ${define} --> _defunct;
-        ${refine} --> _defunct;
-        ${align} --> _defunct;        
-        _alive --> _defunct;
-
-        style ${doc.state}  fill:#f9f,stroke:#333,stroke-width:4px`
-        return html`
-          <div class="document-header row">
-            <div class="column" style="padding:5px">
-            <wc-mermaid>
-                  ${graph}
-            </wc-mermaid>
-            </div>
-            <div class="document-controls row">
-              ${
-                doc.isAlive()
-                  ? ""
-                  : html`<mwc-button
-                      icon="edit"
-                      @click=${() => this.openDoc(this.currentDocumentEh, true)}
-                      >Edit</mwc-button
-                    >`
-              }
-              <div class="column" style="align-items:center">
-                <div>Move to:</div>
-
-                <div class="row">
-                  ${doc
-                    .nextStates()
-                    .map(
-                      (state) =>
-                        html`<mwc-button
-                          @click=${async () => this.stateChange(state)}
-                          >${state}</mwc-button
-                        >`
-                    )}
-                </div>
-              </div>
-            </mwc-button>
-            </div>
-          </div>
+        return html`  
           ${doc.content.map(
             (section, index) =>
               html` <div class="section">
@@ -133,7 +87,6 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         return {
           "mwc-button": Button,
           "how-document-dialog": HowDocumentDialog,
-          "wc-mermaid": WcMermaid,
           "agent-avatar": AgentAvatar
         };
       }

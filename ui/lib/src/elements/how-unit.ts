@@ -8,32 +8,27 @@ import { Unsubscriber, Readable, get } from "svelte/store";
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash, serializeHash } from "@holochain-open-dev/utils";
-import {Unit, DocType, howContext, SysState} from "../types";
+import {Unit, DocType, howContext, SysState, Document} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
+import { HowUnitDetails } from "./how-unit-details";
+import { SvgButton } from "./svg-button";
+import { HowNode } from "./how-node";
+
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext, Profile, AgentAvatar} from "@holochain-open-dev/profiles";
 import {
-  Button,
-  Dialog,
-  TextField,
-  TextArea,
+  Button, Dialog,
 } from "@scoped-elements/material-web";
-import { HowNode } from "./how-node";
 import { Action } from "@holochain/client";
-import { SvgButton } from "./svg-button";
 
 const getCurrentStateName  = (unit:Unit, documentState:string ): string => {
-  let i = 0;
-
-  let currentState = ""
   for (const [procType, procName] of unit.processes) {
       const elems = procType.split(".")
       const typeName = elems[elems.length-1]
       if (documentState == typeName) {
          return procName
       }
-      i+=1
   } 
   return documentState
 }
@@ -62,6 +57,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
 
   @query('#document-dialog')
   _documentDialogElem!: HowDocumentDialog;
+
+  @query('how-unit-details')
+  _detailsElem!: HowUnitDetails;
 
   get myNickName(): string {
     const p = get(this._myProfile)
@@ -97,6 +95,12 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   renderType(type: String, content: String) : String {
     return content
   }
+
+  private async stateChange(documentHash: EntryHashB64, newState: string) {
+    const newDocumentHash = await this._store.changeDocumentState(documentHash, newState)
+    this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+  }
+
   render() {
     if (!this.currentUnitEh) {
       return;
@@ -109,11 +113,13 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const path = this.getPath()
     const docs = this._documentPaths.value[path]
     let document
+    let documentHash: any
     const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
       return docOutput
     }) : undefined;
     if (documents) {
-      document = documents[documents.length-1].content  
+      document = documents[documents.length-1].content
+      documentHash = documents[documents.length-1].hash
     }
 
     // const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
@@ -137,24 +143,45 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const creatorHash = serializeHash(action.author)
     const creator = this._store.getProfileSync(creatorHash)
     let state
-    let controls
+    let controls 
     if (document) {
+      controls = document
+          .nextStates()
+          .map(
+            (state) =>
+              html`<svg-button 
+                @click=${async () => this.stateChange(documentHash, state)}
+                .info=${`move to ${state}`}
+                .button=${"move"}>
+                </svg-button>`
+          )
       if (document.state == SysState.Alive) {
-        controls = html`
-            <svg-button 
+        controls.push(html`
+            <svg-button
               .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
               .info=${"add child"}
               .button=${"plus"}>
             </svg-button> 
           </div>
-        `
+        `)
         state = html`<div class="info-item">4/18/22<div class="info-item-name">completion time</div></div>`
+      } else if (document.state == SysState.Defunct) {
+        state = html`<div class="info-item">Defunct</div>`
       } else {
+        controls.unshift(
+          html`<svg-button
+                      button="edit"
+                      @click=${() => this.openDoc(documentHash, true)}
+                      .info=${"edit"}
+                      ></svg-button
+                    >`
+        )
         state = html`<div class="info-item">${getCurrentStateName(unit, document.state)}<div class="info-item-name">state: ${document.state}</div></div>`
-      }      
+      }
     } else {
       state ="Not started.."
     }
+    const stateName = document ? document.state : ""
     return html`
       <div class="unit row">
         <div class="column">
@@ -166,15 +193,22 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
          <div class="info-item-name">stewards</div></div>
         </div>
         <div class="column">
+          <svg-button class="question-button"
+              .click=${() => this._detailsElem!.open()} 
+              .button=${"question"}>
+            </svg-button> 
           <div class="progress">
-            <how-node .unit=${unit} .document=${document}> </how-node>
+            <how-node .unit=${unit} .state=${stateName}> </how-node>
           </div>
           ${state}
-          <div class="row unit-controls">
+          <div class="column unit-controls">
             ${controls}
           </div>
         </div>
       </div>
+      <how-unit-details id="details-dialog" .state=${stateName}> </how-unit-details>
+      <how-document-dialog id="document-dialog"> </how-document-dialog>
+
     `;
   }
 
@@ -183,6 +217,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     return {
       "mwc-button": Button,
       "how-document-dialog": HowDocumentDialog,
+      "how-unit-details": HowUnitDetails,
       "how-node": HowNode,
       "agent-avatar": AgentAvatar,
       "svg-button": SvgButton,
@@ -192,6 +227,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     return [
       sharedStyles,
       css`
+      svg-button {
+        align-self: flex-end;
+      }
       .unit {
         padding: 10px;
       }

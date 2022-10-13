@@ -51,11 +51,10 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
     super();
   }
   @property() unit:Unit|undefined;
-  @property() document:Document|undefined;
+  @property() state:string = "";
 
   @contextProvided({ context: howContext })
   _store!: HowStore;
-  _documents = new StoreSubscriber(this, () => this._store.documents);
 
   circle(segments: Array<Segment>) {
     const width = 200
@@ -76,11 +75,11 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
     if (!this.unit) {
       return;
     }
-    if (this.document) {
+    if (this.state) {
         const processes = []
         let i = 0;
         const sweep = 360/this.unit.processes.length
-        const stateIndex = ORDER.indexOf(this.document.state)
+        const stateIndex = ORDER.indexOf(this.state)
 
         let currentState = ""
         for (const [procType, procName] of this.unit.processes) {
@@ -89,7 +88,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
             const typeName = elems[elems.length-1]
             //@ts-ignore
             const color: string = i > stateIndex ? "#ccc" : COLORS[typeName]
-            if (this.document.state == typeName) {
+            if (this.state == typeName) {
                 currentState = procName
             }
             processes.push(
