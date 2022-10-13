@@ -4,7 +4,7 @@ import { contextProvided } from "@lit-labs/context";
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash } from "@holochain-open-dev/utils";
-import {Unit, DocType, howContext, Document, DocumentOutput} from "../types";
+import {Unit, DocType, howContext, Document, DocumentOutput, SysState} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { StoreSubscriber } from "lit-svelte-stores";
@@ -75,7 +75,13 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
     if (!this.unit) {
       return;
     }
-    if (this.state) {
+    if (this.state == SysState.Defunct) {
+      return html`
+      ${this.circle([
+          {title:"Defunct", color:"#0c0c2e", start:0, end:360},
+      ])}    
+      `
+  } else if (this.state) {
         const processes = []
         let i = 0;
         const sweep = 360/this.unit.processes.length
