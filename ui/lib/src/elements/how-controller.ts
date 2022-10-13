@@ -334,7 +334,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
           font-weight: bold;
           margin-right: auto;
         }
-
+        #document {
+          border-top: solid .1em #888;
+        }
         .appBody {
           width: 100%;
           margin-top: 2px;

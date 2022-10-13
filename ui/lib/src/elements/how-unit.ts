@@ -18,7 +18,7 @@ import { HowNode } from "./how-node";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext, Profile, AgentAvatar} from "@holochain-open-dev/profiles";
 import {
-  Button, Dialog,
+  Button,
 } from "@scoped-elements/material-web";
 import { Action } from "@holochain/client";
 
