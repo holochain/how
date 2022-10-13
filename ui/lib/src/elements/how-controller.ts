@@ -320,12 +320,12 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       sharedStyles,
       css`
         :host {
-          margin: 10px;
           font-family: Roboto,'Open Sans','Helvetica Neue',sans-serif;
+          margin: auto;
         }
 
         #top-bar {
-          background-color: lightgray;
+          margin: 10px;
           align-items: center;
           justify-content: flex-end;
         }
@@ -338,8 +338,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
           border-top: solid .1em #888;
         }
         .appBody {
-          width: 100%;
-          margin-top: 2px;
+          margin-top: 10px;
+          margin-left: 20px;
+          margin-right: 20px;
+          margin-bottom: 20px;
           display:flex;
         }
 

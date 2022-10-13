@@ -56,7 +56,7 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
   render() {
     if (!this.loaded) return html`<span>Loading...</span>`;
     return html`
-      <profile-prompt style="margin-left:-7px; margin-top:0px;display:block;">
+      <profile-prompt>
          <how-controller></how-controller>
       </profile-prompt>
     `;
@@ -66,7 +66,6 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
     return {
       "profile-prompt": ProfilePrompt,
       "how-controller": HowController,
-      "how-unit": HowUnit,
     };
   }
 }
