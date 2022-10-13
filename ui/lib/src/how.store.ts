@@ -16,6 +16,7 @@ import {
   DocType,
   Section,
   SectionType,
+  DocInfo,
 } from './types';
 import {
   ProfilesStore,
@@ -197,7 +198,7 @@ export class HowStore {
     documents.forEach(doc => {
       doc.content = new Document(doc.content)
     })
-    documents = documents.filter(doc => doc.updatedBy.length > 0)
+    //documents = documents.filter(doc => doc.updatedBy.length == 0)
     for (const s of documents) {
       this.updateDocumentStores(path, s)
     }
@@ -335,6 +336,24 @@ export class HowStore {
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
     return await this.service.createDocument({path, document})
+  }
+ 
+  getCurrentDocument(path:string) : DocInfo | undefined {
+    const docs = get(this.documentPaths)[path]
+    let document
+    let documentHash: any
+    const documents = docs ? docs.filter(doc => doc.updatedBy.length==0).map(docOutput => {
+      return docOutput
+    }) : undefined;
+    if (documents && documents.length> 0) {
+      return {
+        content: documents[documents.length-1].content,
+        hash: documents[documents.length-1].hash,
+        updated: documents[documents.length-1].actions[0].timestamp/1000
+      }
+    } else {
+      return undefined
+    }
   }
 
   getDocumentPath(hash: EntryHashB64) : string | null {

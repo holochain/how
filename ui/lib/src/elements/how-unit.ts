@@ -109,18 +109,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const unit: Unit = this._units.value[this.currentUnitEh]
     const action: Action = this._unitsActions.value[this.currentUnitEh]
 
-    /** the list of documents for this unit */
     const path = this.getPath()
-    const docs = this._documentPaths.value[path]
-    let document
-    let documentHash: any
-    const documents = docs ? docs.filter(doc => doc.updatedBy.length>0).map(docOutput => {
-      return docOutput
-    }) : undefined;
-    if (documents) {
-      document = documents[documents.length-1].content
-      documentHash = documents[documents.length-1].hash
-    }
+    const docInfo = this._store.getCurrentDocument(path)
+
 
     // const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
     //   const doc = docOutput.content
@@ -144,13 +135,17 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const creator = this._store.getProfileSync(creatorHash)
     let state
     let controls 
-    if (document) {
+
+    let updated: Date |undefined
+    if (docInfo) {
+      updated = new Date(docInfo.updated)
+      const document = docInfo.content
       controls = document
           .nextStates()
           .map(
             (state) =>
               html`<svg-button 
-                @click=${async () => this.stateChange(documentHash, state)}
+                @click=${async () => this.stateChange(docInfo.hash, state)}
                 .info=${`move to ${state}`}
                 .button=${"move"}>
                 </svg-button>`
@@ -171,7 +166,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         controls.unshift(
           html`<svg-button
                       button="edit"
-                      @click=${() => this.openDoc(documentHash, true)}
+                      @click=${() => this.openDoc(docInfo.hash, true)}
                       .info=${"edit"}
                       ></svg-button
                     >`
@@ -181,14 +176,14 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     } else {
       state ="Not started.."
     }
-    const stateName = document ? document.state : ""
+    const stateName = docInfo ? docInfo.content.state : ""
     return html`
       <div class="unit row">
         <div class="column">
          <div class="unit-name">${unit.shortName}</div>
          <div class="info-item">${unit.pathAbbreviation}<div class="info-item-name">path</div></div>
          <div class="info-item" title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}>${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}<div class="info-item-name">created</div></div>
-         <div class="info-item">1 month ago<div class="info-item-name">modified</div></div>
+         ${ updated ? html`<div class="info-item" title=${`Last modified ${updated}`}>${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}<div class="info-item-name">modified</div></div>`:''}
          <div class="info-item">${stewards}
          <div class="info-item-name">stewards</div></div>
         </div>

@@ -81,6 +81,11 @@ test("how basic tests", async (t) => {
     const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: serializeHash(hash),value}})
     t.deepEqual(entries, [{hash: entries[0].hash, value: root}, {hash: unit1_hash, value: unit1}]);
 
+
+    let docs:any = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );
+    t.equal(docs[0].updatedBy.length, 0)
+    t.equal(docs.length, 1)
+
     let newDocHash
     try {
     let tree:any = await alice_how.callZome({zome_name:'how', fn_name:'get_tree'} );
@@ -97,7 +102,7 @@ test("how basic tests", async (t) => {
     t.equal(newDocHash, jsTree.val.documents[1])
     } catch(e) {console.log("error in get_tree", e)}
 
-    let docs:any = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );
+    docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );
     console.log("DOCS:", docs)
     t.equal(docs[0].updatedBy.length, 1)
     t.equal(serializeHash(docs[0].updatedBy[0]), newDocHash)

@@ -48,6 +48,7 @@ pub struct DocumentOutput {
     pub hash: EntryHashB64,
     pub updated_by: Vec<EntryHash>,
     pub content: Document,
+    pub actions: Vec<Action>,
 }
 
 #[hdk_extern]
@@ -72,13 +73,14 @@ fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
         .into_iter()
         .filter_map(|me| me)
         .filter_map(|details| match details {
-            Details::Entry(EntryDetails { entry, updates, .. }) => {
+            Details::Entry(EntryDetails { entry, updates, actions , ..}) => {
                 let doc = entry.try_into().ok()?;
                 let hash = hash_entry(&doc).ok()?;
                 Some(DocumentOutput {
                     hash: hash.into(),
                     updated_by: updates.iter().map(|d| d.action().entry_hash().unwrap().clone()).collect(),
                     content: doc,
+                    actions: actions.into_iter().map(|a| a.action().clone()).collect(),
                 })
             }
             _ => None,
