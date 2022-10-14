@@ -337,7 +337,7 @@ export class HowStore {
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
     return await this.service.createDocument({path, document})
   }
- 
+
   getCurrentDocument(path:string) : DocInfo | undefined {
     const docs = get(this.documentPaths)[path]
     let document

@@ -57,7 +57,9 @@ The link tags to Units follow this format:
 where `phase` is one of:
 - define (wip)
 - refine (presumed complete ready for review)
-- align (approved)
+- align (approving)
+- _alive (approved)
+- _defunct
 
 The protocol for each one of these phases must be named in the unit and point to the protocol standard on the tree being used.
 

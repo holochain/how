@@ -19,159 +19,176 @@ const std_procs: Array<[ProcessType, ProcessName]> = [
 export function initialTree(progenitor: AgentPubKeyB64) {
   const init: Initialization = {
     units: [
-      {
+      [SysState.Alive, {
         parents: [], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "", // max 10 char
         shortName: "Holochain Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: [], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "soc_proto", // max 10 char
         shortName: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: [], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "hApps", // max 10 char
         shortName: "hApp Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      ["define", {
         parents: ["hApps"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "ERC721_interop", // max 10 char
         shortName: "ERC721 Interoperability Statandard", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "process", // max 10 char
         shortName: "How Processes", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "define", // max 10 char
         shortName: "Proposal procesess", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "declaration", // max 10 char
         shortName: "Declaration", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "petition", // max 10 char
         shortName: "Petition", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "refine", // max 10 char
         shortName: "Refinement Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process.refine"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "comment_period", // max 10 char
         shortName: "Comment Period", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "align", // max 10 char
         shortName: "Unit Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "vote", // max 10 char
         shortName: "Voting", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "consensus", // max 10 char
         shortName: "Consensus", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "sortition", // max 10 char
         shortName: "Sortition", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: [], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "hc_system", // max 10 char
         shortName: "Holochain System", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "conductor", // max 10 char
         shortName: "Holochain Conductor", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
-      {
+      }],
+      [SysState.Alive, {
         parents: ["hc_system.conductor"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "api", // max 10 char
         shortName: "Holochain Conductor API", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         history: {},
         meta: {},
-      },
+      }],
     ],
     documents: [
       {

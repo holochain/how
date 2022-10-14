@@ -1,32 +1,61 @@
 pub use hdk::prelude::*;
 pub use hdk::hash_path::path::TypedPath;
-use holo_hash::EntryHashB64;
 use how_core::{TREE_ROOT, LinkTypes};
 
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
+pub struct UnitInfo {
+    hash: EntryHash,
+    version: String,
+    state: String,
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
 pub struct Content {
     name: String,
-    units: Vec<EntryHashB64>,
-    documents: Vec<EntryHashB64>,
+    units: Vec<UnitInfo>,
+    documents: Vec<EntryHash>,
 }
 
-fn get_entry_hashes(path: &Path, link_type: LinkTypes) -> ExternResult<Vec<EntryHashB64>> {
-    let links = get_links(path.path_entry_hash()?, link_type, None)?;
-    let entry_hashes = links.into_iter().map(|l| {
-        let e : EntryHash = l.target.as_hash().clone().into();
-        e.into()
-    }).collect();
-    Ok(entry_hashes)
+fn get_entry_hashes(path: &Path) -> ExternResult<(Vec<UnitInfo>,Vec<EntryHash>)> {
+    let mut units = vec![];
+    let mut documents = vec![];
+    let links = get_links(path.path_entry_hash()?, vec![LinkTypes::Unit, LinkTypes::Document], None)?;
+    for l in links {
+        let link_type = LinkTypes::try_from(ScopedLinkType {
+            zome_id: l.zome_id,
+            zome_type: l.link_type,
+        })?;
+        let target = l.target.into();
+        match link_type {
+            LinkTypes::Document => documents.push(target),
+            LinkTypes::Unit => {
+                let tag_string = String::from_utf8(l.tag.clone().into_inner())
+                .map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert link tag to string"))))?;
+                let x : Vec<&str>= tag_string.split("-").collect();
+                if x.len() != 2 {
+                    return Err(wasm_error!(WasmErrorInner::Guest(format!("Badly formed link: {:?}", tag_string))));
+                }
+                let state = x[0].into();
+                let version = x[1].into();
+                units.push(UnitInfo{
+                    hash: target,
+                    version,
+                    state});                
+            },
+            _ => (),
+        };
+    };
+    Ok((units,documents))
 }
 
 fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult<()>{
     for path in path.into_typed(ScopedLinkType::try_from(LinkTypes::Tree)?).children_paths()? {
         let v = path.as_ref();
+        let (units, documents) = get_entry_hashes(&path)?;
         let val = Content {
             name: String::try_from(&v[v.len()-1]).map_err(|e| wasm_error!(e.into()))?,
-            units: get_entry_hashes(&path, LinkTypes::Unit)?,
-            documents: get_entry_hashes(&path, LinkTypes::Document)?,
+            units,
+            documents,
         };
         let idx = tree.insert(node, val);
         build_tree(tree, idx, path.path)?;
@@ -44,10 +73,11 @@ pub fn tree_path(path_str: String) -> Path {
 #[hdk_extern]
 pub fn get_tree(_input: ()) -> ExternResult<Tree<Content>> {
     let root_path = Path::from(TREE_ROOT);
+    let (units, documents) = get_entry_hashes(&root_path)?;
     let val = Content {
         name: String::from(""),
-        units: get_entry_hashes(&root_path, LinkTypes::Unit)?,
-        documents: get_entry_hashes(&root_path, LinkTypes::Document)?,
+        units,
+        documents,
     };
     let mut tree = Tree::new(val);
     build_tree(&mut tree, 0, root_path)?;

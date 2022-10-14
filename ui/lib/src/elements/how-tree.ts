@@ -1,5 +1,5 @@
 import {css, html, LitElement} from "lit";
-import {property, query} from "lit/decorators.js";
+import {property, query, state} from "lit/decorators.js";
 
 import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
@@ -12,6 +12,8 @@ import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles
 import {
   Button, 
 } from "@scoped-elements/material-web";
+import { HowNode } from "./how-node";
+import { serializeHash } from "@holochain-open-dev/utils";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
 
 /**
@@ -33,18 +35,22 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
 
   _tree = new StoreSubscriber(this, () => this._store.tree);
   _units = new StoreSubscriber(this, () => this._store.units);
- 
+  _documents = new StoreSubscriber(this, () => this._store.documents);
+
   select(id: string) : void {
     this.currentNode = id
     this.dispatchEvent(new CustomEvent('node-selected', { detail: id, bubbles: true, composed: true }));
   }
 
   getNodeId(node: Node) : string {
-    return node.val.units.length>0 ? node.val.units[0] : node.id
+    return node.val.units.length>0 ? serializeHash(node.val.units[0].hash) : node.id
   }
 
   buildTree(node: Node):any {
     const nodeId = this.getNodeId(node)
+    //const documentsMap = this._documents.value
+    //const docs = node.val.documents.map(hash => documentsMap[serializeHash(hash)])
+    const state = node.val.units[0].state// docs[docs.length-1]? docs[docs.length-1].state : ""
     return html`
     <li class="${this.treeType}">
       <span class="${nodeId == this.currentNode ? "current" : ""}" @click=${()=>this.select(nodeId)}>
@@ -52,6 +58,9 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
         <!-- <mwc-button icon="add_circle" @click=${
           () => this.dispatchEvent(new CustomEvent('add-child', { detail: nodeId, bubbles: true, composed: true }))}>
           </mwc-button> -->
+          <div style="width:50px">
+          <how-node .unit=${this._units.value[nodeId]} state=${state}> </how-node>
+          </div>
       </span>
 
       ${node.children.length>0 ? html`<ul>${node.children.map(n => this.buildTree(n))}</ul>` :html``}
@@ -67,6 +76,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   static get scopedElements() {
     return {
         "mwc-button": Button,
+        "how-node": HowNode
       };
   }
   static get styles() {

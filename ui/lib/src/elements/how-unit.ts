@@ -21,6 +21,7 @@ import {
   Button,
 } from "@scoped-elements/material-web";
 import { Action } from "@holochain/client";
+import { InfoItem } from "./info-item";
 
 const getCurrentStateName  = (unit:Unit, documentState:string ): string => {
   for (const [procType, procName] of unit.processes) {
@@ -180,12 +181,16 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     return html`
       <div class="unit row">
         <div class="column">
-         <div class="unit-name">${unit.shortName}</div>
-         <div class="info-item">${unit.pathAbbreviation}<div class="info-item-name">path</div></div>
-         <div class="info-item" title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}>${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}<div class="info-item-name">created</div></div>
-         ${ updated ? html`<div class="info-item" title=${`Last modified ${updated}`}>${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}<div class="info-item-name">modified</div></div>`:''}
-         <div class="info-item">${stewards}
-         <div class="info-item-name">stewards</div></div>
+        <info-item size="26px" .item=${unit.shortName} name="short name"></info-item>
+        <info-item .item=${unit.version.slice(4)} .name=${`version (${unit.version.substring(1,4)})`}></info-item>
+        <info-item .item=${unit.pathAbbreviation} name="path"></info-item>
+        <info-item 
+          .title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}
+          .item=${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="created">
+        </info-item>
+        ${ updated ? html`<info-item title=${`Last modified ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="modified"</info-item>`:''}
+        <div class="info-item">${stewards}
+        <div class="info-item-name">stewards</div></div>
         </div>
         <div class="column">
           <svg-button class="question-button"
@@ -216,6 +221,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       "how-node": HowNode,
       "agent-avatar": AgentAvatar,
       "svg-button": SvgButton,
+      "info-item": InfoItem,
     };
   }
   static get styles() {

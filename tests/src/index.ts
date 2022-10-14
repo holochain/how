@@ -33,6 +33,7 @@ test("how basic tests", async (t) => {
     let unit1 = {
       parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
       shortName: "API",
+      version: "vidx1",
       pathAbbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
       processes: [["soc_proto.procs.define","petition"]], // state-machine definition
@@ -43,6 +44,7 @@ test("how basic tests", async (t) => {
     let root = {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       shortName: "Holochain Community Standards",
+      version: "vidx0",
       pathAbbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
       processes: [["soc_proto.procs.define","petition"]], // state-machine definition
@@ -90,6 +92,7 @@ test("how basic tests", async (t) => {
     try {
     let tree:any = await alice_how.callZome({zome_name:'how', fn_name:'get_tree'} );
     console.log("Rust tree", tree);
+    t.equal(tree.tree.length, 5)
     let jsTree = buildTree(tree.tree,tree.tree[0])
     console.log("JS tree", jsTree)
 
@@ -99,7 +102,7 @@ test("how basic tests", async (t) => {
     newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'update_document', payload: {hash: rootDocHash, document: rootDoc, path: ""}} );
     tree = await alice_how.callZome({zome_name:'how', fn_name:'get_tree',} );
     jsTree = buildTree(tree.tree,tree.tree[0])
-    t.equal(newDocHash, jsTree.val.documents[1])
+    t.equal(newDocHash, serializeHash(jsTree.val.documents[1]))
     } catch(e) {console.log("error in get_tree", e)}
 
     docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );

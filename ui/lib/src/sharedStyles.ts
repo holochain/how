@@ -18,7 +18,6 @@ export const sharedStyles = css`
   .info-item {
     font-size: 1.1em;
     font-weight: bold;
-    margin-bottom: 12px;
   }
   .info-item-name {
     font-size: .9em;

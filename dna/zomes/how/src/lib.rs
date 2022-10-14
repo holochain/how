@@ -8,7 +8,7 @@ pub mod document;
 pub mod tree;
 pub mod signals;
 use how_core::Unit;
-use crate::unit::create_unit;
+use unit::create_unit_inner;
 use crate::document::{DocumentInput, create_document};
 
 #[hdk_extern]
@@ -27,15 +27,15 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Initialization {
-    pub units: Vec<Unit>,
+    pub units: Vec<(String, Unit)>,
     pub documents: Vec<DocumentInput>,
 }
 
 #[hdk_extern]
 fn initialize(input: Initialization) -> ExternResult<()> {
     // add progenitor check for call
-    for unit in input.units {
-        create_unit(unit)?;
+    for (state, unit) in input.units {
+        create_unit_inner(unit, &state)?;
     }
     for document in input.documents {
         create_document(document)?;

@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import { contextProvided } from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Unit, howContext, Dictionary, Node} from "../types";
+import {Unit, howContext, Dictionary, Node, VersioningType} from "../types";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
@@ -34,8 +34,16 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
 
   @query('#name-field')
   _nameField!: TextField;
+
+  @query('#version-field')
+  _versionField!: TextField;
+
+  @query('#versioning-type-select')
+  _versioningTypeSelect!: Select;
+
   @query('#title-field')
   _titleField!: TextField;
+
   @query('#summary-field')
   _summaryField!: TextArea;
 
@@ -123,6 +131,9 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
     if (!this._titleField.validity.valid) {
       this._titleField.reportValidity()
     }
+    if (!this._versionField.validity.valid) {
+      this._versionField.reportValidity()
+    }
     if (!this._summaryField.validity.valid) {
       this._summaryField.reportValidity()
     }
@@ -131,6 +142,7 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
 
     const unit: Unit = {
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
+      version: `${this._versioningTypeSelect.value}${this._versionField.value}`, // max 100 chars
       pathAbbreviation: this._nameField.value, // max 10 char
       shortName: this._titleField.value,
       stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
@@ -199,6 +211,20 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   <mwc-textfield dialogInitialFocus type="text"
                  @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
                  id="name-field" minlength="3" maxlength="64" label="Path Abbreviation" autoValidate=true required></mwc-textfield>
+  <mwc-select
+        id="versioning-type-select" 
+        label="Select version type" 
+        @closing=${(e: any) => e.stopPropagation()}
+      >
+        <mwc-list-item selected value=${VersioningType.Semantic}>Semantic</mwc-list-item>
+        <mwc-list-item value=${VersioningType.Indexed}>Indexed</mwc-list-item>
+  </mwc-select>
+  <mwc-textfield type="text"
+                 @input=${() => (this.shadowRoot!.getElementById("version-field") as TextField).reportValidity()}
+                 id="version-field" minlength="1" maxlength="100" label="Version" autoValidate=true required></mwc-textfield>
+
+
+
   <mwc-textfield type="text"
                  @input=${() => (this.shadowRoot!.getElementById("title-field") as TextField).reportValidity()}
                  id="title-field" minlength="3" maxlength="64" label="Title" autoValidate=true required></mwc-textfield>

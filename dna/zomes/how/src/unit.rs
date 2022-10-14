@@ -9,8 +9,15 @@ fn get_units_path() -> Path {
     Path::from("units")
 }
 
+pub const START_STATE: &str = "define";
+pub const ALIVE_STATE: &str = "_alive";
+
 #[hdk_extern]
 pub fn create_unit(input: Unit) -> ExternResult<EntryHashB64> {
+    create_unit_inner(input, START_STATE)
+}
+
+pub fn create_unit_inner(input: Unit, state: &str) -> ExternResult<EntryHashB64> {
     let action_hash = create_entry(EntryTypes::Unitx(input.clone()))?;
     let tree_paths = input.tree_paths();
     let hash = hash_entry(&input)?;
@@ -24,11 +31,13 @@ pub fn create_unit(input: Unit) -> ExternResult<EntryHashB64> {
     typed_path.ensure()?;
 
     let anchor_hash = path.path_entry_hash()?;
-    create_link(anchor_hash, hash.clone(), LinkTypes::Unit, ())?;
+    let tag = LinkTag::new(String::from(format!("{}-{}", state, input.version)));
+
+    create_link(anchor_hash, hash.clone(), LinkTypes::Unit, tag.clone())?;
     for path in tree_paths {
         let typed_path = path.clone().into_typed(ScopedLinkType::try_from(LinkTypes::Tree)?);
         typed_path.ensure()?;
-        create_link(path.path_entry_hash()?, hash.clone(),LinkTypes::Unit, ())?;
+        create_link(path.path_entry_hash()?, hash.clone(),LinkTypes::Unit, tag.clone())?;
     }
     Ok(hash.into())
 }

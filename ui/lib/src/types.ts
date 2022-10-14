@@ -10,7 +10,7 @@ export const howContext = createContext<HowStore>('how/service');
 export type Dictionary<T> = { [key: string]: T };
 
 export interface Initialization {
-  units: Array<Unit>,
+  units: Array<[string,Unit]>,
   documents: Array<DocumentInput>,
 }
 
@@ -19,12 +19,18 @@ export type ProcessType = string
 
 export interface Unit {
   parents: Array<string>,
+  version: string,
   pathAbbreviation: string,
   shortName: string,
   stewards: Array<AgentPubKeyB64>,
   processes: Array<[ProcessType, ProcessName]>,
   history: Dictionary<EntryHashB64>,
   meta?: Dictionary<string>;
+}
+
+export enum VersioningType {
+  Semantic = "vsem",
+  Indexed = "vidx"
 }
 
 export enum DocType {
@@ -126,24 +132,28 @@ export interface DocInfo {
   updated: Timestamp,
 }
 
-
 export interface UpdateDocumentInput {
   hash: EntryHashB64,
   path: string,
   document: Document,
 }
 
-
 export type Signal =
   | {
     unitHash: EntryHashB64, message: {type: "NewUnit", content:  Unit}
   }
-  
+
+export type UnitInfo = {
+    hash: EntryHash,
+    version: String,
+    state: String,
+}
 export type Content = {
   name: string,
-  units: Array<EntryHashB64>,
-  documents: Array<EntryHashB64>
+  units: Array<UnitInfo>,
+  documents: Array<EntryHash>
 }
+
 export type RustNode = {
     idx: number,
     val: Content,

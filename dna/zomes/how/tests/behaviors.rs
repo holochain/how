@@ -40,6 +40,7 @@ pub async fn test_basics() {
 
     let unit1 = Unit {
         parents: vec!["hc_system".into()], // full paths to parent nodes (remember it's a DAG)
+        version: "vsem2.0.3".into(),
         path_abbreviation: "conductor".into(), // max 10 char
         short_name: "Conductor".into(),
         stewards: vec![],  // people who can change this document
@@ -56,6 +57,7 @@ pub async fn test_basics() {
 
     let unit2 = Unit {
         parents: vec!["hc_system.conductor.api".into()], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1".into(),
         path_abbreviation: "app".into(), // max 10 char
         short_name: "Application API".into(), // max 10 char
         stewards: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document

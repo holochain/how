@@ -13,6 +13,7 @@ pub const TREE_ROOT:&str = "T";
 #[derive(Clone)]
 pub struct Unit {
     pub parents: Vec<String>, // full paths to parent nodes (remember it's a DAG)
+    pub version: String, // [version-prefix][version-num]
     pub short_name: String,
     pub path_abbreviation: String, // max 10 char
     pub stewards: Vec<AgentPubKeyB64>,  // people who can change this document
