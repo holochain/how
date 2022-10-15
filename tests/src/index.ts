@@ -1,6 +1,6 @@
 import { ActionHash, DnaSource } from "@holochain/client";
 import { pause, runScenario, Scenario  } from "@holochain/tryorama";
-import { RecordBag, EntryRecord } from '@holochain-open-dev/utils';
+import { RecordBag, EntryRecord, deserializeHash } from '@holochain-open-dev/utils';
 
 import test from "tape-promise/tape.js";
 
@@ -29,19 +29,7 @@ test("how basic tests", async (t) => {
     const boboAgentKey = serializeHash(bobbo.agentPubKey);
     const aliceAgentKey = serializeHash(alice.agentPubKey);
 
-    // Create a unit
-    let unit1 = {
-      parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
-      shortName: "API",
-      version: "vidx1",
-      pathAbbreviation: "app", // max 10 char
-      stewards: [],  // people who can change this document
-      processes: [["soc_proto.procs.define","petition"]], // state-machine definition
-      history: {},
-      meta: {}
-    };
-
-    let root = {
+    let rootUnit = {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       shortName: "Holochain Community Standards",
       version: "vidx0",
@@ -58,35 +46,77 @@ test("how basic tests", async (t) => {
         {name: "title", content: "ROOT NODE DOC", source: "", sectionType:"", contentType:"text/plain"},
         {name: "summary", content: "{}", source: "", sectionType:"", contentType:"text/plain"}
       ],
-      state: "define",
       editors: [],
       meta: {}
     }
 
-    const documentSpec = {
+    const initializer = {
       path: "",
-      document: rootDoc
+      documentType: "_document",
+      content: [
+        {name: "title", content: "ROOT NODE DOC", source: "", sectionType:"", contentType:"text/plain"},
+        {name: "summary", content: "{}", source: "", sectionType:"", contentType:"text/plain"}
+      ],
+      editors: [],
+      meta: {}
     }
  //   a_and_b_conductor.setSignalHandler((signal) => {
  //     console.log("Received Signal:",signal)
 //      t.deepEqual(signal.data.payload.message, { type: 'NewUnit', content: unit1})
  //   })
-
-    await alice_how.callZome({zome_name:'how', fn_name:'initialize', payload: {units: [root], documents:[documentSpec]}} );
-
-    const unit1_hash = await alice_how.callZome({zome_name:'how', fn_name:'create_unit', payload: unit1} );
-    t.ok(unit1_hash)
-    console.log("unit1_hash", unit1_hash);
-
-    const units :Array<any> = await alice_how.callZome({zome_name:'how', fn_name:'get_units'} );
-    const bag = new RecordBag(units);
-    const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: serializeHash(hash),value}})
-    t.deepEqual(entries, [{hash: entries[0].hash, value: root}, {hash: unit1_hash, value: unit1}]);
-
+    try {
+      await alice_how.callZome({zome_name:'how', fn_name:'initialize', payload: {units: [["_alive", rootUnit]], documents:[initializer]}} );
+    }
+    catch (e) {
+      console.log("Error in initialize", e)
+    }
 
     let docs:any = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );
     t.equal(docs[0].updatedBy.length, 0)
     t.equal(docs.length, 1)
+
+    // Create a unit and a doc for that unit.
+    let unit1 = {
+      parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
+      shortName: "app API",
+      version: "vidx1",
+      pathAbbreviation: "app", // max 10 char
+      stewards: [],  // people who can change this document
+      processes: [["soc_proto.procs.define","petition"]], // state-machine definition
+      history: {},
+      meta: {}
+    };
+    
+    const doc1Path = "hc_system.conductor.api.app"
+
+    const unit1Hash: string = await alice_how.callZome({zome_name:'how', fn_name:'create_unit', payload: unit1} );
+    t.ok(unit1Hash)
+    console.log("unit1Hash", unit1Hash);
+
+    let document1 = {  
+      unitHash: deserializeHash(unit1Hash),
+      documentType: "_document",
+      content: [
+        {name: "title", content: "The Application API", source: "", sectionType:"", contentType:"text/plain"},
+        {name: "summary", content: "Some long dummary", source: "", sectionType:"", contentType:"text/plain"}
+      ],
+      state: "define",
+      editors: [],
+      meta: {}
+    }
+
+    const document1Hash = await alice_how.callZome({zome_name:'how', fn_name:'create_document', payload: {path:doc1Path, document:document1}} );
+    t.ok(document1Hash)
+    console.log("document1Hash", document1Hash);
+
+    docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload: doc1Path} );
+    t.equal(docs.length, 1)
+    t.equal(docs[0].hash, document1Hash)
+
+    const units :Array<any> = await alice_how.callZome({zome_name:'how', fn_name:'get_units'} );
+    const bag = new RecordBag(units);
+    const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: serializeHash(hash),value}})
+    t.deepEqual(entries, [{hash: entries[0].hash, value: rootUnit}, {hash: unit1Hash, value: unit1}]);
 
     let newDocHash
     try {
@@ -96,20 +126,32 @@ test("how basic tests", async (t) => {
     let jsTree = buildTree(tree.tree,tree.tree[0])
     console.log("JS tree", jsTree)
 
-    const rootDocHash = jsTree.val.documents[0]
-    const newData = "Update Root node content"
-    rootDoc.content[0].content = newData
-    newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'update_document', payload: {hash: rootDocHash, document: rootDoc, path: ""}} );
+    const newData = "Update API node content"
+    document1.content[0].content = newData
+    console.log("document1Hash", document1Hash)
+    newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'update_document', payload: {hash: document1Hash, document: document1, path: doc1Path}} );
     tree = await alice_how.callZome({zome_name:'how', fn_name:'get_tree',} );
-    jsTree = buildTree(tree.tree,tree.tree[0])
-    t.equal(newDocHash, serializeHash(jsTree.val.documents[1]))
+    console.log("Rust tree 2", tree)
+
+    const node = tree.tree[4].val
+    t.equal(newDocHash, serializeHash(node.documents[1]))
     } catch(e) {console.log("error in get_tree", e)}
 
-    docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:""} );
+    docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
     console.log("DOCS:", docs)
     t.equal(docs[0].updatedBy.length, 1)
     t.equal(serializeHash(docs[0].updatedBy[0]), newDocHash)
     t.equal(docs[1].updatedBy.length, 0)
+
+    document1.state= "align"
+    try {
+      newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'advance_state', payload: {newState: "align", unitHash: unit1Hash, documentHash: document1Hash, document: document1, path: doc1Path}} );
+      const tree:any = await alice_how.callZome({zome_name:'how', fn_name:'get_tree',} );
+      t.equal(tree.tree[4].val.units[0].state, 'align')
+      t.equal(tree.tree[4].val.documents.length, 3)
+      console.log("Rust tree updated node", tree.tree[4].val)
+
+    } catch(e) {console.log("error in advance_state", e)}
 
   })
 })

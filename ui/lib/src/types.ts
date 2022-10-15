@@ -11,21 +11,51 @@ export type Dictionary<T> = { [key: string]: T };
 
 export interface Initialization {
   units: Array<[string,Unit]>,
-  documents: Array<DocumentInput>,
+  documents: Array<DocumentInitializer>,
 }
 
 export type ProcessName = string
 export type ProcessType = string
 
-export interface Unit {
-  parents: Array<string>,
-  version: string,
-  pathAbbreviation: string,
-  shortName: string,
-  stewards: Array<AgentPubKeyB64>,
-  processes: Array<[ProcessType, ProcessName]>,
-  history: Dictionary<EntryHashB64>,
-  meta?: Dictionary<string>;
+export class Unit {
+  parents: Array<string> = []
+  version: string = ""
+  pathAbbreviation: string = ""
+  shortName: string =""
+  stewards: Array<AgentPubKeyB64> = []
+  processes: Array<[ProcessType, ProcessName]> = []
+  history: Dictionary<EntryHashB64> = {}
+  meta: Dictionary<string> = {};
+  machine: Dictionary<Array<string>> =  {
+    define:["refine", SysState.Defunct],
+    refine: ["align", SysState.Defunct],
+    align: [SysState.Alive, SysState.Defunct],
+    [SysState.Defunct]: [],
+    [SysState.Alive]: [SysState.Defunct]
+  }
+  constructor(init?: Partial<Unit> ) {
+    Object.assign(this, init);
+  }
+  public path() : string {
+    return this.parents.length > 0 ? `${this.parents[0]}.${this.pathAbbreviation}` : this.pathAbbreviation
+  }
+  public nextStatesFrom(state:string) : Array<string> {
+    return Object.values(this.machine[state])
+  }
+  public processPathForState(state: string) : string {
+    // TODO: convert to use state machine...
+    let idx = 0;
+    switch (state) {
+      case "refine": idx = 1; break;
+      case "align": idx = 2; break;
+      default: return ""
+    }
+    let proc = this.processes[idx]
+    if (proc) {
+      return `${proc[0]}.${proc[1]}`
+    }
+    return ""
+  }
 }
 
 export enum VersioningType {
@@ -59,20 +89,22 @@ export enum SysState {
   Defunct = "_defunct"
 }
 
+export interface DocumentInitializer {
+  path: string,
+  documentType: DocType
+  editors: Array<AgentPubKeyB64>
+  content: Array<Section>
+  meta: Dictionary<string>
+}
+
 export class Document {
+  unitHash: EntryHash = new Uint8Array
   documentType: DocType = DocType.Document
   editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
   state: string = "define"
-  machine: Dictionary<Array<string>> =  {
-    define:["refine", SysState.Defunct],
-    refine: ["align", SysState.Defunct],
-    align: [SysState.Alive, SysState.Defunct],
-    [SysState.Defunct]: [],
-    [SysState.Alive]: [SysState.Defunct]
-   }
-   protected sectionsMap: Dictionary<number> = {}
+  protected sectionsMap: Dictionary<number> = {}
 
   constructor(init?: Partial<Document> ) {
     Object.assign(this, init);
@@ -105,9 +137,6 @@ export class Document {
   public isAlive() : boolean {
     return this.state == SysState.Alive
   }
-  public nextStates() : Array<string> {
-    return Object.values(this.machine[this.state])
-  }
 
   public getSectionsByType(sectionType: SectionType) : Array<Section> {
     return this.content.filter((section) => section.sectionType == sectionType)
@@ -134,6 +163,14 @@ export interface DocInfo {
 
 export interface UpdateDocumentInput {
   hash: EntryHashB64,
+  path: string,
+  document: Document,
+}
+
+export interface AdvanceStateInput {
+  newState: string,
+  unitHash: EntryHash,
+  documentHash: EntryHashB64,
   path: string,
   document: Document,
 }

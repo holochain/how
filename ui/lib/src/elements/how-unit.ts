@@ -68,7 +68,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   }
 
   handleNodelink(path: string) {
-    console.log("clicked on aligment:", path)
     this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
   }
 
@@ -82,7 +81,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       return ""
     }
     const unit: Unit = this._units.value[this.currentUnitEh];
-    return unit.parents.length > 0 ? `${unit.parents[0]}.${unit.pathAbbreviation}` : unit.pathAbbreviation
+    return unit.path()
   }
 
   addDoc(documentType: DocType ) {
@@ -97,8 +96,8 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     return content
   }
 
-  private async stateChange(documentHash: EntryHashB64, newState: string) {
-    const newDocumentHash = await this._store.changeDocumentState(documentHash, newState)
+  private async advanceState(unitHash: EntryHashB64, newState: string) {
+    const newDocumentHash = await this._store.advanceState(unitHash, newState)
     this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
   }
 
@@ -134,25 +133,25 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const created = new Date(action.timestamp)
     const creatorHash = serializeHash(action.author)
     const creator = this._store.getProfileSync(creatorHash)
-    let state
-    let controls 
+    let stateHTML
+    let controlsHTML
 
     let updated: Date |undefined
     if (docInfo) {
       updated = new Date(docInfo.updated)
       const document = docInfo.content
-      controls = document
-          .nextStates()
+      controlsHTML = unit
+          .nextStatesFrom(document.state)
           .map(
-            (state) =>
+            (nextState) =>
               html`<svg-button 
-                @click=${async () => this.stateChange(docInfo.hash, state)}
-                .info=${`move to ${state}`}
+                @click=${async () => this.advanceState(this.currentUnitEh, nextState)}
+                .info=${`move to ${nextState}`}
                 .button=${"move"}>
                 </svg-button>`
           )
       if (document.state == SysState.Alive) {
-        controls.push(html`
+        controlsHTML.push(html`
             <svg-button
               .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
               .info=${"add child"}
@@ -160,11 +159,11 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
             </svg-button> 
           </div>
         `)
-        state = html`<div class="info-item">4/18/22<div class="info-item-name">completion time</div></div>`
+        stateHTML = html`<div class="info-item">4/18/22<div class="info-item-name">completion time</div></div>`
       } else if (document.state == SysState.Defunct) {
-        state = html`<div class="info-item">Defunct</div>`
+        stateHTML = html`<div class="info-item">Defunct</div>`
       } else {
-        controls.unshift(
+        controlsHTML.unshift(
           html`<svg-button
                       button="edit"
                       @click=${() => this.openDoc(docInfo.hash, true)}
@@ -172,10 +171,10 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
                       ></svg-button
                     >`
         )
-        state = html`<div class="info-item">${getCurrentStateName(unit, document.state)}<div class="info-item-name">state: ${document.state}</div></div>`
+        stateHTML = html`<div class="info-item">${getCurrentStateName(unit, document.state)}<div class="info-item-name">state: ${document.state}</div></div>`
       }
     } else {
-      state ="Not started.."
+      stateHTML ="Not started.."
     }
     const stateName = docInfo ? docInfo.content.state : ""
     return html`
@@ -200,9 +199,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           <div class="progress">
             <how-node .unit=${unit} .state=${stateName}> </how-node>
           </div>
-          ${state}
+          ${stateHTML}
           <div class="column unit-controls">
-            ${controls}
+            ${controlsHTML}
           </div>
         </div>
       </div>

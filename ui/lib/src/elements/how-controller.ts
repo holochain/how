@@ -107,7 +107,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       return ""
     }
     const unit: Unit = this._units.value[this._currentUnitEh];
-    return unit.parents.length > 0 ? `${unit.parents[0]}.${unit.pathAbbreviation}` : unit.pathAbbreviation
+    return unit.path()
   }
 
   private async subscribeProfile() {

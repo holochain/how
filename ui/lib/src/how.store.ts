@@ -139,10 +139,10 @@ export class HowStore {
   }
 
   private updateUnitFromEntry(unitRecord: EntryRecord<Unit>) {
-    const unit = unitRecord.entry
+    const unit = new Unit(unitRecord.entry)
     const hash = serializeHash(unitRecord.entryHash)
     this.unitsPathStore.update(units => {
-      const path = unit.parents.length>0 ? `${unit.parents[0]}.${unit.pathAbbreviation}` : unit.pathAbbreviation
+      const path = unit.path()
       units[path] = hash
       return units
     })
@@ -214,18 +214,38 @@ export class HowStore {
       this.pullDocuments(path)
     }
     return newHash
-
   }
-  async changeDocumentState(hash: EntryHashB64, state: string) : Promise<EntryHashB64> {
-    let newHash: EntryHashB64 = ""
-    let doc = cloneDeep(get(this.documents)[hash])
-    doc.state = state
 
-    const processPath = this.getProcessPathForState(hash, state)
-    doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
-    const newDocumentHash = await this.updateDocument(hash, doc);
+  getDocumentForUnit(unitHash: EntryHashB64) : DocumentOutput | undefined {
+    const unit = this.unit(unitHash)
+    const path = unit.path()
+    const documents = get(this.documentPaths)[path]
+    return documents.find(d => d.updatedBy.length==0)
+  }
 
-    return newDocumentHash
+  async advanceState(unitHash: EntryHashB64, state: string) : Promise<EntryHashB64|undefined> {
+    const unit = this.unit(unitHash)
+    if (unit) {
+      const documentOutput = this.getDocumentForUnit(unitHash)
+      if (documentOutput) {
+        let doc = cloneDeep(documentOutput.content)
+        doc.state = state
+
+        const processPath = unit.processPathForState(state)
+        doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
+  
+        const newDocumentHash = await this.service.advanceState({
+            newState: state,
+            unitHash: deserializeHash(unitHash),
+            documentHash: documentOutput.hash,
+            path: unit.path(),
+            document: doc,
+            }
+          );
+        return newDocumentHash
+      }
+    }
+    return undefined
   }
 
 
@@ -238,7 +258,6 @@ export class HowStore {
   }
 
   private getProcesses(tree: Node) : Array<Process> {
-    console.log("GET PROCS", tree)
     const node = this.find(tree,"soc_proto.process".split("."))
     let processes : Array<Process> = []
     if (node) {
@@ -364,33 +383,4 @@ export class HowStore {
     }
     return null;
   }
-
-  private getDocumentAligment(hash: string) : Unit | null {
-    // TODO this will break once we get versions because there will be
-    // more that one aligment per path
-    const path = this.getDocumentPath(hash)
-    for (let [unitPath, unitEh] of Object.entries(get(this.unitsPath))) {
-      if (unitPath == path) {
-        return this.unit(unitEh)
-      }
-    }
-    return null
-  }
-
-  private getProcessPathForState(hash: EntryHashB64, state: string) : string {
-    const unit = this.getDocumentAligment(hash)
-    // TODO: convert to use state machine...
-    let idx = 0;
-    switch (state) {
-      case "refine": idx = 1; break;
-      case "align": idx = 2; break;
-      default: return ""
-    }
-    let proc = unit?.processes[idx]
-    if (proc) {
-      return `${proc[0]}.${proc[1]}`
-    }
-    return ""
-  }
-
 }

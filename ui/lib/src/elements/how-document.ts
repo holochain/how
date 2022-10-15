@@ -43,11 +43,6 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         this._documentDialogElem.open(this.path, documentEh, editable);
     }
 
-    private async stateChange(state: string) {
-        const newDocumentHash = await this._store.changeDocumentState(this.currentDocumentEh, state)
-        this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
-    }
-
     private sectionTypeMarker(section: Section) {
       switch (section.sectionType) {
         case SectionType.Content: return ""; break;

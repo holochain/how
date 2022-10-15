@@ -23,6 +23,20 @@ pub struct Unit {
 }
 
 impl Unit {
+    pub fn path_str(&self) -> ExternResult<String> {
+        let x = self.tree_paths();
+        let v = x[0].as_ref();
+        if v.len() == 0 {
+            return Ok(String::from(""))
+        }
+        let mut seg: Vec<String> = Vec::new();
+        let mut i = 1;
+        while i < v.len() {
+            seg.push(String::try_from(&v[i]).map_err(|e| wasm_error!(e.into()))?);
+            i = i + 1;
+        }
+        Ok(seg.join("."))
+    }
     pub fn tree_paths(&self) -> Vec<Path> {
         let mut paths = Vec::new();
         for parent in &self.parents {
@@ -72,6 +86,7 @@ impl Section {
 #[derive(Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Document {
+    pub unit_hash: EntryHash,  // Which unit this document is attached to
     pub document_type: String, // DOC_TEMPLATE, DOC_DOCUMENT, DOC_COMMENT, ...
     pub state: String,         // name of current process
     pub editors: Vec<AgentPubKeyB64>, // people who can change this document, if empty anyone can

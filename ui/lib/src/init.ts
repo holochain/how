@@ -6,7 +6,8 @@ import {
   SysState,
   Document,
   SectionType,
-  SourceManual
+  SourceManual,
+  Unit
 } from "./types";
 import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 
@@ -19,181 +20,146 @@ const std_procs: Array<[ProcessType, ProcessName]> = [
 export function initialTree(progenitor: AgentPubKeyB64) {
   const init: Initialization = {
     units: [
-      [SysState.Alive, {
+      [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "", // max 10 char
         shortName: "Holochain Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+      })],
+      [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "soc_proto", // max 10 char
         shortName: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "hApps", // max 10 char
         shortName: "hApp Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      ["define", {
+        })],
+      ["define", new Unit({
         parents: ["hApps"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "ERC721_interop", // max 10 char
         shortName: "ERC721 Interoperability Statandard", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "process", // max 10 char
         shortName: "How Processes", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "define", // max 10 char
         shortName: "Proposal procesess", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "declaration", // max 10 char
         shortName: "Declaration", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "petition", // max 10 char
         shortName: "Petition", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "refine", // max 10 char
         shortName: "Refinement Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process.refine"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "comment_period", // max 10 char
         shortName: "Comment Period", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "align", // max 10 char
         shortName: "Unit Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "vote", // max 10 char
         shortName: "Voting", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "consensus", // max 10 char
         shortName: "Consensus", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "sortition", // max 10 char
         shortName: "Sortition", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "hc_system", // max 10 char
         shortName: "Holochain System", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "conductor", // max 10 char
         shortName: "Holochain Conductor", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
-      [SysState.Alive, {
+        })],
+      [SysState.Alive, new Unit({
         parents: ["hc_system.conductor"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "api", // max 10 char
         shortName: "Holochain Conductor API", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        history: {},
-        meta: {},
-      }],
+        })],
     ],
     documents: [
       {
-        path: "",
-        document: new Document( {
+          path: "",
           documentType: DocType.Document,
           content: [
             {
@@ -212,12 +178,10 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive
-        })
+          meta: {}
       },
       {
         path: "hApps",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -236,12 +200,10 @@ export function initialTree(progenitor: AgentPubKeyB64) {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive
-        })
+          meta: {}
       },
       {
         path: "hApps.ERC721_interop",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -400,13 +362,11 @@ function mintNFT(uint256 memory target_) external {
             },
           ],
           editors: [progenitor],
-          state: "define"
-        })
+          meta: {}
       },
      
       {
         path: "soc_proto.process.define",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -449,13 +409,10 @@ function mintNFT(uint256 memory target_) external {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
           meta: {},
-        }),
       },
       {
         path: "soc_proto.process.refine",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -474,12 +431,10 @@ function mintNFT(uint256 memory target_) external {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
-        }),
+          meta: {}
       },
       {
         path: "soc_proto.process.align",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -498,12 +453,10 @@ function mintNFT(uint256 memory target_) external {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
-        }),
+          meta: {}
       },
       {
         path: "soc_proto.process.define.petition",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -529,13 +482,10 @@ function mintNFT(uint256 memory target_) external {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
           meta: {},
-        }),
       },
       {
         path: "soc_proto.process.define.declaration",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -570,13 +520,10 @@ function mintNFT(uint256 memory target_) external {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
           meta: {},
-        }),
       },
       {
         path: "soc_proto.process.refine.comment_period",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -601,13 +548,10 @@ function mintNFT(uint256 memory target_) external {
             },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
           meta: {},
-        }),
       },
       {
         path: "soc_proto.process.align.vote",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -622,7 +566,7 @@ function mintNFT(uint256 memory target_) external {
               source: "",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
-              content: "The Votes aligment variant specifies a voting group, and a count of those votes",
+              content: "The Votes alignment variant specifies a voting group, and a count of those votes",
             },
             { name: "voters", content: "{list of people who may vote}", sectionType: SectionType.Process,
             contentType: "text/plain", source: SourceManual },
@@ -630,13 +574,10 @@ function mintNFT(uint256 memory target_) external {
             contentType: "text/plain", source: SourceManual },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
           meta: {},
-        }),
       },
       {
         path: "soc_proto.process.align.consensus",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -651,19 +592,16 @@ function mintNFT(uint256 memory target_) external {
               source: "",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
-              content: "The Consensus aligment variant specifies an outcome of consensus decision that a group has taken",
+              content: "The Consensus alignment variant specifies an outcome of consensus decision that a group has taken",
             },
             { name: "outcome", content: "{results of the consensus decision}", sectionType: SectionType.Process,
             contentType: "text/markdown", source: SourceManual },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
           meta: {},
-        }),
       },
       {
         path: "soc_proto.process.align.sortition",
-        document: new Document( {
           documentType: DocType.Document,
           content: [
             {
@@ -678,7 +616,7 @@ function mintNFT(uint256 memory target_) external {
               source: "",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
-              content: "The Sortition aligment variant specifies a group of people who will decide on the unit and it's outcome of consensus decision that a group has taken",
+              content: "The Sortition alignment variant specifies a group of people who will decide on the unit and it's outcome of consensus decision that a group has taken",
             },
             { name: "people", content: "{list of people who will decide}", sectionType: SectionType.Process,
             contentType: "text/plain", source: SourceManual },
@@ -686,9 +624,7 @@ function mintNFT(uint256 memory target_) external {
             contentType: "text/markdown", source: SourceManual },
           ],
           editors: [progenitor],
-          state: SysState.Alive,
           meta: {},
-        }),
       }
     ],
   };

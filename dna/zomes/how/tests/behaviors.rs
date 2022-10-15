@@ -49,7 +49,7 @@ pub async fn test_basics() {
         meta: BTreeMap::new(),
     };
 
-    let input= Initialization {units: vec![unit1], documents: vec![]};
+    let input= Initialization {units: vec![("define".into(),unit1)], documents: vec![]};
 
     let _:() = conductor_alice
         .call(&cell_alice.zome("how"), "initialize", input.clone())
@@ -85,6 +85,7 @@ pub async fn test_basics() {
 
     let content  = vec![Section::new("summary", "p", "text/markdown", "m", "blah blah")];
     let document = Document {
+      unit_hash: hash.into(),
       document_type: String::from(DOC_DOCUMENT),
       editors: vec![AgentPubKeyB64::from(cell_alice.agent_pubkey().clone())],  // people who can change this document, if empty anyone can
       content, // semantically identified content components

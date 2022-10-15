@@ -1,6 +1,6 @@
 import { CellClient } from '@holochain-open-dev/cell-client';
 import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
-import { Unit, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput} from './types';
+import { Unit, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput, AdvanceStateInput} from './types';
 import { RecordBag, serializeHash } from '@holochain-open-dev/utils';
 
 export class HowService {
@@ -32,6 +32,10 @@ export class HowService {
 
   async updateDocument(input: UpdateDocumentInput): Promise<EntryHashB64> {
     return this.callZome('update_document', input);
+  }
+
+  async advanceState(input: AdvanceStateInput): Promise<EntryHashB64> {
+    return this.callZome('advance_state', input);
   }
 
   async getDocuments(path: string): Promise<Array<DocumentOutput>> {
