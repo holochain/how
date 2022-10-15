@@ -99,6 +99,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   private async advanceState(unitHash: EntryHashB64, newState: string) {
     const newDocumentHash = await this._store.advanceState(unitHash, newState)
     this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('unit-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
   }
 
   render() {

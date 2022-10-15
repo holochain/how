@@ -245,7 +245,13 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   async handleDocumentUpdated(e:any) {
     console.log("calling handDocUpdate")
     await this._store.pullDocuments(this.getCurrentPath())
+    await this._store.pullTree()
+
     this._currentDocumentEh = e.detail
+  }
+  async handleUnitUpdated(e:any) {
+    console.log("calling handDocUnitUpdated")
+    await this._store.pullTree()
   }
   render() {
     const tree = html`      
@@ -257,6 +263,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     const unit = html`
     <how-unit id="how-unit" .currentUnitEh=${this._currentUnitEh}
         @document-updated=${this.handleDocumentUpdated}
+        @unit-updated=${this.handleUnitUpdated}
         @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
         @select-node=${(e: any)=>{const hash = this._unitsPath.value[e.detail]; this.handleUnitSelect(hash)}}
         @add-child=${this.handleAddChild}
