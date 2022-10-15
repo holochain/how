@@ -38,6 +38,7 @@ const arc = (x:number, y:number, radius:number, startAngle:number, endAngle:numb
 interface Segment {
     title: string;
     color: string;
+    opacity?: string;
     start: number;
     end: number;
 }
@@ -56,7 +57,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
   @contextProvided({ context: howContext })
   _store!: HowStore;
 
-  circle(segments: Array<Segment>) {
+  circle(segments: Array<Segment>, cross?: boolean) {
     const width = 200
     const x = width/2
     const y = width/2
@@ -64,8 +65,9 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
     const svg = `
     <svg style="fill:none; stroke-width:30" width="100%" height="100%" viewbox="0 0 ${width} ${width}">
         ${segments.map((segment,i) => {
-            return `<path style="stroke:${segment.color};" d=" ${arc(x,y,r,segment.start,segment.end)}"><title>${segment.title}</title></path>`
+            return `<path style="stroke:${segment.color}";${segment.opacity?` stroke-opacity="${segment.opacity}"`:""} d=" ${arc(x,y,r,segment.start,segment.end)}"><title>${segment.title}</title></path>`
         }).join('')}
+        ${cross ? '<path style="stroke:black; stroke-width:30" d=" M 40 40 l 120 120">' : ''}
     </svg>
     `
     return unsafeHTML(svg)
@@ -79,7 +81,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
       return html`
       ${this.circle([
           {title:"Defunct", color:"#0c0c2e", start:0, end:360},
-      ])}    
+      ], true)}    
       `
   } else if (this.state) {
         const processes = []
@@ -88,6 +90,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
         const stateIndex = ORDER.indexOf(this.state)
 
         let currentState = ""
+        let opacity = ""
         for (const [procType, procName] of this.unit.processes) {
             //const path = `${procType}.${procName}`
             const elems = procType.split(".")
@@ -96,9 +99,12 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
             const color: string = i > stateIndex ? "#ccc" : COLORS[typeName]
             if (this.state == typeName) {
                 currentState = procName
+                opacity = "50%"
+            } else {
+              opacity = ""
             }
             processes.push(
-                {title:procName, color, start:sweep*i+.75, end:sweep*(i+1)-.75}
+                {title:procName, color, opacity, start:sweep*i+.75, end:sweep*(i+1)-.75}
             )
             i+=1
         } 
