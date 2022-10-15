@@ -321,7 +321,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       css`
         :host {
           font-family: Roboto,'Open Sans','Helvetica Neue',sans-serif;
-          margin: auto;
         }
 
         #top-bar {

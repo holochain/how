@@ -50,17 +50,17 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
     const nodeId = this.getNodeId(node)
     //const documentsMap = this._documents.value
     //const docs = node.val.documents.map(hash => documentsMap[serializeHash(hash)])
-    const state = node.val.units[0].state// docs[docs.length-1]? docs[docs.length-1].state : ""
+    const state = node.val.units.length ? node.val.units[0].state : ""// docs[docs.length-1]? docs[docs.length-1].state : ""
     return html`
     <li class="${this.treeType}">
       <span class="${nodeId == this.currentNode ? "current" : ""}" @click=${()=>this.select(nodeId)}>
-        ${node.id=="0" ? "Holochain Community Standards" : node.val.name} : ${node.val.documents.length}
+        <div class="progress" title=${`document count: ${node.val.documents.length}`}>
+          <how-node .unit=${this._units.value[nodeId]} state=${state}> </how-node>
+        </div>
+        ${node.id=="0" ? "Holochain Community Standards" : node.val.name}
         <!-- <mwc-button icon="add_circle" @click=${
           () => this.dispatchEvent(new CustomEvent('add-child', { detail: nodeId, bubbles: true, composed: true }))}>
           </mwc-button> -->
-          <div style="width:50px">
-          <how-node .unit=${this._units.value[nodeId]} state=${state}> </how-node>
-          </div>
       </span>
 
       ${node.children.length>0 ? html`<ul>${node.children.map(n => this.buildTree(n))}</ul>` :html``}
@@ -83,6 +83,15 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
     return [
       sharedStyles,
       css`
+      .progress {
+        width: 50px;
+        margin: auto;
+      }
+      .file-tree .progress {
+        width: 20px;
+        display: inline-block;
+        vertical-align: middle;
+      }
       mwc-button {
         width: 30px;
       }
@@ -90,8 +99,8 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
         height: 0px;
       }
       .file-tree span.current {
-          background-color: palegreen;
-        }
+          background-color: lightcoral
+      }
 
         .file-tree {
           font:normal normal 13px/1.4 Segoe,"Segoe UI",Calibri,Helmet,FreeSans,Sans-Serif;
@@ -104,7 +113,10 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
           color: black;
           position: relative;
         }
-
+        .file-tree span {
+          display: inline-block;
+          cursor: pointer;
+        }
         .file-tree ul {
           margin-left: 0.5em;
         } /* (indentation/2) */
@@ -124,7 +136,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
         .file-tree li {
           margin: 0;
           padding: 0 1em; /* indentation + .5em */
-          line-height: 2em;
+          line-height: 1em;
           position: relative;
         }
 
@@ -166,11 +178,11 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   width: 100%;
 }
 .tree span.current {
-  background-color: palegreen;
+  box-shadow: inset 0px 0px 0px 3px #666;
 }
-.tree span {
+/* .tree span {
   background-color: white;
-}
+} */
     .tree li {
       cursor: pointer;
         display: table-cell;
@@ -190,11 +202,10 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
         .tree li:last-child:before {right: 50%;}
 
         .tree code, .tree span {
-            border: solid .1em #666;
-            border-radius: .2em;
+            border-radius: 1em;
             display: inline-block;
             margin: 0 .2em .5em;
-            padding: .2em .5em;
+            padding: .3em .5em;
             position: relative;
         }
         /* If the tree represents DOM structure */
