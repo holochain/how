@@ -38,7 +38,7 @@ export class SvgButton extends ScopedElementsMixin(LitElement) {
     return html`
       <div @click=${this.click} class="button row">
         ${this.info ? html`<div class="info-item-name">${this.info}</div>`:""}
-        ${unsafeHTML(svg)}
+        <div class="icon"> ${unsafeHTML(svg)}</div>
       </div>
     `;
   }
@@ -49,6 +49,15 @@ export class SvgButton extends ScopedElementsMixin(LitElement) {
       .button {
         cursor: pointer;
         align-items: center;
+      }
+      .icon:hover {
+        background-color: #eee;
+      }
+      .icon {
+        border-radius: 50%;
+        display: flex;
+        justify-content: space-around;
+        padding: 3px;
       }
       .info-item-name {
         margin-right: 7px;
