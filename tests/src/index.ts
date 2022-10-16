@@ -145,7 +145,7 @@ test("how basic tests", async (t) => {
 
     document1.state= "align"
     try {
-      newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'advance_state', payload: {newState: "align", unitHash: unit1Hash, documentHash: document1Hash, document: document1, path: doc1Path}} );
+      newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'advance_state', payload: {newState: "align", unitHash: unit1Hash, documentHash: document1Hash, document: document1}} );
       const tree:any = await alice_how.callZome({zome_name:'how', fn_name:'get_tree',} );
       t.equal(tree.tree[4].val.units[0].state, 'align')
       t.equal(tree.tree[4].val.documents.length, 3)

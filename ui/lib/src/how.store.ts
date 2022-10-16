@@ -238,7 +238,6 @@ export class HowStore {
             newState: state,
             unitHash: deserializeHash(unitHash),
             documentHash: documentOutput.hash,
-            path: unit.path(),
             document: doc,
             }
           );

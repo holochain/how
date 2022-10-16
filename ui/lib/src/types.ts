@@ -171,7 +171,6 @@ export interface AdvanceStateInput {
   newState: string,
   unitHash: EntryHash,
   documentHash: EntryHashB64,
-  path: string,
   document: Document,
 }
 

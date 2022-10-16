@@ -1,7 +1,9 @@
 pub use hdk::prelude::*;
 use holo_hash::{EntryHashB64};
+use how_core::Document;
 use how_core::{Unit, EntryTypes, LinkTypes};
 
+use crate::document::{update_document, UpdateDocumentInput};
 use crate::error::*;
 use crate::signals::*;
 
@@ -100,4 +102,30 @@ fn get_units_inner(base: EntryHash) -> HowResult<Vec<Record>> {
     let unit_records: Vec<Record> = HDK.with(|hdk| hdk.borrow().get(get_input))?.into_iter()
     .filter_map(|me| me).collect();
     Ok(unit_records)
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct AdvanceStateInput {
+    pub new_state: String,
+    pub unit_hash: EntryHash,
+    pub document_hash: EntryHashB64,
+    pub document: Document,
+}
+#[hdk_extern]
+pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
+    let hash = EntryHash::from(input.unit_hash);
+    let record = get(hash.clone(), GetOptions::default())?
+         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Unit not found"))))?;
+    let unit: Unit = record
+        .entry()
+        .to_app_option().map_err(|err| wasm_error!(err.into()))?
+
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
+    let new_doc_hash = update_document(UpdateDocumentInput { 
+        hash: input.document_hash.clone(), path: unit.path_str()?, document: input.document })?;
+    
+    delete_unit_links(hash.clone(), unit.tree_paths())?;
+    create_unit_links(hash,unit.tree_paths(), &input.new_state, &unit.version)?;
+    return Ok(new_doc_hash);
 }
