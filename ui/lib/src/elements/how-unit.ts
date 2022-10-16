@@ -160,7 +160,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
             </svg-button> 
           </div>
         `)
-        stateHTML = html`<div class="info-item">4/18/22<div class="info-item-name">completion time</div></div>`
+        stateHTML = updated ? html`<info-item title=${`Alive as of ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="alive as of"</info-item>`:''
       } else if (document.state == SysState.Defunct) {
         stateHTML = html`<div class="info-item">Defunct</div>`
       } else {
