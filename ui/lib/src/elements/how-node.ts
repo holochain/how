@@ -111,7 +111,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
         
         if (this.state == SysState.Alive) {
           return html`
-            <img src="aliveImage">`
+            <img src=${aliveImage}>`
         } else {
           return html`
             <div class="circle">${this.circle(processes)}</div>
