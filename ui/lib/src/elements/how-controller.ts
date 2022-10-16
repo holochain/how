@@ -254,7 +254,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     await this._store.pullTree()
   }
   render() {
-    const tree = html`      
+    const tree = html`
       <how-tree id="tree"
         .treeType=${this._treeType}
         @node-selected=${this.handleNodeSelected}
