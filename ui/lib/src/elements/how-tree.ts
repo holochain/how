@@ -99,7 +99,8 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
         height: 0px;
       }
       .file-tree span.current {
-          background-color: lightcoral
+        border-radius: 7%;
+        box-shadow: rgba(102, 102, 102, 0.7) 0px 0px 0px 3px inset;
       }
 
         .file-tree {
@@ -116,6 +117,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
         .file-tree span {
           display: inline-block;
           cursor: pointer;
+          padding: 2px;
         }
         .file-tree ul {
           margin-left: 0.5em;
