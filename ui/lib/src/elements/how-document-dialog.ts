@@ -191,7 +191,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
               : html`${this.sections.map(
                     (section, index) =>
                       html`<div class="section-name">${section.name}</div>
-                        <div>${sectionValue(section, index)}</div>`
+                        <div>${sectionValue(section)}</div>`
                   )}
                   
                   <hr />

@@ -16,10 +16,11 @@ import {
   TextField,
   TextArea,
 } from "@scoped-elements/material-web";
-import {sectionValue} from "./utils";
 
 // @ts-ignore
 import { AgentAvatar } from "@holochain-open-dev/profiles";
+import { HowNewSectionDialog } from "./how-new-section.dialog";
+import { HowSection } from "./how-section";
 
 /**
  * @element how-document
@@ -43,14 +44,6 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         this._documentDialogElem.open(this.path, documentEh, editable);
     }
 
-    private sectionTypeMarker(section: Section) {
-      switch (section.sectionType) {
-        case SectionType.Content: return ""; break;
-        case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
-        case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`
-      }
-    }
-
     render() {
         if (!this.currentDocumentEh) {
           return;
@@ -59,13 +52,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         return html`  
           ${doc.content.map(
             (section, index) =>
-              html` <div class="section">
-                <div class="section-name" title="source: ${section.source == "" ? "_root" : section.source}">
-                  ${section.name}
-                  ${this.sectionTypeMarker(section)}
-                </div>
-                <div>${sectionValue(section, index)}</div>
-              </div>`
+              html` <how-section .section=${section}></how-section>`
           )}
           <hr />
           Editors:
@@ -82,6 +69,7 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         return {
           "mwc-button": Button,
           "how-document-dialog": HowDocumentDialog,
+          "how-section": HowSection,
           "agent-avatar": AgentAvatar
         };
       }
@@ -89,25 +77,12 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
         return [
           sharedStyles,
           css`
-            .section {
-              padding: 10px;
-            }
-            .section-content p {
-                margin: 0;
-                color: #555;
-            }
             .template-marker {
                 font-weight: normal;
                 border: solid .1em #666;
                 border-radius: .1em;
                 font-size: 76%;
                 padding: 0 3px 0 3px;
-            }
-            .section-name {
-              text-transform: capitalize;
-              font-weight: bold;
-              font-size: 25px;
-              margin-bottom: 2px;
             }
           `,
         ];
