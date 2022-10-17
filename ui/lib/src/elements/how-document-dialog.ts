@@ -16,6 +16,7 @@ import {
 import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
 import {sectionValue} from "./utils";
 import { HowNewSectionDialog } from "./how-new-section.dialog";
+import { deserializeHash } from "@holochain-open-dev/utils";
 
 /**
  * @element how-unit-dialog
@@ -27,6 +28,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     @property() isNew = false
     @property() editable = false
     @property() hash = ""
+    @property() unitHash = ""
 
     @state() sections: Array<Section> = []
     @state() sources: Dictionary<String> = {}
@@ -54,13 +56,13 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
     /**
      *
      */
-    async new(path: string, documentType: DocType) {
+    async new(path: string, unitHash: EntryHashB64, documentType: DocType) {
       this.isNew = true
       this.editable = true
       this.path = path
       this.documentType = documentType
       this.sections = await this._store.getSectionsFromHierarcy(path, 0, SectionType.Requirement)
-
+      this.unitHash = unitHash
       // also  get the sections from the process templates
       const docs = this._documentPaths.value[documentType]
       for (const doc of docs) {
@@ -72,11 +74,12 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
       dialog.open = true
     }
 
-    open(path: string, hash: EntryHashB64, editable: boolean) {
+    open(path: string, unitHash: EntryHashB64, hash: EntryHashB64, editable: boolean) {
       this.isNew = false
       this.editable = editable
       this.path = path
       this.hash = hash
+      this.unitHash = unitHash
       const document = this._documents.value[hash]
       this.documentType = document.documentType
       this.sections = document.content
@@ -98,6 +101,7 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
         })
         
         const document: Document = new Document ({
+          unitHash: deserializeHash(this.unitHash),
           documentType: this.documentType,
           editors: Object.keys(this._editors).map((agent)=> agent),  // people who can change this document
           content: this.sections, 

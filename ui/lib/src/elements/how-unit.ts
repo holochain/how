@@ -85,11 +85,11 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   }
 
   addDoc(documentType: DocType ) {
-    this._documentDialogElem.new(this.getPath(), documentType);
+    this._documentDialogElem.new(this.getPath(), this.currentUnitEh, documentType);
   }
 
   openDoc(documentEh: EntryHashB64, editable: boolean ) {
-    this._documentDialogElem.open(this.getPath(), documentEh, editable);
+    this._documentDialogElem.open(this.getPath(), this.currentUnitEh, documentEh, editable);
   }
 
   renderType(type: String, content: String) : String {

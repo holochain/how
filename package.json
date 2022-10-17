@@ -20,7 +20,7 @@
     "playground": "run-singleton \"holochain-playground\"",
     "test": "npm run build:happ && npm run build -w @how/elements && npm t -w tests",
     "start:happ": "rimraf .hc* && RUST_LOG=warn echo \"pass\" | hc s --piped generate ./dna/workdir/happ/how.happ --run=$HC_PORT -a how network mdns",
-    "start:happ-proxied": "rimraf .hc* && RUST_LOG=warn echo \"pass\" | hc s --piped generate ./dna/workdir/happ/how.happ --run=$HC_PORT -a how network --bootstrap https://bootstrap-staging.holo.host/ quic -p=kitsune-proxy://SYVd4CF3BdJ4DS7KwLLgeU3_DbHoZ34Y-qroZ79DOs8/kitsune-quic/h/165.22.32.11/p/5779/--",
+    "start:happ-proxied": "rimraf .hc* && RUST_LOG=debug echo \"pass\" | hc s --piped generate ./dna/workdir/happ/how.happ --run=$HC_PORT -a how network --bootstrap https://bootstrap-staging.holo.host/ quic -p=kitsune-proxy://SYVd4CF3BdJ4DS7KwLLgeU3_DbHoZ34Y-qroZ79DOs8/kitsune-quic/h/165.22.32.11/p/5779/--",
     "package": "npm run build:happ && npm run build -w @how/elements && npm run package -w how && hc web-app pack workdir",
     "build:happ": "npm run build:dna && hc app pack ./dna/workdir/happ",
     "build:dna": "npm run build:zome && hc dna pack ./dna/workdir/dna",

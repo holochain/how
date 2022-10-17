@@ -315,11 +315,11 @@ export class HowStore {
     return get(this.treeStore)
   }
 
-  async initializeUnit(algnmentEh: EntryHashB64) : Promise<void>  {
-    const unit = this.unit(algnmentEh)
+  async initializeUnit(unitEh: EntryHashB64) : Promise<void>  {
+    const unit = this.unit(unitEh)
     const proc = unit.processes[0]
     const processPath = `${proc[0]}.${proc[1]}`
-    const doc = new Document({documentType: DocType.Document})
+    const doc = new Document({unitHash: deserializeHash(unitEh), documentType: DocType.Document})
 
     doc.appendSections(await this.getSectionsFromHierarcy(unit.parents[0], 0, SectionType.Requirement))
     await this.pullDocuments(processPath)

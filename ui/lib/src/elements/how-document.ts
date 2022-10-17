@@ -40,8 +40,8 @@ import { HowSection } from "./how-section";
     @query('#document-dialog')
     _documentDialogElem!: HowDocumentDialog;
 
-    openDoc(documentEh: EntryHashB64, editable: boolean ) {
-        this._documentDialogElem.open(this.path, documentEh, editable);
+    openDoc(unitEh: EntryHashB64, documentEh: EntryHashB64, editable: boolean ) {
+        this._documentDialogElem.open(this.path, unitEh, documentEh, editable);
     }
 
     render() {
