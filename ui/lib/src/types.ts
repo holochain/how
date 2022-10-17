@@ -42,10 +42,26 @@ export class Unit {
   public nextStatesFrom(state:string) : Array<string> {
     return Object.values(this.machine[state])
   }
+  public processNameForState(state: string) : string {
+    // TODO: convert to use state machine...
+    let idx = 0;
+    switch (state) {
+      case "define": idx = 0; break;
+      case "refine": idx = 1; break;
+      case "align": idx = 2; break;
+      default: return ""
+    }
+    let proc = this.processes[idx]
+    if (proc) {
+      return proc[1]
+    }
+    return ""
+  }
   public processPathForState(state: string) : string {
     // TODO: convert to use state machine...
     let idx = 0;
     switch (state) {
+      case "define": idx = 0; break;
       case "refine": idx = 1; break;
       case "align": idx = 2; break;
       default: return ""

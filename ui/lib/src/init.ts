@@ -48,7 +48,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
         parents: ["hApps"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "ERC721_interop", // max 10 char
-        shortName: "ERC721 Interoperability Statandard", // max 25 char
+        shortName: "ERC721 Interoperability Standard", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         })],
