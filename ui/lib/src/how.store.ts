@@ -339,7 +339,7 @@ export class HowStore {
     })
     await this.initializeUnit(unitEh)
 
-    this.service.notify({unitHash:unitEh, message: {type:"NewUnit", content:unit}}, this.others());
+    //this.service.notify({unitHash:unitEh, message: {type:"NewUnit", content:unit}}, this.others());
     return unitEh
   }
 

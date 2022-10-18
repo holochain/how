@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import {Unit, howContext, Section, SectionType} from "../types";
+import {Unit, howContext, Section, SectionType, SourceManual} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -33,6 +33,9 @@ import { HowSection } from "./how-section";
     @property() currentDocumentEh = "";
     @property() path = "";
 
+    @query('how-new-section-dialog')
+    private newSectionDialog!: HowNewSectionDialog;
+
     @contextProvided({ context: howContext })
     _store!: HowStore;
     _documents = new StoreSubscriber(this, () => this._store.documents);
@@ -44,23 +47,61 @@ import { HowSection } from "./how-section";
         this._documentDialogElem.open(this.path, unitEh, documentEh, editable);
     }
 
+    async updateSection(section:Section, index:number) {
+      const document = this._documents.value[this.currentDocumentEh]
+      const newDocumentHash = await this._store.updateDocument(this.currentDocumentEh, document);
+      this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+    }
+
+    async addSection(e: any) {
+      const section: Section = {
+        name: e.detail.name, 
+        contentType: e.detail.contentType, 
+        sectionType:e.detail.sectionType,
+        source: SourceManual,
+        content: "{}"
+      }
+      const document = this._documents.value[this.currentDocumentEh]
+      document.content.push(section)
+      const newDocumentHash = await this._store.updateDocument(this.currentDocumentEh, document);
+      this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+    }
+
     render() {
         if (!this.currentDocumentEh) {
           return;
         }
         const doc = this._documents.value[this.currentDocumentEh]
-        return html`  
-          ${doc.content.map(
-            (section, index) =>
-              html` <how-section .section=${section}></how-section>`
-          )}
-          <hr />
-          Editors:
-          ${Object.entries(doc.editors).map(
-            ([key, pubkey]) => html`<agent-avatar agent-pub-key="${pubkey}"></agent-avatar>`
-          )}
+        return html`
+          <div id="header">
+            <div id="editors" class="row">
+              Editors:
+              ${Object.entries(doc.editors).map(
+                ([key, pubkey]) => html`<agent-avatar agent-pub-key="${pubkey}"></agent-avatar>`
+              )}
+            </div>
+          </div>
+          <div id="sections">
+            ${doc.content.map(
+              (section, index) =>
+                html` <how-section 
+                @section-changed=${(e:any) => this.updateSection(e.detail, index)}
+                .section=${section} .index=${index} .editable=${doc.isEditable(section.name)}></how-section>`
+            )}
+          </div>
+          <svg-button
+                button="plus"
+                info="add section"
+                infoPosition="right"
+                @click=${() => this.newSectionDialog.open()}
+                ></svg-button>
+          </div>
 
           <how-document-dialog id="document-dialog"> </how-document-dialog>
+          <how-new-section-dialog
+            .takenNames=${doc.content.map((s)=>s.name)}
+            @add-section=${this.addSection}
+          ></how-new-section-dialog>
         `;
       
     }
@@ -70,6 +111,7 @@ import { HowSection } from "./how-section";
           "mwc-button": Button,
           "how-document-dialog": HowDocumentDialog,
           "how-section": HowSection,
+          "how-new-section-dialog": HowNewSectionDialog,
           "agent-avatar": AgentAvatar
         };
       }
@@ -77,13 +119,13 @@ import { HowSection } from "./how-section";
         return [
           sharedStyles,
           css`
-            .template-marker {
-                font-weight: normal;
-                border: solid .1em #666;
-                border-radius: .1em;
-                font-size: 76%;
-                padding: 0 3px 0 3px;
-            }
+          #header {
+            float: right;
+            padding: 10px;          
+          }
+          #editors {
+            align-items:center;
+          }
           `,
         ];
   }

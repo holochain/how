@@ -4,7 +4,7 @@ import { contextProvided } from "@lit-labs/context";
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash } from "@holochain-open-dev/utils";
-import {Unit, DocType, howContext, Document, DocumentOutput, SysState} from "../types";
+import {Unit, DocType, howContext, Document, DocumentOutput, SysState, Progress} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { StoreSubscriber } from "lit-svelte-stores";
@@ -53,6 +53,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
   }
   @property() unit:Unit|undefined;
   @property() state:string = "";
+  @property() progress:Progress| undefined = undefined;
 
   @contextProvided({ context: howContext })
   _store!: HowStore;
@@ -84,7 +85,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
       ], true)}    
       `
   } else if (this.state) {
-        const processes = []
+        const segments = []
         let i = 0;
         const sweep = 360/this.unit.processes.length
         const stateIndex = ORDER.indexOf(this.state)
@@ -99,13 +100,29 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
             const color: string = i > stateIndex ? "#ccc" : COLORS[typeName]
             if (this.state == typeName) {
                 currentState = procName
-                opacity = "50%"
+                const start = sweep*i+.75
+                const end = sweep*(i+1)-.75
+                const len = end - start
+
+                if (this.progress) {
+                  const seg = len/this.progress.total
+                  const progressText = `${procName}: ${this.progress.count} of ${this.progress.total}`
+
+                  segments.push({title: progressText, color, start, end:start+ seg*this.progress.count })
+                  segments.push({title: progressText, color:"#ccc", start: start+ seg*this.progress.count, end })
+
+                } else {
+                  // create a gradient because we don't know the progress
+                  const seg = len/100
+                  let o = 100;
+                  for (let j= start; j <= end; j+=seg) {
+                    segments.push({title:procName, opacity:`${o}%`, color, start:j, end:j+seg})
+                    o-=1
+                  }  
+                }
             } else {
-              opacity = ""
+              segments.push({title:procName, color, start:sweep*i+.75, end:sweep*(i+1)-.75})
             }
-            processes.push(
-                {title:procName, color, opacity, start:sweep*i+.75, end:sweep*(i+1)-.75}
-            )
             i+=1
         }
         
@@ -114,7 +131,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
             <img src=${aliveImage}>`
         } else {
           return html`
-            <div class="circle">${this.circle(processes)}</div>
+            <div class="circle">${this.circle(segments)}</div>
           `
         }
     } else {    

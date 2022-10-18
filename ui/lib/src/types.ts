@@ -142,10 +142,39 @@ export class Document {
     return this.content[this.sectionsMap[sectionName]]
   }
 
+  public getProgress() : Progress {
+    let total = 1
+    let count = 0
+    for (const section of this.content) {
+      if (this.state == "define") {
+        total+=1
+        if (section.content[0] != '{') {
+          count += 1
+        }
+      } else if (section.source.indexOf(".soc_proto.process."+this.state) >= 0) {
+        total+=1
+        if (section.content[0] != '{') {
+          count += 1
+        }
+      }  
+    }
+    return {
+      total,
+      count
+    }
+  }
+
+  public isEditable(sectionName:string) : Boolean {
+    if (this.state == "define") {
+      return true
+    }
+    const section = this.getSection(sectionName)
+    return section.source.indexOf(".soc_proto.process."+this.state) >= 0
+  }
+
   public setSection(sectionName: string, content: string ) {
     const section = this.getSection(sectionName)
     if (section != null) {
-      console.log("SETTING", sectionName, content)
       section.content = content
     }
   }
@@ -225,4 +254,9 @@ export type Node = {
 export type Process = {
   path: string,
   name: string,
+}
+
+export type Progress = {
+  total: number,
+  count: number,
 }

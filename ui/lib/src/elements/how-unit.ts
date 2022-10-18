@@ -148,7 +148,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
               html`<svg-button 
                 @click=${async () => this.advanceState(this.currentUnitEh, nextState)}
                 .info=${`move to ${nextState}`}
-                .button=${"move"}>
+                .button=${nextState == SysState.Defunct ? "defunct" : "move"}>
                 </svg-button>`
           )
       if (document.state == SysState.Alive) {
@@ -164,14 +164,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       } else if (document.state == SysState.Defunct) {
         stateHTML = html`<div class="info-item">Defunct</div>`
       } else {
-        controlsHTML.unshift(
-          html`<svg-button
-                      button="edit"
-                      @click=${() => this.openDoc(docInfo.hash, true)}
-                      .info=${"edit"}
-                      ></svg-button
-                    >`
-        )
         stateHTML = html`<div class="info-item">${getCurrentStateName(unit, document.state)}<div class="info-item-name">state: ${document.state}</div></div>`
       }
     } else {
@@ -198,7 +190,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
               .button=${"question"}>
             </svg-button> 
           <div class="progress">
-            <how-node .unit=${unit} .state=${stateName}> </how-node>
+            <how-node .unit=${unit} .state=${stateName} .progress=${docInfo?.content.getProgress()}> </how-node>
           </div>
           ${stateHTML}
           <div class="column unit-controls">
