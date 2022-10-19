@@ -44,9 +44,6 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   @query('#title-field')
   _titleField!: TextField;
 
-  @query('#summary-field')
-  _summaryField!: TextArea;
-
   @query('#align-process-select')
   _alignProcessSelect!: Select;
 
@@ -134,9 +131,6 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
     if (!this._versionField.validity.valid) {
       this._versionField.reportValidity()
     }
-    if (!this._summaryField.validity.valid) {
-      this._summaryField.reportValidity()
-    }
 
     const processes = this.getProcessesValue()
 
@@ -164,7 +158,6 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
     this._parent = undefined
     this._nameField.value = ''
     this._titleField.value = ''
-    this._summaryField.value = ''
     this._alignProcessSelect.value = HowUnitDialog.NONE
     this._defineProcessSelect.value = HowUnitDialog.NONE
     this._refineProcessSelect.value = HowUnitDialog.NONE
@@ -226,9 +219,6 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   <mwc-textfield type="text"
                  @input=${() => (this.shadowRoot!.getElementById("title-field") as TextField).reportValidity()}
                  id="title-field" minlength="3" maxlength="64" label="Title" autoValidate=true required></mwc-textfield>
-  <mwc-textarea 
-                 @input=${() => (this.shadowRoot!.getElementById("summary-field") as TextArea).reportValidity()}
-                 id="summary-field" minlength="3" maxlength="64" cols="73" rows="10" label="Summary" autoValidate=true required></mwc-textarea>
   
   ${PROCESS_TYPES.map(processType => 
     html`
