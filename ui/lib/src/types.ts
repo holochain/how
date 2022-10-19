@@ -1,7 +1,8 @@
 // TODO: add globally available interfaces for your elements
 
 import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
-import { Action, EntryHash, Timestamp } from "@holochain/client";
+import { EntryRecord } from "@holochain-open-dev/utils";
+import { Action, EntryHash, Record, Timestamp } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
 import { HowStore } from "./how.store";
 
@@ -164,6 +165,11 @@ export class Document {
     }
   }
 
+  public canAddSection() : boolean {
+    // TODO add stuff about Editors and Stewards
+    return this.state === "define" || this.state === "refine"
+  }
+
   public isEditable(sectionName:string) : Boolean {
     if (this.state == "define") {
       return true
@@ -226,9 +232,15 @@ export type Signal =
 
 export type UnitInfo = {
     hash: EntryHash,
-    version: String,
-    state: String,
+    version: string,
+    state: string,
 }
+
+export type UnitOutput = {
+  info: UnitInfo,
+  record: Record,
+}
+
 export type Content = {
   name: string,
   units: Array<UnitInfo>,

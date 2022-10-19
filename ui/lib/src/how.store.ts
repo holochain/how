@@ -17,6 +17,8 @@ import {
   Section,
   SectionType,
   DocInfo,
+  UnitOutput,
+  UnitInfo,
 } from './types';
 import {
   ProfilesStore,
@@ -36,6 +38,7 @@ export class HowStore {
   /** UnitEh -> Unit */
   private unitsStore: Writable<Dictionary<Unit>> = writable({});   // maps unit hash to unit
   private unitsActionStore: Writable<Dictionary<Action>> = writable({});   // maps unit hash to unit
+  private unitsInfoStore: Writable<Dictionary<UnitInfo>> = writable({});   // maps unit hash to unit
   private documentsStore: Writable<Dictionary<Document>> = writable({});
   private unitsPathStore: Writable<Dictionary<string>> = writable({});  // maps unit hash to path
   private treeStore: Writable<Node> = writable({val:{name:"T", units: [], documents: []}, children:[], id:"0"});
@@ -49,6 +52,7 @@ export class HowStore {
   public documents: Readable<Dictionary<Document>> = derived(this.documentsStore, i => i)
   public unitsPath: Readable<Dictionary<string>> = derived(this.unitsPathStore, i => i)
   public unitsAction: Readable<Dictionary<Action>> = derived(this.unitsActionStore, i => i)
+  public unitsInfo: Readable<Dictionary<UnitInfo>> = derived(this.unitsInfoStore, i => i)
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
   public processes: Readable<Array<Process>> = derived(this.documents, d => this.getProcesses(get(this.treeStore)))
@@ -83,7 +87,7 @@ export class HowStore {
       switch(payload.message.type) {
       case "NewUnit":
         if (!get(this.units)[payload.unitHash]) {
-          this.updateUnitFromEntry(new EntryRecord<Unit>(payload.message.content))
+        //  this.updateUnitFromEntry(new EntryRecord<Unit>(payload.message.content))
         }
         break;
       }
@@ -138,9 +142,10 @@ export class HowStore {
     }
   }
 
-  private updateUnitFromEntry(unitRecord: EntryRecord<Unit>) {
-    const unit = new Unit(unitRecord.entry)
-    const hash = serializeHash(unitRecord.entryHash)
+  private updateUnitFromEntry(unitOutput: UnitOutput) {
+    const record: EntryRecord<Unit> = new EntryRecord<Unit>(unitOutput.record)
+    const unit = new Unit(record.entry)
+    const hash = serializeHash(record.entryHash)
     this.unitsPathStore.update(units => {
       const path = unit.path()
       units[path] = hash
@@ -151,15 +156,19 @@ export class HowStore {
       return units
     })
     this.unitsActionStore.update(units => {
-      units[hash] = unitRecord.action
+      units[hash] = record.action
+      return units
+    })
+    this.unitsInfoStore.update(units => {
+      units[hash] = unitOutput.info
       return units
     })
   }
 
   async pullUnits() : Promise<Dictionary<Unit>> {
     const units = await this.service.getUnits();
-    for (const record of units.entryRecords) {
-      this.updateUnitFromEntry(record)
+    for (const unitOutput of units) {
+      this.updateUnitFromEntry(unitOutput)
     }
     return get(this.unitsStore)
   }

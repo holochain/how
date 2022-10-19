@@ -5,7 +5,7 @@ import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {Node, howContext} from "../types";
+import {Node, howContext, UnitInfo} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {ProfilesStore, profilesStoreContext,} from "@holochain-open-dev/profiles";
@@ -14,6 +14,7 @@ import {
 } from "@scoped-elements/material-web";
 import { HowNode } from "./how-node";
 import { serializeHash } from "@holochain-open-dev/utils";
+import { EntryHashB64 } from "@holochain-open-dev/core-types";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
 
 /**
@@ -23,7 +24,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   constructor() {
     super();
   }
-
+  // TODO: distinguis between different Units selected at the same node
   @property() currentNode = "";
   @property() treeType = "tree";
 
@@ -37,17 +38,18 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   _units = new StoreSubscriber(this, () => this._store.units);
   _documents = new StoreSubscriber(this, () => this._store.documents);
 
-  select(id: string) : void {
+  select(id: EntryHashB64) : void {
     this.currentNode = id
     this.dispatchEvent(new CustomEvent('node-selected', { detail: id, bubbles: true, composed: true }));
   }
 
-  getNodeId(node: Node) : string {
-    return node.val.units.length>0 ? serializeHash(node.val.units[0].hash) : node.id
+  getUnitInfo(node: Node) : UnitInfo | undefined {
+    return node.val.units[0]
   }
 
   buildTree(node: Node):any {
-    const nodeId = this.getNodeId(node)
+    const unitInfo = this.getUnitInfo(node)
+    const nodeId = unitInfo ? serializeHash(unitInfo.hash) : node.id
     //const documentsMap = this._documents.value
     //const docs = node.val.documents.map(hash => documentsMap[serializeHash(hash)])
     const state = node.val.units.length ? node.val.units[0].state : ""// docs[docs.length-1]? docs[docs.length-1].state : ""

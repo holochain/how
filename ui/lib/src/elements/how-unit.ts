@@ -8,7 +8,7 @@ import { Unsubscriber, Readable, get } from "svelte/store";
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash, serializeHash } from "@holochain-open-dev/utils";
-import {Unit, DocType, howContext, SysState, Document} from "../types";
+import {Unit, DocType, howContext, SysState, Document, UnitInfo} from "../types";
 import {HowStore} from "../how.store";
 import {HowDocumentDialog } from "./how-document-dialog";
 import { HowUnitDetails } from "./how-unit-details";
@@ -53,6 +53,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   _myProfile!: Readable<Profile | undefined> ;
   _units = new StoreSubscriber(this, () => this._store.units);
   _unitsActions = new StoreSubscriber(this, () => this._store.unitsAction);
+  _unitsInfos = new StoreSubscriber(this, () => this._store.unitsInfo);
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
@@ -108,6 +109,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     }
     /** Get current unit*/
     const unit: Unit = this._units.value[this.currentUnitEh]
+    const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
     const action: Action = this._unitsActions.value[this.currentUnitEh]
 
     const path = this.getPath()
@@ -135,13 +137,15 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const creatorHash = serializeHash(action.author)
     const creator = this._store.getProfileSync(creatorHash)
     let stateHTML
-    let controlsHTML
+    let controlsHTML:any[] = []
 
     let updated: Date |undefined
+    let state 
     if (docInfo) {
       updated = new Date(docInfo.updated)
       const document = docInfo.content
-      controlsHTML = unit
+      state = document.state
+      controlsHTML = controlsHTML.concat(unit
           .nextStatesFrom(document.state)
           .map(
             (nextState) =>
@@ -150,26 +154,31 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
                 .info=${`move to ${nextState}`}
                 .button=${nextState == SysState.Defunct ? "defunct" : "move"}>
                 </svg-button>`
-          )
-      if (document.state == SysState.Alive) {
-        controlsHTML.push(html`
-            <svg-button
-              .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
-              .info=${"add child"}
-              .button=${"plus"}>
-            </svg-button> 
-          </div>
-        `)
-        stateHTML = updated ? html`<info-item title=${`Alive as of ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="alive as of"</info-item>`:''
-      } else if (document.state == SysState.Defunct) {
-        stateHTML = html`<div class="info-item">Defunct</div>`
-      } else {
-        stateHTML = html`<div class="info-item">${getCurrentStateName(unit, document.state)}<div class="info-item-name">state: ${document.state}</div></div>`
-      }
+          ))
     } else {
-      stateHTML ="Not started.."
+      state = unitInfo.state
     }
-    const stateName = docInfo ? docInfo.content.state : ""
+    if (state == SysState.Alive) {
+      controlsHTML.push(html`
+          <svg-button
+            .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
+            .info=${"add child"}
+            .button=${"plus"}>
+          </svg-button> 
+        </div>
+      `)
+      if (updated) {
+        stateHTML = html`<info-item title=${`Alive as of ${updated}`} item="Alive" .name=${`as of ${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}`}></info-item>`
+      } else {
+        stateHTML = html`<info-item item="Alive"></info-item>`
+      }
+    } else if (state == SysState.Defunct) {
+      stateHTML = html`<info-item item="Defunct"></info-item >`
+    } else {
+      stateHTML = html`<div class="info-item">${getCurrentStateName(unit, state)}<div class="info-item-name">state: ${state}</div></div>`
+    }
+
+    const stateName = docInfo ? docInfo.content.state : unitInfo.state
     return html`
       <div class="unit row">
         <div class="column">
@@ -180,7 +189,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           .title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}
           .item=${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="created">
         </info-item>
-        ${ updated ? html`<info-item title=${`Last modified ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="modified"</info-item>`:''}
+        ${ updated ? html`<info-item title=${`Last modified ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="modified"></info-item>`:''}
         <div class="info-item">${stewards}
         <div class="info-item-name">stewards</div></div>
         </div>

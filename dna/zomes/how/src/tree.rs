@@ -2,11 +2,13 @@ pub use hdk::prelude::*;
 pub use hdk::hash_path::path::TypedPath;
 use how_core::{TREE_ROOT, LinkTypes};
 
+use crate::unit::convert_tag;
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct UnitInfo {
-    hash: EntryHash,
-    version: String,
-    state: String,
+    pub hash: EntryHash,
+    pub version: String,
+    pub state: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
@@ -29,14 +31,7 @@ fn get_entry_hashes(path: &Path) -> ExternResult<(Vec<UnitInfo>,Vec<EntryHash>)>
         match link_type {
             LinkTypes::Document => documents.push(target),
             LinkTypes::Unit => {
-                let tag_string = String::from_utf8(l.tag.clone().into_inner())
-                .map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert link tag to string"))))?;
-                let x : Vec<&str>= tag_string.split("-").collect();
-                if x.len() != 2 {
-                    return Err(wasm_error!(WasmErrorInner::Guest(format!("Badly formed link: {:?}", tag_string))));
-                }
-                let state = x[0].into();
-                let version = x[1].into();
+                let (state, version) = convert_tag(l.tag)?;
                 units.push(UnitInfo{
                     hash: target,
                     version,

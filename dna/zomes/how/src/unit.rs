@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub use hdk::prelude::*;
 use holo_hash::{EntryHashB64};
 use how_core::Document;
@@ -6,6 +8,7 @@ use how_core::{Unit, EntryTypes, LinkTypes};
 use crate::document::{update_document, UpdateDocumentInput};
 use crate::error::*;
 use crate::signals::*;
+use crate::tree::UnitInfo;
 
 pub fn get_units_path() -> Path {
     Path::from("units")
@@ -82,25 +85,62 @@ pub fn create_unit_inner(input: Unit, state: &str) -> ExternResult<EntryHash> {
     Ok(hash)
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+
+pub struct UnitOutput {
+    pub info: UnitInfo,
+    pub record: Record,
+}
+
 ///
 #[hdk_extern]
-fn get_units(_: ()) -> ExternResult<Vec<Record>> {
+fn get_units(_: ()) -> ExternResult<Vec<UnitOutput>> {
     let path = get_units_path();
     let anchor_hash = path.path_entry_hash()?;
     let units = get_units_inner(anchor_hash)?;
     Ok(units)
 }
 
-fn get_units_inner(base: EntryHash) -> HowResult<Vec<Record>> {
+pub fn convert_tag(tag: LinkTag) -> ExternResult<(String,String)> {
+    let tag_string = String::from_utf8(tag.into_inner())
+    .map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert link tag to string"))))?;
+    let x : Vec<&str>= tag_string.split("-").collect();
+    if x.len() != 2 {
+        return Err(wasm_error!(WasmErrorInner::Guest(format!("Badly formed link: {:?}", tag_string))));
+    }
+    let state = x[0].into();
+    let version = x[1].into();
+    Ok((state,version))
+}
+
+fn get_units_inner(base: EntryHash) -> HowResult<Vec<UnitOutput>> {
     let links = get_links(base, LinkTypes::Unit, None)?;
+
+    let mut unit_infos: HashMap<EntryHash,UnitInfo> = HashMap::new();
+    for link in links.clone() {
+        let (state, version) = convert_tag(link.tag.clone())?;
+        unit_infos.insert(link.target.clone().into(), UnitInfo {
+            hash: link.target.into(),
+            version,
+            state});
+    }
 
     let get_input = links
         .into_iter()
         .map(|link| GetInput::new(link.target.into(), GetOptions::default()))
         .collect();
 
-    let unit_records: Vec<Record> = HDK.with(|hdk| hdk.borrow().get(get_input))?.into_iter()
-    .filter_map(|me| me).collect();
+    let unit_records = HDK.with(|hdk| hdk.borrow().get(get_input))?.into_iter()
+    .filter_map(|me| me)
+    .map(|record| {
+        let hash = record.action().entry_hash().unwrap().clone();
+        UnitOutput{
+            info: unit_infos.remove(&hash).unwrap(),
+            record,}
+        }
+     )
+    .collect();
     Ok(unit_records)
 }
 

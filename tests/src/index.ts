@@ -114,7 +114,7 @@ test("how basic tests", async (t) => {
     t.equal(docs[0].hash, document1Hash)
 
     const units :Array<any> = await alice_how.callZome({zome_name:'how', fn_name:'get_units'} );
-    const bag = new RecordBag(units);
+    const bag = new RecordBag(units.map((u)=>u.record));
     const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: serializeHash(hash),value}})
     t.deepEqual(entries, [{hash: entries[0].hash, value: rootUnit}, {hash: unit1Hash, value: unit1}]);
 

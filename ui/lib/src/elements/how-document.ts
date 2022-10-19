@@ -72,6 +72,24 @@ import { HowSection } from "./how-section";
           return;
         }
         const doc = this._documents.value[this.currentDocumentEh]
+        let addSectionHTML
+        if (doc.canAddSection()) {
+          addSectionHTML = html`
+          <svg-button
+                button="plus"
+                info="add section"
+                infoPosition="right"
+                @click=${() => this.newSectionDialog.open()}
+                ></svg-button>
+          </div>
+
+          <how-new-section-dialog
+            .takenNames=${doc.content.map((s)=>s.name)}
+            @add-section=${this.addSection}
+            sectionType=${SectionType.Content}
+          ></how-new-section-dialog>
+          `
+        }
         return html`
           <div id="header">
             <div id="editors" class="row">
@@ -89,20 +107,7 @@ import { HowSection } from "./how-section";
                 .section=${section} .index=${index} .editable=${doc.isEditable(section.name)}></how-section>`
             )}
           </div>
-          <svg-button
-                button="plus"
-                info="add section"
-                infoPosition="right"
-                @click=${() => this.newSectionDialog.open()}
-                ></svg-button>
-          </div>
-
-          <how-document-dialog id="document-dialog"> </how-document-dialog>
-          <how-new-section-dialog
-            .takenNames=${doc.content.map((s)=>s.name)}
-            @add-section=${this.addSection}
-            sectionType=${SectionType.Content}
-          ></how-new-section-dialog>
+          ${addSectionHTML}
         `;
       
     }
@@ -110,7 +115,6 @@ import { HowSection } from "./how-section";
     static get scopedElements() {
         return {
           "mwc-button": Button,
-          "how-document-dialog": HowDocumentDialog,
           "how-section": HowSection,
           "how-new-section-dialog": HowNewSectionDialog,
           "agent-avatar": AgentAvatar

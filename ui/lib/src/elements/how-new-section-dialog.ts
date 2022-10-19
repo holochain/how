@@ -77,9 +77,9 @@ export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
 
   }
   render() {
-    let sectionType
+    let sectionTypeHTML
     if (!this.sectionType) {
-      sectionType = html`
+      sectionTypeHTML = html`
     <mwc-select
       id="section-type-select" 
       label="Section Type" 
@@ -97,7 +97,7 @@ export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
       <mwc-textfield dialogInitialFocus type="text"
             @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
             id="name-field" minlength="3" maxlength="64" label="Name" autoValidate=true required></mwc-textfield>
-      ${sectionType}
+      ${sectionTypeHTML}
       <mwc-select
         id="content-type-select" 
         label="Content Type" 
