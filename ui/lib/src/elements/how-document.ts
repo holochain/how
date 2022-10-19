@@ -19,7 +19,7 @@ import {
 
 // @ts-ignore
 import { AgentAvatar } from "@holochain-open-dev/profiles";
-import { HowNewSectionDialog } from "./how-new-section.dialog";
+import { HowNewSectionDialog } from "./how-new-section-dialog";
 import { HowSection } from "./how-section";
 
 /**
@@ -101,6 +101,7 @@ import { HowSection } from "./how-section";
           <how-new-section-dialog
             .takenNames=${doc.content.map((s)=>s.name)}
             @add-section=${this.addSection}
+            sectionType=${SectionType.Content}
           ></how-new-section-dialog>
         `;
       

@@ -15,7 +15,7 @@ import {
 } from "@scoped-elements/material-web";
 import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
 import {sectionValue} from "./utils";
-import { HowNewSectionDialog } from "./how-new-section.dialog";
+import { HowNewSectionDialog } from "./how-new-section-dialog";
 import { deserializeHash } from "@holochain-open-dev/utils";
 
 /**
@@ -220,10 +220,10 @@ export class HowDocumentDialog extends ScopedElementsMixin(LitElement) {
                   >close</mwc-button
                 >`}
           </mwc-dialog>
-          <how-new-section-dialog
+          <!-- <how-new-section-dialog
             .takenNames=${this.sections.map((s)=>s.name)}
             @add-section=${this.addSection}
-          ></how-new-section-dialog>
+          ></how-new-section-dialog> -->
         `;
     }
 

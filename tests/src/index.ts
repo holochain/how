@@ -43,8 +43,8 @@ test("how basic tests", async (t) => {
     const rootDoc = {  
       documentType: "_document",
       content: [
-        {name: "title", content: "ROOT NODE DOC", source: "", sectionType:"", contentType:"text/plain"},
-        {name: "summary", content: "{}", source: "", sectionType:"", contentType:"text/plain"}
+        {name: "title", content: "ROOT NODE DOC", source: "", sectionType:"c", contentType:"text/plain"},
+        {name: "summary", content: "{}", source: "", sectionType:"c", contentType:"text/plain"}
       ],
       editors: [],
       meta: {}
@@ -54,8 +54,8 @@ test("how basic tests", async (t) => {
       path: "",
       documentType: "_document",
       content: [
-        {name: "title", content: "ROOT NODE DOC", source: "", sectionType:"", contentType:"text/plain"},
-        {name: "summary", content: "{}", source: "", sectionType:"", contentType:"text/plain"}
+        {name: "title", content: "ROOT NODE DOC", source: "", sectionType:"c", contentType:"text/plain"},
+        {name: "summary", content: "{}", source: "", sectionType:"c", contentType:"text/plain"}
       ],
       editors: [],
       meta: {}
@@ -97,8 +97,8 @@ test("how basic tests", async (t) => {
       unitHash: deserializeHash(unit1Hash),
       documentType: "_document",
       content: [
-        {name: "title", content: "The Application API", source: "", sectionType:"", contentType:"text/plain"},
-        {name: "summary", content: "Some long dummary", source: "", sectionType:"", contentType:"text/plain"}
+        {name: "title", content: "The Application API", source: "", sectionType:"c", contentType:"text/plain"},
+        {name: "summary", content: "Some long dummary", source: "", sectionType:"c", contentType:"text/plain"}
       ],
       state: "define",
       editors: [],

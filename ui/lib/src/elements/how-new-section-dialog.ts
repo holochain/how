@@ -23,8 +23,16 @@ import { sectionValue } from "./utils";
  * @element how-new-section-dialog
  */
 export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
+    constructor() {
+      // Always call super() first
+      super();
+      this.sectionType = 'Hello World';
+    }
+    
     @property()
     takenNames: Array<string> = []
+    @property() 
+    sectionType: string = SectionType.Content;
 
     @query('#name-field')
     _nameField!: TextField;
@@ -63,27 +71,33 @@ export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
     if (!isValid) {
         return
     }
-    this.dispatchEvent(new CustomEvent('add-section', { detail: {name: this._nameField.value, contentType: this._contentTypeSelect.value, sectionType: this._sectionTypeSelect.value}, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('add-section', { detail: {name: this._nameField.value, contentType: this._contentTypeSelect.value, sectionType: this.sectionType ? this.sectionType : this._sectionTypeSelect.value}, bubbles: true, composed: true }));
     const dialog = this.shadowRoot!.getElementById("new-section-dialog") as Dialog;
     dialog.close()
 
   }
   render() {
+    let sectionType
+    if (!this.sectionType) {
+      sectionType = html`
+    <mwc-select
+      id="section-type-select" 
+      label="Section Type" 
+      @closing=${(e: any) => e.stopPropagation()}
+    >
+      <mwc-list-item selected value=${SectionType.Content}>Content</mwc-list-item>
+      <mwc-list-item selected value=${SectionType.Process}>Process Template</mwc-list-item>
+      <mwc-list-item selected value=${SectionType.Requirement}>Required Section Template</mwc-list-item>
+    </mwc-select>
+    `
+    }
     return html`
       <mwc-dialog id="new-section-dialog" heading="New Section">
       <div class="spacer"></div>
       <mwc-textfield dialogInitialFocus type="text"
             @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
             id="name-field" minlength="3" maxlength="64" label="Name" autoValidate=true required></mwc-textfield>
-      <mwc-select
-        id="section-type-select" 
-        label="Section Type" 
-        @closing=${(e: any) => e.stopPropagation()}
-      >
-        <mwc-list-item selected value=${SectionType.Content}>Content</mwc-list-item>
-        <mwc-list-item selected value=${SectionType.Process}>Process Template</mwc-list-item>
-        <mwc-list-item selected value=${SectionType.Requirement}>Required Section Template</mwc-list-item>
-      </mwc-select>
+      ${sectionType}
       <mwc-select
         id="content-type-select" 
         label="Content Type" 

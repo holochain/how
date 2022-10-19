@@ -87,7 +87,7 @@ export enum DocType {
 export enum SectionType {
   Process = "p",
   Requirement = "r",
-  Content = "",
+  Content = "c",
 }
 
 export const SourceManual: string = "_manual"
