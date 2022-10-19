@@ -22,6 +22,7 @@ import {
 } from "@scoped-elements/material-web";
 import { Action } from "@holochain/client";
 import { InfoItem } from "./info-item";
+import { HowConfirm } from "./how-confirm";
 
 const getCurrentStateName  = (unit:Unit, documentState:string ): string => {
   for (const [procType, procName] of unit.processes) {
@@ -63,6 +64,10 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   @query('how-unit-details')
   _detailsElem!: HowUnitDetails;
 
+  @query('how-confirm')
+  _confirmElem!: HowConfirm;
+
+
   get myNickName(): string {
     const p = get(this._myProfile)
     return p ? p.nickname : "";
@@ -95,6 +100,30 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
 
   renderType(type: String, content: String) : String {
     return content
+  }
+
+  private confirmAdvance(unitHash: EntryHashB64, newState: string) {
+    let message = ""
+    if (newState == SysState.Defunct) {
+      message = "Are you sure you want to move this item to Defunct?  This can not be undone."
+    } else {
+      const unit: Unit = this._units.value[this.currentUnitEh]
+      const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
+      const process_path = unit.processPathForState(unitInfo.state)
+      console.log("cprod path", process_path)
+      const docInfo = this._store.getCurrentDocument(process_path)
+      const threshold = docInfo?.content.getSection("threshold")
+      if (threshold) {
+        message = threshold.content
+      }
+    }
+    this._confirmElem!.open(message, {unitHash, newState})
+  }
+
+  private async handleConfirm(confirmation:any) {
+    const unitHash: EntryHashB64 = confirmation.unitHash
+    const nextState: string = confirmation.newState
+    this.advanceState(unitHash, nextState)
   }
 
   private async advanceState(unitHash: EntryHashB64, newState: string) {
@@ -150,7 +179,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           .map(
             (nextState) =>
               html`<svg-button 
-                @click=${async () => this.advanceState(this.currentUnitEh, nextState)}
+                @click=${() => this.confirmAdvance(this.currentUnitEh, nextState)}
                 .info=${`move to ${nextState}`}
                 .button=${nextState == SysState.Defunct ? "defunct" : "move"}>
                 </svg-button>`
@@ -208,8 +237,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         </div>
       </div>
       <how-unit-details id="details-dialog" .state=${stateName}> </how-unit-details>
-      <how-document-dialog id="document-dialog"> </how-document-dialog>
-
+      <how-confirm @confirmed=${(e:any) => this.handleConfirm(e.detail)}></how-confirm>
     `;
   }
 
@@ -223,6 +251,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       "agent-avatar": AgentAvatar,
       "svg-button": SvgButton,
       "info-item": InfoItem,
+      "how-confirm": HowConfirm,
     };
   }
   static get styles() {

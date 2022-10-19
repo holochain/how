@@ -474,6 +474,13 @@ function mintNFT(uint256 memory target_) external {
               content: "The petition definition variant allways includes a list of the pettioners",
             },
             {
+              name: "threshold",
+              source: "soc_proto.process.define",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
+              content: "A petition can move to refine when the threshold number of people have signed on to the pettition.",
+            },
+            {
               name: "pettioners",
               content: "{who is making the petition}",
               source: SourceManual,
@@ -501,6 +508,13 @@ function mintNFT(uint256 memory target_) external {
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "The declaration definition variant allways includes the zome signatures and an optional reference implementation",
+            },
+            {
+              name: "threshold",
+              source: "soc_proto.process.define",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
+              content: "A declaration can move to refinement whenever the stewards decide to.",
             },
             {
               name: "zome signatures",
@@ -539,6 +553,13 @@ function mintNFT(uint256 memory target_) external {
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "The Comment Period refinement variant specifies a timeframe for commenting",
+            },
+            {
+              name: "threshold",
+              source: "soc_proto.process.refine",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
+              content: "Refinement can complete after the specified number of weeks in the period.",
             },
             { name: "period", 
               content: "{number of weeks in the comment period}", 

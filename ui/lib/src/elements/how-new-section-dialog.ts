@@ -23,12 +23,6 @@ import { sectionValue } from "./utils";
  * @element how-new-section-dialog
  */
 export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
-    constructor() {
-      // Always call super() first
-      super();
-      this.sectionType = 'Hello World';
-    }
-    
     @property()
     takenNames: Array<string> = []
     @property() 

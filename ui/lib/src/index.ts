@@ -4,6 +4,7 @@ import 'cqfill';
 // TODO: change exports to be available for consumer packages
 
 export * from './elements/how-controller';
+export * from './elements/how-confirm';
 export * from './elements/how-unit';
 export * from './elements/how-node';
 export * from './elements/how-document';
