@@ -131,6 +131,9 @@ import { HowSection } from "./how-section";
           #editors {
             align-items:center;
           }
+          #sections {
+            max-width: 1200px;
+          }
           `,
         ];
   }

@@ -25,6 +25,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   @property() click = ()=>{};
 
   @state() editing = false;
+  @state() preview = false;
 
   private sectionTypeMarker(section: Section) {
     switch (section.sectionType) {
@@ -82,6 +83,23 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 @click=${() => this.editing=true}
                 ></svg-button>`)
         }
+        if (this.section.contentType == "text/markdown") {
+            controls.push(this.preview ?
+                html`<svg-button
+                button="checked"
+                info="preview"
+                infoPosition="right"
+                @click=${() => this.preview=false}
+                ></svg-button>`
+                :
+                html`<svg-button
+                button="unchecked"
+                info="preview"
+                infoPosition="right"
+                @click=${() => this.preview=true}
+                ></svg-button>`
+            )
+        }
         const sectionNameBar = html`
         <div class="section-name-bar row">
             <div class="section-name" title="source: ${this.section.source == "" ? "_root" : this.section.source}">
@@ -103,7 +121,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             return html` 
             <div class="section column">
                 ${sectionNameBar}
-                <div>${sectionValue(this.section)}</div>
+                <div>${sectionValue(this.section, !this.preview)}</div>
             </div>`
         }
     }
@@ -135,6 +153,12 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 font-size: 76%;
                 padding: 0 3px 0 3px;
             }
+        .source {
+            overflow-x: auto;
+            white-space: pre-wrap;
+            white-space: -pre-wrap;
+            word-wrap: break-word;
+          }
       `,
     ];
   }
