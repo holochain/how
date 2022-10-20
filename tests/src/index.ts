@@ -89,8 +89,9 @@ test("how basic tests", async (t) => {
     
     const doc1Path = "hc_system.conductor.api.app"
 
-    const unit1Hash: string = await alice_how.callZome({zome_name:'how', fn_name:'create_unit', payload: unit1} );
-    t.ok(unit1Hash)
+    const unit1Output:any = await alice_how.callZome({zome_name:'how', fn_name:'create_unit', payload: unit1} );
+    t.ok(unit1Output)
+    const unit1Hash = serializeHash(unit1Output.info.hash)
     console.log("unit1Hash", unit1Hash);
 
     let document1 = {  

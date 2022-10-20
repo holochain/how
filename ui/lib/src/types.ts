@@ -149,12 +149,12 @@ export class Document {
     for (const section of this.content) {
       if (this.state == "define") {
         total+=1
-        if (section.content[0] != '{') {
+        if (section.content != "") {
           count += 1
         }
       } else if (section.source.indexOf(".soc_proto.process."+this.state) >= 0) {
         total+=1
-        if (section.content[0] != '{') {
+        if (section.content != "") {
           count += 1
         }
       }  
@@ -276,3 +276,7 @@ export type Progress = {
 export type RequirementInfo = {
   description: string,
 }
+
+export const parseRequirementInfo =  (section: Section) : RequirementInfo => {
+  return JSON.parse(section.content)
+} 

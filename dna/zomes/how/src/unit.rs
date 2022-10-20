@@ -7,7 +7,7 @@ use how_core::{Unit, EntryTypes, LinkTypes};
 
 use crate::document::{update_document, UpdateDocumentInput};
 use crate::error::*;
-use crate::signals::*;
+//use crate::signals::*;
 use crate::tree::UnitInfo;
 
 pub fn get_units_path() -> Path {
@@ -18,8 +18,8 @@ pub const START_STATE: &str = "define";
 pub const ALIVE_STATE: &str = "_alive";
 
 #[hdk_extern]
-pub fn create_unit(input: Unit) -> ExternResult<EntryHashB64> {
-    Ok(create_unit_inner(input, START_STATE)?.into())
+pub fn create_unit(input: Unit) -> ExternResult<UnitOutput> {
+    Ok(create_unit_inner(input, START_STATE)?)
 }
 
 pub fn delete_unit_links(hash: EntryHash, tree_paths: Vec<Path>)  -> ExternResult<()> {
@@ -72,7 +72,7 @@ pub fn create_unit_links(hash: EntryHash, tree_paths: Vec<Path>, state: &str, ve
     Ok(())
 }
 
-pub fn create_unit_inner(input: Unit, state: &str) -> ExternResult<EntryHash> {
+pub fn create_unit_inner(input: Unit, state: &str) -> ExternResult<UnitOutput> {
     let action_hash = create_entry(EntryTypes::Unitx(input.clone()))?;
     let tree_paths = input.tree_paths();
     let hash = hash_entry(&input)?;
@@ -80,9 +80,16 @@ pub fn create_unit_inner(input: Unit, state: &str) -> ExternResult<EntryHash> {
     let record = maybe_record.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
         "Could not get the record created just now"
     ))))?;
-    emit_signal(&SignalPayload::new(hash.clone().into(), Message::NewUnit(record)))?;
+    //emit_signal(&SignalPayload::new(hash.clone().into(), Message::NewUnit(record)))?;
     create_unit_links(hash.clone(), tree_paths, state, &input.version)?;
-    Ok(hash)
+    Ok(UnitOutput {
+        info: UnitInfo {
+            hash,
+            state: state.into(),
+            version: input.version
+        },
+        record,
+    })
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

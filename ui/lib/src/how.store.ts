@@ -111,8 +111,9 @@ export class HowStore {
       if (docs) {
         for (const doc of docs) {
           if (doc.content.documentType == DocType.Document) {
-            let newSections = doc.content.getSectionsByType(sectionType)
+            let newSections = doc.content.getSectionsByType(sectionType).map(s => cloneDeep(s))
             for (const section of newSections) {
+              section.content = ""
               section.sectionType = SectionType.Content
               section.source = walk
             }
@@ -174,7 +175,6 @@ export class HowStore {
   }
 
   private updateDocumentStores(path: string, doc: DocumentOutput)  {
-    console.log("updating doc for ",path, "to", doc)
     this.documentPathStore.update(documents => {
       if (!documents[path]) {
         documents[path] = [doc]
@@ -341,15 +341,12 @@ export class HowStore {
   }
 
   async addUnit(unit: Unit) : Promise<EntryHashB64> {
-    const unitEh: EntryHashB64 = await this.service.createUnit(unit)
-    this.unitsStore.update(units => {
-      units[unitEh] = unit
-      return units
-    })
-    await this.initializeUnit(unitEh)
+    const unitOutput: UnitOutput = await this.service.createUnit(unit)
+    this.updateUnitFromEntry(unitOutput)
+    await this.initializeUnit(serializeHash(unitOutput.info.hash))
 
     //this.service.notify({unitHash:unitEh, message: {type:"NewUnit", content:unit}}, this.others());
-    return unitEh
+    return serializeHash(unitOutput.info.hash)
   }
 
   async initilize(input: Initialization) : Promise<void> {
@@ -362,9 +359,11 @@ export class HowStore {
   }
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
-    return await this.service.createDocument({path, document})
+    const hash = await this.service.createDocument({path, document})
+    await this.pullDocuments(path)
+    return hash
   }
-  
+
   async getCurrentDocumentPull(path:string) : Promise<DocInfo | undefined> {
     if (!get(this.documentPaths)[path]) {
       await this.pullDocuments(path)

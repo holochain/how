@@ -174,7 +174,7 @@ export function initialTree(progenitor: AgentPubKeyB64) {
               source: SourceManual,
               sectionType: SectionType.Requirement,
               contentType: "text/markdown",
-              content: '{"description": "a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does."}',
+              content: '{"description": "A multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does."}',
             },
           ],
           editors: [progenitor],

@@ -17,7 +17,7 @@ export class HowService {
     return this.callZome('initialize', input);
   }
 
-  async createUnit(unit: Unit): Promise<EntryHashB64> {
+  async createUnit(unit: Unit): Promise<UnitOutput> {
     return this.callZome('create_unit', unit);
   }
 

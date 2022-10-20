@@ -51,8 +51,8 @@ fn initialize(input: Initialization) -> ExternResult<()> {
     // add progenitor check for call
     for (state, unit) in input.units {
         let path = unit.path_str()?;
-        let hash = create_unit_inner(unit, &state)?;
-        units.insert(path, (hash, state));
+        let unit_output = create_unit_inner(unit, &state)?;
+        units.insert(path, (unit_output.info.hash, state));
     }
     for doc in input.documents {
         if let Some((unit_hash, state)) = units.get(&doc.path) {

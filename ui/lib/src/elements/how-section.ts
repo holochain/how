@@ -1,10 +1,11 @@
 import {css, html, LitElement, TemplateResult} from "lit";
+import {until} from 'lit-html/directives/until.js';
 import {property, query, state} from "lit/decorators.js";
 import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { Section, SectionType, howContext, RequirementInfo } from "../types";
+import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo } from "../types";
 import { TextArea, TextField } from "@scoped-elements/material-web";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
@@ -46,7 +47,8 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   private textareaWidget(id: string, value: string) : TemplateResult {
     const lines = value.split("\n").length
     let rows = lines<MIN_LINES ? MIN_LINES : lines
-    rows = lines>MAX_LINES ? MAX_LINES : lines
+    rows = rows>MAX_LINES ? MAX_LINES : rows
+    console.log("lines", lines, MIN_LINES, MAX_LINES, rows)
     return html`<mwc-textarea @input=${() => (this.shadowRoot!.getElementById(id) as TextArea).reportValidity()}
       id="${id}" cols="100" .rows=${rows} value="${value}" autoValidate=true required>
       </mwc-textarea>`
@@ -59,52 +61,74 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           id="${id}" maxlength="255" autoValidate=true value="${value}" required></mwc-textfield>`
   }
 
-  private sectionEditWidget(section: Section, index: number) : TemplateResult {
-    const id = `section-${index}`
-    if (section.sectionType != SectionType.Content) {
-        const reqInfo = this.parseRequirementInfo(section)
-        return this.inputWidget(id, reqInfo.description)
+  private sectionEditWidget() : TemplateResult {
+    if (this.section) {
+      const section = this.section
+      const index = this.index
+      const id = `section-${index}`
+      console.log("EDIT", section)
+      if (section.sectionType != SectionType.Content) {
+          const reqInfo = parseRequirementInfo(section)
+          return this.inputWidget(id, reqInfo.description)
+      }
+      switch (section.contentType) {
+        case "text/plain":
+          return this.inputWidget(id, section.content)
+        case "text/plain:long":
+        default: 
+        return this.textareaWidget(id, section.content)
+      }
     }
-    switch (section.contentType) {
-      case "text/plain":
-        return this.inputWidget(id, section.content)
-      case "text/plain:long":
-      default: 
-      return this.textareaWidget(id, section.content)
-    } 
+    return html`Section Missing`
   }
 
-  private parseRequirementInfo(section: Section) : RequirementInfo {
-    return JSON.parse(section.content)
-  } 
+  private async sectionViewWidget() : Promise<TemplateResult>{
+    if (this.section) {
+      const section = this.section
+      const sourceOnly = !this.preview
 
-  private sectionViewWidget(section: Section, sourceOnly: boolean) {
-    if (section.sectionType != SectionType.Content) {
-        const reqInfo = this.parseRequirementInfo(section)
-        return html`<div class="section-content"><p>${reqInfo.description}</p></div>`
+      if (section.sectionType != SectionType.Content) {
+          const reqInfo = parseRequirementInfo(section)
+          return html`<div class="section-content"><p>${reqInfo.description}</p></div>`
+      }
+      if (section.content == "") {
+          const description = await this.getSectionDescription()
+          return html`<div class="section-content empty">
+            <p>This section has not been edited.</p>
+            <p>Section Description: ${description}</p>
+          </div>`
+      }
+      if (section.contentType == "text/markdown") {
+          if (sourceOnly) {
+            return html`<div class="section-content"><pre class="source">${section.content}</pre></div>`
+          } else {
+            return html`<div class="section-content markdown">${unsafeHTML(Marked.parse(section.content))}</div>`
+          }
+      } else {
+          return html`<div class="section-content"><p>${section.content}</p></div>`
+      }
     }
-
-    if (section.contentType == "text/markdown") {
-        if (sourceOnly) {
-          return html`<div class="section-content"><pre class="source">${section.content}</pre></div>`
-        } else {
-          return html`<div class="section-content markdown">${unsafeHTML(Marked.parse(section.content))}</div>`
-        }
-    } else {
-        return html`<div class="section-content"><p>${section.content}</p></div>`
-    }
+    return html`Section Missing`
   }
-  private async openDetails() {
+
+  private async getSectionDescription() {
+    let description = ""
     if (this.section) {
         const srcDocInfo = await this._store.getCurrentDocumentPull(this.section.source)
-        let description = "<unknown>"
         if (srcDocInfo) {
             const srcSection = srcDocInfo.content.getSection(this.section.name)
             if (srcSection) {
-                const reqInfo = this.parseRequirementInfo(srcSection)
+                const reqInfo = parseRequirementInfo(srcSection)
                 description = reqInfo.description
             }
         }
+    }
+    return description
+  }
+
+  private async openDetails() {
+    if (this.section) {
+        const description = await this.getSectionDescription()
         this._detailsDialog!.open(
             this.section.name, 
             this.section.source == "" ? "_root" : this.section.source,
@@ -114,11 +138,12 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
     }
   }
   save() {
+    console.log
     if (this.section) {
         this.editing=false
         const valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextField
         if (this.section.sectionType != SectionType.Content) {
-            const reqInfo = this.parseRequirementInfo(this.section)
+            const reqInfo = parseRequirementInfo(this.section)
             reqInfo.description = valElement.value
             this.section.content = JSON.stringify(reqInfo)
         } else {
@@ -140,7 +165,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 button="save"
                 info="save"
                 infoPosition="right"
-                @click=${() => this.save}
+                @click=${() => this.save()}
                 ></svg-button>`)
             controls.push(html`<svg-button
                 button="close"
@@ -188,8 +213,11 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         <div class="section column">
             ${sectionNameBar}
             ${this.editing ? 
-                this.sectionEditWidget(this.section, this.index):
-                this.sectionViewWidget(this.section, !this.preview)
+                this.sectionEditWidget():
+                until(
+                  this.sectionViewWidget().then(res => res),
+                  html`Loading...`,
+                )
             }
         </div>
         <how-section-details id="details-dialog"> </how-section-details>
@@ -207,6 +235,12 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
       css`
         .section {
             padding: 10px;
+        }
+        .empty {
+          margin-left: 30px;
+          font-style: italic;
+          background-color: #eee;
+          padding: 5px;
         }
         .section-content p {
             margin: 0;
