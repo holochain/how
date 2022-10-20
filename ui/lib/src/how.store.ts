@@ -364,23 +364,32 @@ export class HowStore {
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
     return await this.service.createDocument({path, document})
   }
+  
+  async getCurrentDocumentPull(path:string) : Promise<DocInfo | undefined> {
+    if (!get(this.documentPaths)[path]) {
+      await this.pullDocuments(path)
+    }
+    return this.getCurrentDocument(path)
+  }
 
   getCurrentDocument(path:string) : DocInfo | undefined {
     const docs = get(this.documentPaths)[path]
-    let document
-    let documentHash: any
-    const documents = docs ? docs.filter(doc => doc.updatedBy.length==0).map(docOutput => {
-      return docOutput
-    }) : undefined;
-    if (documents && documents.length> 0) {
-      return {
-        content: documents[documents.length-1].content,
-        hash: documents[documents.length-1].hash,
-        updated: documents[documents.length-1].actions[0].timestamp/1000
+    if (docs) {
+      
+      let document
+      let documentHash: any
+      const documents = docs.filter(doc => doc.updatedBy.length==0).map(docOutput => {
+        return docOutput
+      });
+      if (documents.length> 0) {
+        return {
+          content: documents[documents.length-1].content,
+          hash: documents[documents.length-1].hash,
+          updated: documents[documents.length-1].actions[0].timestamp/1000
+        }
       }
-    } else {
-      return undefined
     }
+    return undefined
   }
 
   getDocumentPath(hash: EntryHashB64) : string | null {

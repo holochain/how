@@ -16,12 +16,13 @@ export class InfoItem extends ScopedElementsMixin(LitElement) {
   @property() item: string = "";
   @property() name: string = "";
   @property() title: string = "";
+  @property() layout: string = "column";
   @property() click = ()=>{};
 
 
   render() {
     return html`
-        <div class="info">
+        <div class="info ${this.layout}">
         <div style=${this.size ? `font-size:${this.size};`:''} .title=${this.title} class="info-item">${this.item}</div><div class="info-item-name">${this.name}</div>
         </div>
     `;

@@ -1,4 +1,4 @@
-import {css, html, LitElement} from "lit";
+import {css, html, LitElement, TemplateResult} from "lit";
 import {property, query} from "lit/decorators.js";
 
 import { contextProvided } from "@lit-labs/context";
@@ -6,21 +6,19 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import {Unit, howContext, Section, SectionType, SourceManual} from "../types";
+import {Unit, howContext, Section, SectionType, SourceManual, Document} from "../types";
 import {HowStore} from "../how.store";
-import {HowDocumentDialog } from "./how-document-dialog";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
   Button,
-  Dialog,
-  TextField,
-  TextArea,
 } from "@scoped-elements/material-web";
 
 // @ts-ignore
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { HowNewSectionDialog } from "./how-new-section-dialog";
 import { HowSection } from "./how-section";
+import { HowComment } from "./how-comment";
+import { InfoItem } from "./info-item";
 
 /**
  * @element how-document
@@ -34,18 +32,12 @@ import { HowSection } from "./how-section";
     @property() path = "";
 
     @query('how-new-section-dialog')
-    private newSectionDialog!: HowNewSectionDialog;
-
+    private _newSectionDialog!: HowNewSectionDialog;
+  
+  
     @contextProvided({ context: howContext })
     _store!: HowStore;
     _documents = new StoreSubscriber(this, () => this._store.documents);
-
-    @query('#document-dialog')
-    _documentDialogElem!: HowDocumentDialog;
-
-    openDoc(unitEh: EntryHashB64, documentEh: EntryHashB64, editable: boolean ) {
-        this._documentDialogElem.open(this.path, unitEh, documentEh, editable);
-    }
 
     async updateSection(section:Section, index:number) {
       const document = this._documents.value[this.currentDocumentEh]
@@ -66,12 +58,29 @@ import { HowSection } from "./how-section";
       const newDocumentHash = await this._store.updateDocument(this.currentDocumentEh, document);
       this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
     }
-
+    private sectionRow(doc:Document, section: Section, index: number) : TemplateResult {
+      return html`
+      <div class="section row">
+        <how-section
+          @section-changed=${(e:any) => this.updateSection(e.detail, index)}
+          .section=${section} 
+          .index=${index} 
+          .editable=${doc.isEditable(section.name)}
+          >
+        </how-section>
+        <!-- ${doc.state === "refine" ? html`
+          <div class="column">
+            ${[].map(c => html`<how-comment .comment=${c}></how-comment>`)}
+          </div>`
+      :""} -->
+      </div>
+      `
+    }
     render() {
         if (!this.currentDocumentEh) {
           return;
         }
-        const doc = this._documents.value[this.currentDocumentEh]
+        const doc : Document = this._documents.value[this.currentDocumentEh]
         let addSectionHTML
         if (doc.canAddSection()) {
           addSectionHTML = html`
@@ -79,7 +88,7 @@ import { HowSection } from "./how-section";
                 button="plus"
                 info="add section"
                 infoPosition="right"
-                @click=${() => this.newSectionDialog.open()}
+                @click=${() => this._newSectionDialog.open()}
                 ></svg-button>
           </div>
 
@@ -89,6 +98,15 @@ import { HowSection } from "./how-section";
             sectionType=${SectionType.Content}
           ></how-new-section-dialog>
           `
+        }
+        const sectionsHTML = doc.content.filter(section => section.sectionType != SectionType.Requirement).map((section, index) => 
+          this.sectionRow(doc, section, index))
+        let requirementsHTML = doc.content.filter(section => section.sectionType == SectionType.Requirement).map((section, index) => 
+          this.sectionRow(doc, section, index))
+        if (requirementsHTML.length > 0) {
+          requirementsHTML.unshift(html`
+            <info-item item="Requirements" name="sections that this standard requrires of sub-nodes"></info-item>
+          `)
         }
         return html`
           <div id="header">
@@ -100,14 +118,12 @@ import { HowSection } from "./how-section";
             </div>
           </div>
           <div id="sections">
-            ${doc.content.map(
-              (section, index) =>
-                html` <how-section 
-                @section-changed=${(e:any) => this.updateSection(e.detail, index)}
-                .section=${section} .index=${index} .editable=${doc.isEditable(section.name)}></how-section>`
-            )}
+            ${sectionsHTML}
+            ${requirementsHTML}
+            ${addSectionHTML}
+
           </div>
-          ${addSectionHTML}
+          <how-section-details id="details-dialog"> </how-section-details>
         `;
       
     }
@@ -116,8 +132,10 @@ import { HowSection } from "./how-section";
         return {
           "mwc-button": Button,
           "how-section": HowSection,
+          "how-comment": HowComment,
           "how-new-section-dialog": HowNewSectionDialog,
-          "agent-avatar": AgentAvatar
+          "agent-avatar": AgentAvatar,
+          "info-item": InfoItem,
         };
       }
     static get styles() {
@@ -131,7 +149,7 @@ import { HowSection } from "./how-section";
           #editors {
             align-items:center;
           }
-          #sections {
+          how-section {
             max-width: 1200px;
           }
           `,

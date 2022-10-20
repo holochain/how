@@ -272,3 +272,7 @@ export type Progress = {
   total: number,
   count: number,
 }
+
+export type RequirementInfo = {
+  description: string,
+}

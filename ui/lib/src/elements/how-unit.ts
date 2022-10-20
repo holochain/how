@@ -10,7 +10,6 @@ import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash, serializeHash } from "@holochain-open-dev/utils";
 import {Unit, DocType, howContext, SysState, Document, UnitInfo} from "../types";
 import {HowStore} from "../how.store";
-import {HowDocumentDialog } from "./how-document-dialog";
 import { HowUnitDetails } from "./how-unit-details";
 import { SvgButton } from "./svg-button";
 import { HowNode } from "./how-node";
@@ -58,9 +57,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   _documents = new StoreSubscriber(this, () => this._store.documents);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
 
-  @query('#document-dialog')
-  _documentDialogElem!: HowDocumentDialog;
-
   @query('how-unit-details')
   _detailsElem!: HowUnitDetails;
 
@@ -88,14 +84,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     }
     const unit: Unit = this._units.value[this.currentUnitEh];
     return unit.path()
-  }
-
-  addDoc(documentType: DocType ) {
-    this._documentDialogElem.new(this.getPath(), this.currentUnitEh, documentType);
-  }
-
-  openDoc(documentEh: EntryHashB64, editable: boolean ) {
-    this._documentDialogElem.open(this.getPath(), this.currentUnitEh, documentEh, editable);
   }
 
   renderType(type: String, content: String) : String {
@@ -245,7 +233,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   static get scopedElements() {
     return {
       "mwc-button": Button,
-      "how-document-dialog": HowDocumentDialog,
       "how-unit-details": HowUnitDetails,
       "how-node": HowNode,
       "agent-avatar": AgentAvatar,

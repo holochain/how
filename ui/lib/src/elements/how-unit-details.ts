@@ -6,16 +6,13 @@ import { contextProvided } from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Unit, howContext, Dictionary, Node} from "../types";
-import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import {
   Button,
   Dialog,
 } from "@scoped-elements/material-web";
 import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
-import { StoreSubscriber } from "lit-svelte-stores";
 // @ts-ignore
 import {WcMermaid} from "wc-mermaid"
-
 
 /**
  * @element how-unit-details

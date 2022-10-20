@@ -3,11 +3,6 @@ import { property, query, state } from "lit/decorators.js";
 import { sharedStyles } from "../sharedStyles";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {
-  howContext,
-  Dictionary,
-  Section,
-  DocType,
-  DocumentOutput,
   SectionType,
 } from "../types";
 import {
@@ -17,7 +12,6 @@ import {
   Select,
   ListItem,
 } from "@scoped-elements/material-web";
-import { sectionValue } from "./utils";
 
 /**
  * @element how-new-section-dialog
