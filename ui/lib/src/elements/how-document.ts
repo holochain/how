@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult} from "lit";
-import {property, query} from "lit/decorators.js";
+import {property, query, state} from "lit/decorators.js";
 
 import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
@@ -10,7 +10,7 @@ import {Unit, howContext, Section, SectionType, SourceManual, Document, DocType,
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
-  Button,
+  Button, TextArea, TextField,
 } from "@scoped-elements/material-web";
 
 // @ts-ignore
@@ -20,7 +20,6 @@ import { HowSection } from "./how-section";
 import { HowComment } from "./how-comment";
 import { InfoItem } from "./info-item";
 import { serializeHash } from "@holochain-open-dev/utils";
-import { forEach } from "lodash";
 
 /**
  * @element how-document
@@ -32,6 +31,7 @@ import { forEach } from "lodash";
   
     @property() currentDocumentEh = "";
     @property() path = "";
+    @state() commentingOn : Section|undefined = undefined;
 
     @query('how-new-section-dialog')
     private _newSectionDialog!: HowNewSectionDialog;
@@ -85,17 +85,45 @@ import { forEach } from "lodash";
 
     }
 
+    comment() {
+      if (this.commentingOn) {
+        const valElement = this.shadowRoot!.getElementById(`comment`) as TextField
+        this.addComment(valElement.value, this.commentingOn)
+        this.commentingOn = undefined
+      }
+    }
+  
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<DocumentOutput>) : TemplateResult {
       return html`
       <div class="section row">
         <how-section
-          @add-comment=${(e:any) => this.addComment(e.detail.comment, e.detail.section)}
           @section-changed=${(e:any) => this.updateSection(e.detail, index)}
           .section=${section} 
           .index=${index} 
           .editable=${doc.isEditable(section.name)}
           >
         </how-section>
+          <svg-button
+            .click=${async () => this.commentingOn=section} 
+            .button=${"new_comment"}>
+          </svg-button>
+        ${this.commentingOn && this.commentingOn.name == section.name?
+              html`
+              <div class="comment-box">
+                Add Comment:
+                <mwc-textarea @input=${() => (this.shadowRoot!.getElementById("comment") as TextArea).reportValidity()}
+                  id="comment" cols="100" .rows=${5} autoValidate=true required>
+                </mwc-textarea>
+                <svg-button
+                button="send"
+                info="send"
+                @click=${() => this.comment()}
+                ></svg-button>
+              </div>
+              `
+              :
+              ''
+            }
         ${comments ? html`
           <div class="column">
             ${comments.map(c => html`<how-comment .comment=${c}></how-comment>`)}

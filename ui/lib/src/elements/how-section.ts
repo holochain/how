@@ -34,7 +34,6 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
 
   @state() editing = false;
   @state() preview = false;
-  @state() commenting = false;
 
   @query('how-section-details')
   private _detailsDialog!: HowSectionDetails;
@@ -154,11 +153,6 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         this.dispatchEvent(new CustomEvent('section-changed', { detail: this.section, bubbles: true, composed: true }));
     }
   }
-  comment() {
-    const valElement = this.shadowRoot!.getElementById(`comment`) as TextField
-    this.dispatchEvent(new CustomEvent('add-comment', { detail: {comment:valElement.value, section:this.section}, bubbles: true, composed: true }));
-    this.commenting = false
-  }
 
   render() {
     if (this.section) {
@@ -167,12 +161,6 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             .click=${async () => this.openDetails()} 
             .button=${"question"}>
           </svg-button> `,
-          html`
-          <svg-button
-            .click=${async () => this.commenting=true} 
-            .button=${"new_comment"}>
-          </svg-button> `
-
         ]
         if (this.editing) {
             controls.push(html`<svg-button
@@ -232,21 +220,6 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                   this.sectionViewWidget().then(res => res),
                   html`Loading...`,
                 )
-            }
-            ${this.commenting ?
-              html`
-              <div class="comment-box">
-                Add Comment:
-                ${this.textareaWidget('comment',"")}
-                <svg-button
-                button="send"
-                info="send"
-                @click=${() => this.comment()}
-                ></svg-button>
-              </div>
-              `
-              :
-              ''
             }
         </div>
         <how-section-details id="details-dialog"> </how-section-details>
