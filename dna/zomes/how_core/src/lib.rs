@@ -67,16 +67,18 @@ pub struct Section {
     pub name: String,
     pub section_type: String,
     pub content_type: String,
-    pub source: String,
+    pub source_path: String,
+    pub source_unit: Option<EntryHash>,
     pub content: String,
 }
 impl Section {
-    pub fn new(name: &str, section_type: &str, content_type: &str, source: &str, content: &str) -> Self {
+    pub fn new(name: &str, section_type: &str, content_type: &str, source_path: &str,source_unit: Option<EntryHash>, content: &str) -> Self {
         Section {
             name: name.into(),
             section_type: section_type.into(),
             content_type: content_type.into(),
-            source: source.into(),
+            source_path: source_path.into(),
+            source_unit,
             content: content.into(),
         }
     }

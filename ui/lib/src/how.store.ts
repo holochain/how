@@ -115,7 +115,8 @@ export class HowStore {
             for (const section of newSections) {
               section.content = ""
               section.sectionType = SectionType.Content
-              section.source = walk
+              section.sourcePath = walk
+              section.sourceUnit = doc.content.unitHash
             }
             sections = sections.concat(newSections)
           } 
@@ -364,31 +365,35 @@ export class HowStore {
     return hash
   }
 
-  async getCurrentDocumentPull(path:string) : Promise<DocInfo | undefined> {
+  async getCurrentDocumentPull(path:string, unitHash: EntryHashB64) : Promise<DocInfo | undefined> {
     if (!get(this.documentPaths)[path]) {
       await this.pullDocuments(path)
     }
-    return this.getCurrentDocument(path)
+    return this.getCurrentDocument(path, unitHash)
   }
 
-  getCurrentDocument(path:string) : DocInfo | undefined {
-    const docs = get(this.documentPaths)[path]
-    if (docs) {
-      
-      let document
-      let documentHash: any
-      const documents = docs.filter(doc => doc.updatedBy.length==0).map(docOutput => {
-        return docOutput
-      });
-      if (documents.length> 0) {
-        return {
-          content: documents[documents.length-1].content,
-          hash: documents[documents.length-1].hash,
-          updated: documents[documents.length-1].actions[0].timestamp/1000
-        }
+  getCurrentDocument(path:string, unitHash: EntryHashB64 ) : DocInfo | undefined {
+    const documents = this.getDocumentsFiltered(path, unitHash, DocType.Document, true)
+    if (documents.length> 0) {
+      return {
+        content: documents[documents.length-1].content,
+        hash: documents[documents.length-1].hash,
+        updated: documents[documents.length-1].actions[0].timestamp/1000
       }
     }
     return undefined
+  }
+
+  getDocumentsFiltered(path: string, unitEh: EntryHashB64, docType: DocType, latestOnly: boolean) : Array<DocumentOutput> {
+    let docs = get(this.documentPaths)[path]
+    if (docs) {
+      if (latestOnly) {
+        docs = docs.filter(doc => doc.updatedBy.length==0)
+      }
+      docs = docs.filter(d=>d.content.documentType==docType && serializeHash(d.content.unitHash) == unitEh)
+      return docs
+    }
+    return []
   }
 
   getDocumentPath(hash: EntryHashB64) : string | null {

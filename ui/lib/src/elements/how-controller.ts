@@ -6,7 +6,7 @@ import { StoreSubscriber } from "lit-svelte-stores";
 import { Unsubscriber, Readable, get } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Unit, Dictionary, Initialization, DocumentOutput} from "../types";
+import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType} from "../types";
 import { HowStore } from "../how.store";
 import { HowUnit } from "./how-unit";
 import { HowTree } from "./how-tree";
@@ -28,6 +28,7 @@ import {
   Profile,
 } from "@holochain-open-dev/profiles";
 import {EntryHashB64} from "@holochain-open-dev/core-types";
+import { serializeHash } from "@holochain-open-dev/utils";
 
 /**
  * @element how-controller
@@ -201,13 +202,13 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return this.shadowRoot!.getElementById("unit-dialog") as HowUnitDialog;
   }
 
-  private async handleUnitSelect(unitEh: string): Promise<void> {
+  private async handleUnitSelect(unitEh: EntryHashB64): Promise<void> {
     if (this._units.value[unitEh]) {
       this._currentUnitEh = unitEh;
       this.unitElem.currentUnitEh = unitEh;
       this._tree.currentNode = unitEh;
       await this._store.pullDocuments(this.getCurrentPath())
-      let docs = this.getUnitDocuments()
+      let docs = this.getUnitDocuments(unitEh, DocType.Document)
       if (docs) {
         docs = docs.filter(doc => doc.updatedBy.length==0)
         if (docs.length > 0) {
@@ -220,9 +221,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
   }
 
-  getUnitDocuments(): Array<DocumentOutput> {
-    const docs = this._documentPaths.value[this.getCurrentPath()]
+  getUnitDocuments(unitEh: EntryHashB64, docType: DocType): Array<DocumentOutput> {
+    const path = this.getCurrentPath()
+    const docs = this._documentPaths.value[path]
+    if (!docs) {
+      return []
+    }
     return docs
+        .filter(d=>d.content.documentType==docType && serializeHash(d.content.unitHash) ==unitEh)
   }
 
   handleNodeSelected(event: any) {

@@ -56,6 +56,17 @@ fn initialize(input: Initialization) -> ExternResult<()> {
     }
     for doc in input.documents {
         if let Some((unit_hash, state)) = units.get(&doc.path) {
+            let mut sections = Vec::new();
+            for mut section in doc.content {
+                // if we can't find a source path, then assume that the section was manually entered
+                // its source is the document's unit
+                if let Some((unit, _)) = units.get(&section.source_path) {
+                    section.source_unit = Some(unit.clone());
+                } else {
+                    section.source_unit = Some(unit_hash.clone());
+                }
+                sections.push(section);
+            }
             let input = DocumentInput {
                 path: doc.path.clone(),
                 document: Document {
@@ -63,11 +74,13 @@ fn initialize(input: Initialization) -> ExternResult<()> {
                     document_type: doc.document_type,
                     state: state.clone(),
                     editors: doc.editors,
-                    content: doc.content,
+                    content: sections,
                     meta: BTreeMap::new(),
                 }
             };
             create_document(input)?;
+        } else {
+            debug!("no unit for document {:?}", doc);
         }
     }
     Ok(())

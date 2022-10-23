@@ -97,8 +97,9 @@ export interface Section {
   name: string,
   sectionType: SectionType,
   contentType: string,
-  source: string,
   content: string,    
+  sourcePath: string,
+  sourceUnit?: EntryHash,
 }
 
 export enum SysState {
@@ -152,7 +153,7 @@ export class Document {
         if (section.content != "") {
           count += 1
         }
-      } else if (section.source.indexOf(".soc_proto.process."+this.state) >= 0) {
+      } else if (section.sourcePath.indexOf(".soc_proto.process."+this.state) >= 0) {
         total+=1
         if (section.content != "") {
           count += 1
@@ -175,7 +176,7 @@ export class Document {
       return true
     }
     const section = this.getSection(sectionName)
-    return section.source.indexOf(".soc_proto.process."+this.state) >= 0
+    return section.sourcePath.indexOf(".soc_proto.process."+this.state) >= 0
   }
 
   public setSection(sectionName: string, content: string ) {

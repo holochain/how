@@ -11,6 +11,7 @@ import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
 import { HowSectionDetails } from "./how-section-details";
 import { HowStore } from "../how.store";
+import { serializeHash } from "@holochain-open-dev/utils";
 
 
 const MAX_LINES= 100
@@ -33,6 +34,8 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
 
   @state() editing = false;
   @state() preview = false;
+  @state() commenting = false;
+
   @query('how-section-details')
   private _detailsDialog!: HowSectionDetails;
 
@@ -48,7 +51,6 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
     const lines = value.split("\n").length
     let rows = lines<MIN_LINES ? MIN_LINES : lines
     rows = rows>MAX_LINES ? MAX_LINES : rows
-    console.log("lines", lines, MIN_LINES, MAX_LINES, rows)
     return html`<mwc-textarea @input=${() => (this.shadowRoot!.getElementById(id) as TextArea).reportValidity()}
       id="${id}" cols="100" .rows=${rows} value="${value}" autoValidate=true required>
       </mwc-textarea>`
@@ -113,8 +115,8 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
 
   private async getSectionDescription() {
     let description = ""
-    if (this.section) {
-        const srcDocInfo = await this._store.getCurrentDocumentPull(this.section.source)
+    if (this.section  && this.section.sourceUnit) {
+        const srcDocInfo = await this._store.getCurrentDocumentPull(this.section.sourcePath, serializeHash(this.section.sourceUnit))
         if (srcDocInfo) {
             const srcSection = srcDocInfo.content.getSection(this.section.name)
             if (srcSection) {
@@ -131,7 +133,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         const description = await this.getSectionDescription()
         this._detailsDialog!.open(
             this.section.name, 
-            this.section.source == "" ? "_root" : this.section.source,
+            this.section.sourcePath == "" ? "_root" : this.section.sourcePath,
             this.section.contentType,
             description,
             )
@@ -152,13 +154,25 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         this.dispatchEvent(new CustomEvent('section-changed', { detail: this.section, bubbles: true, composed: true }));
     }
   }
+  comment() {
+    const valElement = this.shadowRoot!.getElementById(`comment`) as TextField
+    this.dispatchEvent(new CustomEvent('add-comment', { detail: {comment:valElement.value, section:this.section}, bubbles: true, composed: true }));
+    this.commenting = false
+  }
+
   render() {
     if (this.section) {
         const controls = [html`
             <svg-button
             .click=${async () => this.openDetails()} 
             .button=${"question"}>
+          </svg-button> `,
+          html`
+          <svg-button
+            .click=${async () => this.commenting=true} 
+            .button=${"new_comment"}>
           </svg-button> `
+
         ]
         if (this.editing) {
             controls.push(html`<svg-button
@@ -219,6 +233,21 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                   html`Loading...`,
                 )
             }
+            ${this.commenting ?
+              html`
+              <div class="comment-box">
+                Add Comment:
+                ${this.textareaWidget('comment',"")}
+                <svg-button
+                button="send"
+                info="send"
+                @click=${() => this.comment()}
+                ></svg-button>
+              </div>
+              `
+              :
+              ''
+            }
         </div>
         <how-section-details id="details-dialog"> </how-section-details>
         `
@@ -268,6 +297,9 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             white-space: -pre-wrap;
             word-wrap: break-word;
           }
+        .comment-box {
+          background-color: lightblue
+        }
       `,
     ];
   }

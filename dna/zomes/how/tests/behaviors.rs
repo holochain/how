@@ -83,7 +83,7 @@ pub async fn test_basics() {
     assert_eq!(units.len(), 2);
     debug!("{:#?}", units);
 
-    let content  = vec![Section::new("summary", "p", "text/markdown", "m", "blah blah")];
+    let content  = vec![Section::new("summary", "p", "text/markdown", "_manual", None, "blah blah")];
     let document = Document {
       unit_hash: hash.into(),
       document_type: String::from(DOC_DOCUMENT),

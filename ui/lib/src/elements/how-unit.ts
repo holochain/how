@@ -99,7 +99,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
       const process_path = unit.processPathForState(unitInfo.state)
       console.log("cprod path", process_path)
-      const docInfo = this._store.getCurrentDocument(process_path)
+      const docInfo = this._store.getCurrentDocument(process_path, unitHash)
       const threshold = docInfo?.content.getSection("threshold")
       if (threshold) {
         message = threshold.content
@@ -130,7 +130,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const action: Action = this._unitsActions.value[this.currentUnitEh]
 
     const path = this.getPath()
-    const docInfo = this._store.getCurrentDocument(path)
+    const docInfo = this._store.getCurrentDocument(path, serializeHash(unitInfo.hash))
 
 
     // const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
