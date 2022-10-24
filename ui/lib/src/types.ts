@@ -281,3 +281,10 @@ export type RequirementInfo = {
 export const parseRequirementInfo =  (section: Section) : RequirementInfo => {
   return JSON.parse(section.content)
 } 
+
+export type HilightRange = {
+  sectionName: string,
+  startOffset: number,
+  endOffset: number,
+  commentHash: EntryHashB64,
+}

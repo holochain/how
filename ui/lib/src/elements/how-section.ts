@@ -5,7 +5,7 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo } from "../types";
+import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange } from "../types";
 import { TextArea, TextField } from "@scoped-elements/material-web";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
@@ -31,6 +31,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   @property() index = 0
   @property() editable = false;
   @property() click = ()=>{};
+  @property() selectedRange: any | undefined = undefined;
 
   @state() editing = false;
   @state() preview = false;
@@ -83,6 +84,21 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
     return html`Section Missing`
   }
 
+  handleSelect(e:any) {
+    this.dispatchEvent(new CustomEvent('selection', { detail: this.section, bubbles: true, composed: true }));
+  }
+
+  private highlitContent(range: HilightRange| undefined,content: string) : TemplateResult {
+    if (range) {
+      const p1 = content.substring(0,range.startOffset)
+      const p2 = content.substring(range.startOffset, range.endOffset)
+      const p3 = content.substring(range.endOffset)
+      return html`${p1}<span class='hilight'>${p2}</span>${p3}`
+    } else {
+      return html`${content}`
+    }
+  }
+
   private async sectionViewWidget() : Promise<TemplateResult>{
     if (this.section) {
       const section = this.section
@@ -101,12 +117,12 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
       }
       if (section.contentType == "text/markdown") {
           if (sourceOnly) {
-            return html`<div class="section-content"><pre class="source">${section.content}</pre></div>`
+            return html`<div class="section-content" @mouseup=${(e:any)=>this.handleSelect(e)}><pre class="source">${this.highlitContent(this.selectedRange,section.content)}</pre></div>`
           } else {
             return html`<div class="section-content markdown">${unsafeHTML(Marked.parse(section.content))}</div>`
           }
       } else {
-          return html`<div class="section-content"><p>${section.content}</p></div>`
+          return html`<div class="section-content" @mouseup=${(e:any)=>this.handleSelect(e)}><p>${this.highlitContent(this.selectedRange,section.content)}</p></div>`
       }
     }
     return html`Section Missing`
@@ -270,9 +286,6 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             white-space: -pre-wrap;
             word-wrap: break-word;
           }
-        .comment-box {
-          background-color: lightblue
-        }
       `,
     ];
   }

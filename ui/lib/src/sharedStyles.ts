@@ -24,5 +24,7 @@ export const sharedStyles = css`
     color: #999;
     font-weight: normal;  
   }
-
+  .hilight {
+    background-color: yellow;
+  }
 `;

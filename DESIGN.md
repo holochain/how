@@ -105,11 +105,11 @@ struct Section {                     // content compontents
 - Used for instructions on how to use processes (because the content contains templates for other documents)
 
 ### Comments 
-Comments are implement by putting the comment text in the value of a content element keyed as "comment" and a sugested change in a content element keyed as "suggestion" with and the following in the meta:
+Comments are implement by putting the comment text in the value of a section keyed as "comment" and a sugested change in a section keyed as "suggestion" with and the following in the meta:
 
 ```rust=
   document: EntryHash, // points to document being commented on
-  content_key: String, // key of content component being commented on
+  section: String, // key of content component being commented on
   start_index: u32, 
   end_index: u32,
 ```
