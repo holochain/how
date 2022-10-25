@@ -286,5 +286,6 @@ export type HilightRange = {
   sectionName: string,
   startOffset: number,
   endOffset: number,
-  commentHash: EntryHashB64,
+  commentHash: EntryHashB64 | undefined,
+  replacement: string | undefined,  // undefined = no replacement.  empty string = delete
 }

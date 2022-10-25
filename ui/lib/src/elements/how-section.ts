@@ -31,7 +31,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   @property() index = 0
   @property() editable = false;
   @property() click = ()=>{};
-  @property() selectedRange: any | undefined = undefined;
+  @property() highlitRange: HilightRange | undefined = undefined;
 
   @state() editing = false;
   @state() preview = false;
@@ -91,9 +91,13 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   private highlitContent(range: HilightRange| undefined,content: string) : TemplateResult {
     if (range) {
       const p1 = content.substring(0,range.startOffset)
-      const p2 = content.substring(range.startOffset, range.endOffset)
+      let p2: string | TemplateResult = content.substring(range.startOffset, range.endOffset)
       const p3 = content.substring(range.endOffset)
-      return html`${p1}<span class='hilight'>${p2}</span>${p3}`
+      if (range.startOffset == range.endOffset) {
+        p2 = html`<span id="cursor" class="cursor"><div></div></span>`
+      }
+      // has to be on one line because this may be a PRE!
+      return html`<span id="1">${p1}</span><span id="hilight" class='hilight ${range.replacement != undefined ? 'deleted' : ''}'>${p2}</span>${range.replacement? html`<span class="hilight">${range.replacement}</span>`: ''}<span id="2">${p3}</span>`
     } else {
       return html`${content}`
     }
@@ -117,12 +121,18 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
       }
       if (section.contentType == "text/markdown") {
           if (sourceOnly) {
-            return html`<div class="section-content" @mouseup=${(e:any)=>this.handleSelect(e)}><pre class="source">${this.highlitContent(this.selectedRange,section.content)}</pre></div>`
+            return html`<div class="section-content"
+           
+            @click=${(e:any)=>this.handleSelect(e)}
+            ><pre class="source">${this.highlitContent(this.highlitRange, section.content)}</pre></div>`
           } else {
             return html`<div class="section-content markdown">${unsafeHTML(Marked.parse(section.content))}</div>`
           }
       } else {
-          return html`<div class="section-content" @mouseup=${(e:any)=>this.handleSelect(e)}><p>${this.highlitContent(this.selectedRange,section.content)}</p></div>`
+          return html`<div class="section-content" 
+           
+            @click=${(e:any)=>this.handleSelect(e)}
+          ><p>${this.highlitContent(this.highlitRange,section.content)}</p></div>`
       }
     }
     return html`Section Missing`
@@ -286,6 +296,13 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             white-space: -pre-wrap;
             word-wrap: break-word;
           }
+        .cursor {
+          width: 0px;
+          display: inline-block;
+          box-shadow: 0px 0px 0px 1px #4f93df;
+          height: 13px;
+          margin-bottom: -1px;
+        }
       `,
     ];
   }

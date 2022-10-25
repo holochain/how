@@ -3,7 +3,7 @@ import {property, query, state} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { DocumentOutput, Section } from "../types";
+import { DocumentOutput, HilightRange, Section } from "../types";
 import { serializeHash } from "@holochain-open-dev/utils";
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 /**
@@ -22,14 +22,24 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       //this.selected = true
       const commentDoc = this.comment.content
       const meta = commentDoc.meta
-      this.dispatchEvent(new CustomEvent('do-hilight', { detail: {commentHash:this.comment.hash, sectionName: meta["section"], startOffset: parseInt(meta["startOffset"]), endOffset: parseInt(meta["endOffset"]),}, bubbles: true, composed: true }))
+      const suggestionSection = commentDoc.getSection("suggestion")
+      const replacement = suggestionSection ? suggestionSection.content : undefined
+      const hilightRange: HilightRange = {
+        commentHash:this.comment.hash, 
+        sectionName: meta["section"], 
+        startOffset: parseInt(meta["startOffset"]), 
+        endOffset: parseInt(meta["endOffset"]),
+        replacement
+      }
+
+      this.dispatchEvent(new CustomEvent('do-hilight', { detail: hilightRange, bubbles: true, composed: true }))
     }
   }
 
   render() {
     if (this.comment) {
       const commentDoc = this.comment.content
-      const created = new Date(this.comment.actions[0].timestamp)
+      const created = new Date(this.comment.actions[0].timestamp/1000)
       let commentSection: Section | undefined
       let suggestionSection: Section | undefined
       commentDoc.content.forEach(section => {

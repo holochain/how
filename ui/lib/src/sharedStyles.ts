@@ -27,4 +27,7 @@ export const sharedStyles = css`
   .hilight {
     background-color: yellow;
   }
+  .deleted {
+    text-decoration: line-through;
+  }
 `;

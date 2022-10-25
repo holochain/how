@@ -122,15 +122,33 @@ import { serializeHash } from "@holochain-open-dev/utils";
         this.addComment(valElement.value, this.commentingOn)
       }
     }
-    openComment(section: Section) {
-      this.highlitRange = undefined
+    openComment(section: Section) { 
+      // TODO handle double-click     
       this.commentingOn = undefined
-
       this.commentingOn = section
       const sel = document.getSelection()
       if (sel) {
         const range = sel.getRangeAt(0)
+        let extra = 0
+        if (this.highlitRange) {
+          switch (range.startContainer.parentElement?.id) {
+            case "2":
+              extra = this.highlitRange.endOffset;
+              break;
+            case "hilight":
+            case "cursor":
+              extra = this.highlitRange.endOffset - range.startContainer.parentElement!.textContent!.length
+          }
+        }
         this.commentRange = range
+        this.highlitRange = {
+          startOffset: range.startOffset+extra,
+          endOffset: range.startOffset+range.toString().length+extra, // not endOffset because it might be in the part 1 hilight divs!
+          sectionName: section.name,
+          replacement: undefined,
+          commentHash: undefined
+        }
+
       }
     }
 
@@ -138,6 +156,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
       this.commentingOn = undefined
       this.highlitRange = range
     }
+
     private getCommentDocs(doc: Document) : Dictionary<Array<DocumentOutput>> {
       const comments: Dictionary<Array<DocumentOutput>> = {}
       this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( comment => {
@@ -154,7 +173,22 @@ import { serializeHash } from "@holochain-open-dev/utils";
       })
       return comments
     }
-
+    handleCommentChange(index: number) {
+      if (this.highlitRange) {
+        const commentBox = this.shadowRoot!.getElementById("comment") as TextArea
+        if (commentBox) {
+          commentBox.reportValidity()
+          const matches = commentBox.value.match(/([\s\S]*)```suggestion\s*([\s\S]*)\n```([\s\S]*)/)
+          if (matches) {
+            const suggestion = matches[2]
+            this.highlitRange.replacement = suggestion
+            const sectionElement = this.shadowRoot!.getElementById("section-"+index) as HowSection
+            sectionElement.highlitRange = this.highlitRange
+            sectionElement.requestUpdate()
+          }
+        }
+      }
+    }
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<DocumentOutput>) : TemplateResult {
       const maybeCommentBox = this.commentingOn && this.commentingOn.name == section.name?
         html`
@@ -164,8 +198,8 @@ import { serializeHash } from "@holochain-open-dev/utils";
           <div class="row comment-header">
             Add Comment:
           </div>
-          <mwc-textarea @input=${() => (this.shadowRoot!.getElementById("comment") as TextArea).reportValidity()}
-            id="comment" .value=${this.commentRange && this.commentRange.toString() ? `\`\`\`suggestion\n${this.commentRange.toString()}\n\`\`\`` : ""} cols="100" .rows=${5} autoValidate=true required>
+          <mwc-textarea @input=${() => this.handleCommentChange(index)}
+            cols="50" id="comment" .value=${this.commentRange && this.commentRange.toString() ? `\`\`\`suggestion\n${this.commentRange.toString()}\n\`\`\`` : ""} cols="100" .rows=${5} autoValidate=true required>
           </mwc-textarea>
 
           <div class="row comment-controls">
@@ -179,7 +213,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
                 button="close"
                 info="cancel"
                 infoPosition="right"
-                @click=${() => {this.commentingOn = undefined}}
+                @click=${() => this.clearCommenting()}
               ></svg-button>
           </div>
         </div>
@@ -189,30 +223,32 @@ import { serializeHash } from "@holochain-open-dev/utils";
 
       return html`
       <div class="section row">
-        <how-section
+        <how-section id=${'section-'+index}
           @selection=${(e:any)=>this.openComment(e.detail)}
           @section-changed=${(e:any) => this.updateSection(e.detail, index)}
           .section=${section} 
           .index=${index}
-          .selectedRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
+          .highlitRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
           .editable=${doc.isEditable(section.name)}
           >
         </how-section>
+        <div class="column">
           <svg-button
             .click=${async () => this.commentingOn=section} 
             .button=${"new_comment"}>
           </svg-button>
           ${maybeCommentBox}
-        ${comments ? html`
-          <div class="column">
-            ${comments.map(c => html`
-            <how-comment 
-              .comment=${c} 
-              @do-hilight=${(e:any) => this.hilight(e.detail)}
-              .selected=${this.highlitRange && this.highlitRange.commentHash == c.hash}
-            ></how-comment>`)}
-          </div>
-        `:''}
+          ${comments ? html`
+            <div class="column">
+              ${comments.map(c => html`
+              <how-comment 
+                .comment=${c} 
+                @do-hilight=${(e:any) => this.hilight(e.detail)}
+                .selected=${this.highlitRange && this.highlitRange.commentHash == c.hash}
+              ></how-comment>`)}
+            </div>
+          `:''}
+        </div>
       </div>
       `
     }
@@ -292,7 +328,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
             align-items:center;
           }
           how-section {
-            max-width: 1200px;
+            width: 1000px;
           }
           .comment-box {
             background-color: lightblue;
