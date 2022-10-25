@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, AgentPubKeyB64, Dictionary} from "@holochain-open-dev/core-types";
-import {Unit, howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange} from "../types";
+import {Unit, howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -20,6 +20,7 @@ import { HowSection } from "./how-section";
 import { HowComment } from "./how-comment";
 import { InfoItem } from "./info-item";
 import { serializeHash } from "@holochain-open-dev/utils";
+import { HowCommentBox } from "./how-comment-box";
 
 /**
  * @element how-document
@@ -33,7 +34,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
     @property() path = "";
     @state() commentingOn : Section|undefined = undefined;
     @state() highlitRange : HilightRange | undefined;
-    private commentRange: Range | undefined = undefined
+    private selectedCommentText: string = ""
 
     @query('how-new-section-dialog')
     private _newSectionDialog!: HowNewSectionDialog;
@@ -63,26 +64,20 @@ import { serializeHash } from "@holochain-open-dev/utils";
       this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
     }
 
-    addComment(commentText: string, section: Section) {
+    addComment(commentText: string, suggestion: string | undefined, section: Section) {
       const document = this._documents.value[this.currentDocumentEh]
       const sections = []
-      if (this.commentRange) {
-        const matches = commentText.match(/([\s\S]*)```suggestion\s*([\s\S]*)\n```([\s\S]*)/)
-        if (matches) {
-          const suggestion = matches[2]
-          const selectedText = this.commentRange.toString()
-          if (selectedText != suggestion) {
-            sections.push({
-              name: "suggestion",
-              sourcePath: SourceManual,
-              content: suggestion,
-              contentType: "text/markdown",
-              sectionType: SectionType.Content            
-            })
-          }
-          commentText = matches[1]+matches[3]
-        }
+
+      if (suggestion != undefined) {
+        sections.push({
+          name: "suggestion",
+          sourcePath: SourceManual,
+          content: suggestion,
+          contentType: "text/markdown",
+          sectionType: SectionType.Content            
+        })
       }
+
       if (commentText != "") {
         sections.unshift(
         {name: "comment",
@@ -92,23 +87,20 @@ import { serializeHash } from "@holochain-open-dev/utils";
           sectionType: SectionType.Content}
         )
       }
-      if (sections.length == 0) {
-        alert("please make a comment or suggested change")
-        return
+      if (sections.length != 0) {
+        const comment = new Document({
+          unitHash: document.unitHash, 
+          documentType: DocType.Comment,
+          content: sections,
+          meta: {
+            document: this.currentDocumentEh, // points to document being commented on
+            section: section.name, // key of content component being commented on
+            startOffset: `${this.highlitRange?.startOffset}`, 
+            endOffset: `${this.highlitRange?.endOffset}`,
+          }
+        })
+        this._store.addDocument(this.path, comment)
       }
-      const comment = new Document({
-        unitHash: document.unitHash, 
-        documentType: DocType.Comment,
-        content: sections,
-        meta: {
-          document: this.currentDocumentEh, // points to document being commented on
-          section: section.name, // key of content component being commented on
-          startOffset: `${this.commentRange?.startOffset}`, 
-          endOffset: `${this.commentRange?.endOffset}`,
-        }
-      })
-      this._store.addDocument(this.path, comment)
-      this.clearCommenting()
     }
 
     clearCommenting() {
@@ -116,12 +108,16 @@ import { serializeHash } from "@holochain-open-dev/utils";
       this.commentingOn = undefined
     }
 
-    comment() {
+    comment(info: CommentInfo) {
       if (this.commentingOn) {
-        const valElement = this.shadowRoot!.getElementById(`comment`) as TextField
-        this.addComment(valElement.value, this.commentingOn)
+        if (info.suggestion == undefined && info.commentText == "") {
+          alert("boink"!)
+        }
+        this.addComment(info.commentText, info.suggestion, this.commentingOn)
+        this.clearCommenting()
       }
     }
+
     openComment(section: Section) { 
       // TODO handle double-click     
       this.commentingOn = undefined
@@ -140,7 +136,6 @@ import { serializeHash } from "@holochain-open-dev/utils";
               extra = this.highlitRange.endOffset - range.startContainer.parentElement!.textContent!.length
           }
         }
-        this.commentRange = range
         this.highlitRange = {
           startOffset: range.startOffset+extra,
           endOffset: range.startOffset+range.toString().length+extra, // not endOffset because it might be in the part 1 hilight divs!
@@ -148,7 +143,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
           replacement: undefined,
           commentHash: undefined
         }
-
+        this.selectedCommentText = section.content.substring(this.highlitRange.startOffset,this.highlitRange.endOffset)
       }
     }
 
@@ -173,53 +168,26 @@ import { serializeHash } from "@holochain-open-dev/utils";
       })
       return comments
     }
-    handleCommentChange(index: number) {
+
+    handleCommentChange(index: number, suggestion: string) {
       if (this.highlitRange) {
-        const commentBox = this.shadowRoot!.getElementById("comment") as TextArea
-        if (commentBox) {
-          commentBox.reportValidity()
-          const matches = commentBox.value.match(/([\s\S]*)```suggestion\s*([\s\S]*)\n```([\s\S]*)/)
-          if (matches) {
-            const suggestion = matches[2]
             this.highlitRange.replacement = suggestion
             const sectionElement = this.shadowRoot!.getElementById("section-"+index) as HowSection
             sectionElement.highlitRange = this.highlitRange
             sectionElement.requestUpdate()
-          }
-        }
       }
     }
-    private sectionRow(doc:Document, section: Section, index: number, comments:Array<DocumentOutput>) : TemplateResult {
-      const maybeCommentBox = this.commentingOn && this.commentingOn.name == section.name?
-        html`
-        <div class="comment-box column"
-          @keyup=${(e:any)=>{if (e.code=="Escape"){this.clearCommenting()}}}
-        >
-          <div class="row comment-header">
-            Add Comment:
-          </div>
-          <mwc-textarea @input=${() => this.handleCommentChange(index)}
-            cols="50" id="comment" .value=${this.commentRange && this.commentRange.toString() ? `\`\`\`suggestion\n${this.commentRange.toString()}\n\`\`\`` : ""} cols="100" .rows=${5} autoValidate=true required>
-          </mwc-textarea>
 
-          <div class="row comment-controls">
-            <svg-button
-              button="save"
-              info="save"
-              infoPosition="right"
-              @click=${() => this.comment()} 
-            ></svg-button>
-            <svg-button
-                button="close"
-                info="cancel"
-                infoPosition="right"
-                @click=${() => this.clearCommenting()}
-              ></svg-button>
-          </div>
-        </div>
-        `
-        :
-        ''
+    private sectionRow(doc:Document, section: Section, index: number, comments:Array<DocumentOutput>) : TemplateResult {
+      let maybeCommentBox
+      if (this.commentingOn && this.commentingOn.name == section.name) {
+        maybeCommentBox = html`<how-comment-box
+        @cancel=${()=>this.clearCommenting()}
+        @save=${(e:any)=>this.comment(e.detail)}
+        @suggestion-changed=${(e:any)=>this.handleCommentChange(index, e.detail)}
+        .selectedCommentText=${this.selectedCommentText}
+        ></how-comment-box>`
+      }
 
       return html`
       <div class="section row">
@@ -252,6 +220,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
       </div>
       `
     }
+
     render() {
         if (!this.currentDocumentEh) {
           return;
@@ -311,6 +280,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
           "mwc-button": Button,
           "how-section": HowSection,
           "how-comment": HowComment,
+          "how-comment-box": HowCommentBox,
           "how-new-section-dialog": HowNewSectionDialog,
           "agent-avatar": AgentAvatar,
           "info-item": InfoItem,
@@ -329,21 +299,6 @@ import { serializeHash } from "@holochain-open-dev/utils";
           }
           how-section {
             width: 1000px;
-          }
-          .comment-box {
-            background-color: lightblue;
-            padding: 0px 14px;
-            height: fit-content;
-            border: solid 1px;
-            border-radius: 5px;
-          }
-          .comment-header {
-            margin-top: 8px;
-            align-items: center;
-            justify-content: space-between;
-          }
-          .comment-controls {
-            align-items: center;
           }
           `,
         ];

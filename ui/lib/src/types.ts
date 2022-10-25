@@ -289,3 +289,8 @@ export type HilightRange = {
   commentHash: EntryHashB64 | undefined,
   replacement: string | undefined,  // undefined = no replacement.  empty string = delete
 }
+
+export type CommentInfo = {
+  commentText: string,
+  suggestion: string | undefined
+}

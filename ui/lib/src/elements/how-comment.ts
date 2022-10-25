@@ -29,7 +29,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
         sectionName: meta["section"], 
         startOffset: parseInt(meta["startOffset"]), 
         endOffset: parseInt(meta["endOffset"]),
-        replacement
+        replacement,
       }
 
       this.dispatchEvent(new CustomEvent('do-hilight', { detail: hilightRange, bubbles: true, composed: true }))
