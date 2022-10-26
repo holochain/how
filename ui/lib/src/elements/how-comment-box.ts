@@ -16,6 +16,7 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
     super();
   }
   @property() selectedCommentText : string = ""
+  @state() valid = false
 
   private getCommentInfo() : CommentInfo | undefined {
     const commentBox = this.shadowRoot!.getElementById("comment") as TextArea
@@ -30,7 +31,10 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
           info.suggestion = matches[2]
         }
         info.commentText = matches[1]+matches[3]
+      } else {
+        info.commentText = commentBox.value
       }
+      this.valid = !(info.suggestion == undefined && info.commentText == "")
       return info
     }
     return undefined
@@ -70,6 +74,7 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
             button="save"
             info="save"
             infoPosition="right"
+            .enabled=${this.valid}
             .click=${() => this.save()} 
           ></svg-button>
           <svg-button

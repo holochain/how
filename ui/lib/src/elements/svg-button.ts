@@ -59,10 +59,12 @@ export class SvgButton extends ScopedElementsMixin(LitElement) {
   @property() button: string = "";
   @property() info: string = "";
   @property() infoPosition: string = "left";
+  @property() enabled = true;
   @property() click = ()=>{};
 
   handleClick() {
-    this.click()
+    if (this.enabled) 
+      this.click()
   }
   render() {
     //@ts-ignore
@@ -70,7 +72,7 @@ export class SvgButton extends ScopedElementsMixin(LitElement) {
     return html`
       <div class="button row" uselectable="on">
         ${this.info && this.infoPosition==="left" ? html`<div class="info-item-name">${this.info}</div>`:""}
-        <div class="icon" @click=${this.handleClick}> ${unsafeHTML(svg)}</div>
+        <div class="icon ${this.enabled ? '' : 'disabled'}" @click=${this.handleClick}> ${unsafeHTML(svg)}</div>
         ${this.info && this.infoPosition==="right" ? html`<div class="info-item-name">${this.info}</div>`:""}
       </div>
     `;
@@ -95,6 +97,13 @@ export class SvgButton extends ScopedElementsMixin(LitElement) {
         justify-content: space-around;
         padding: 3px;
         cursor: pointer;
+      }
+      .disabled {
+        opacity: 30%;
+        cursor: default;
+      }
+      .icon:hover.disabled  {
+        background-color: transparent
       }
       .info-item-name {
         margin-right: 7px;

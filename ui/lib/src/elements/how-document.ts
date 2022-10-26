@@ -115,9 +115,6 @@ import { HowConfirm } from "./how-confirm";
 
     comment(info: CommentInfo) {
       if (this.commentingOn) {
-        if (info.suggestion == undefined && info.commentText == "") {
-          alert("boink"!)
-        }
         this.addComment(info.commentText, info.suggestion, this.commentingOn)
         this.clearCommenting()
       }
