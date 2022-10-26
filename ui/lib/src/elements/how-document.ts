@@ -109,6 +109,7 @@ import { HowConfirm } from "./how-confirm";
     }
 
     clearCommenting() {
+      this.selectedCommentText = ""
       this.highlitRange = undefined
       this.commentingOn = undefined
     }
@@ -120,7 +121,12 @@ import { HowConfirm } from "./how-confirm";
       }
     }
 
-    openComment(section: Section) { 
+    openComment(section: Section) {
+      const doc = this._documents.value[this.currentDocumentEh]
+      if (doc.state != "refine") {
+        return
+      }
+
       // TODO handle double-click     
       this.commentingOn = undefined
       this.commentingOn = section
@@ -150,6 +156,10 @@ import { HowConfirm } from "./how-confirm";
     }
 
     hilight(range: HilightRange) {
+      const doc = this._documents.value[this.currentDocumentEh]
+      if (doc.state != "refine") {
+        return
+      }
       this.commentingOn = undefined
       this.highlitRange = range
     }
@@ -218,10 +228,13 @@ import { HowConfirm } from "./how-confirm";
           >
         </how-section>
         <div class="column">
+          ${doc.state == "refine" ? html`
           <svg-button
             .click=${async () => this.commentingOn=section} 
             .button=${"new_comment"}>
           </svg-button>
+          ` : ''}
+          
           ${maybeCommentBox}
           ${comments ? html`
             <div class="column">
