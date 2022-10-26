@@ -62,17 +62,28 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
           suggestionSection = section
         }
       })
-      const commentHTML = commentSection ? commentSection.content : ""
-      const suggestionHTML = suggestionSection ? html`Suggestion: ${suggestionSection.content}`: ""
+      let commentHTML
+      if (commentSection) {
+        commentHTML = html`<div class="comment-text">${commentSection.content}</div>`
+      } 
+      let suggestionHTML
+      if (suggestionSection) {
+        if (suggestionSection.content == "") {
+          suggestionHTML = html`<div class="suggestion">Suggest Delete</div>`
+        } else {
+          suggestionHTML = html`
+            <div class="suggestion">Suggest Replace With: ${suggestionSection.content}</div>`
+        }
+      } 
       let controlsHTML
       if (serializeHash(this.comment.actions[0].content.author) == this._store.myAgentPubKey) {
         controlsHTML = html`
-         <svg-button
-              button="trash"
-              info="delete"
-              infoPosition="right"
-              .click=${() => this.delete()}
-            ></svg-button>
+          <svg-button
+            button="trash"
+            info="delete"
+            infoPosition="right"
+            .click=${() => this.delete()}
+          ></svg-button>
         `
       }
       return html` 
@@ -101,13 +112,19 @@ static get styles() {
         }
         .comment {
           padding: 0px 14px;
-            height: fit-content;
-            border: solid 1px;
-            border-radius: 5px;
+          height: fit-content;
+          border: solid 1px;
+          border-radius: 5px;
         }
         .comment-header {
-            margin-top: 8px;
-            align-items: center;
+          margin-top: 8px;
+          align-items: center;
+        }
+        .comment-text {
+          background: white;
+        }
+        .suggestion {
+          background: white;
         }
       `,
     ];
