@@ -1,4 +1,4 @@
-import {css, html, LitElement} from "lit";
+import {css, html, LitElement, TemplateResult} from "lit";
 import {property} from "lit/decorators.js";
 import { contextProvided } from "@lit-labs/context";
 
@@ -48,6 +48,9 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
   delete () {
     this.dispatchEvent(new CustomEvent('delete', { detail: this.comment, bubbles: true, composed: true }))
   }
+  section(header:string, content: string) : TemplateResult {
+    return html`<div class="comment-section column"><div class="section-header">${header}</div><div class="section-content">${content}</div></div>`
+  }
   render() {
     if (this.comment) {
       const commentDoc = this.comment.content
@@ -64,15 +67,15 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       })
       let commentHTML
       if (commentSection) {
-        commentHTML = html`<div class="comment-text">${commentSection.content}</div>`
+        commentHTML = this.section("General Comment",commentSection.content)
       } 
       let suggestionHTML
       if (suggestionSection) {
         if (suggestionSection.content == "") {
-          suggestionHTML = html`<div class="suggestion">Suggest Delete</div>`
+          suggestionHTML = this.section("Change Request", "Delete")
         } else {
-          suggestionHTML = html`
-            <div class="suggestion">Suggest Replace With: ${suggestionSection.content}</div>`
+          const meta = commentDoc.meta
+          suggestionHTML = this.section("Change Request", (meta["startOffset"]!=meta["endOffset"] ? "Replace with: " : "Insert: ")+suggestionSection.content)
         }
       } 
       let controlsHTML
@@ -92,9 +95,11 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
             <agent-avatar agent-pub-key=${serializeHash(this.comment.actions[0].content.author)}> </agent-avatar>
             ${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}
           </div>
+          <div class="comment-sections column">
             ${commentHTML}
             ${suggestionHTML}
-            ${controlsHTML}
+          </div>
+          ${controlsHTML}
         </div>`
     }
   }
@@ -118,13 +123,20 @@ static get styles() {
         }
         .comment-header {
           margin-top: 8px;
+          margin-bottom: 5px;
           align-items: center;
         }
-        .comment-text {
+        .comment-sections {
+          padding: 10px;
           background: white;
         }
-        .suggestion {
-          background: white;
+        .section-header {
+          font-weight: bold;
+          color: gray;
+          font-size: 70%;
+        }
+        .section-content {
+          margin-left: 5px;
         }
       `,
     ];
