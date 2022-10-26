@@ -24,7 +24,7 @@ import {
   ProfilesStore,
   Profile,
 } from "@holochain-open-dev/profiles";
-import { Action } from '@holochain/client';
+import { Action, ActionHash } from '@holochain/client';
 
 const areEqual = (first: Uint8Array, second: Uint8Array) =>
       first.length === second.length && first.every((value, index) => value === second[index]);
@@ -202,13 +202,22 @@ export class HowStore {
       }
     }
   }
+
+  private markDocumentDeleted(path: string, hash: EntryHashB64, actionHash: ActionHash) {
+    const docs = get(this.documentPathStore)[path]
+    if (docs) {
+      let doc = docs.find(e=>e.hash == hash)
+      if (doc) {
+        doc.deletedBy.push(actionHash); 
+      }
+    }
+  }
   
   async pullDocuments(path: string) : Promise<Array<DocumentOutput>> {
     let documents = await this.service.getDocuments(path)
     documents.forEach(doc => {
       doc.content = new Document(doc.content)
     })
-    //documents = documents.filter(doc => doc.updatedBy.length == 0)
     for (const s of documents) {
       this.updateDocumentStores(path, s)
     }
@@ -226,11 +235,18 @@ export class HowStore {
     return newHash
   }
 
+  async deleteDocument(path: string, document: DocumentOutput) : Promise<ActionHash> {
+    const actionHash = await this.service.deleteDocument(document.actions[0].hash)
+    this.markDocumentDeleted(path, document.hash, actionHash)
+    this.pullDocuments(path)
+    return actionHash
+  }
+
   getDocumentForUnit(unitHash: EntryHashB64) : DocumentOutput | undefined {
     const unit = this.unit(unitHash)
     const path = unit.path()
     const documents = get(this.documentPaths)[path]
-    return documents.find(d => d.updatedBy.length==0)
+    return documents.find(d => d.updatedBy.length==0 && d.deletedBy.length==0)
   }
 
   async advanceState(unitHash: EntryHashB64, state: string) : Promise<EntryHashB64|undefined> {
@@ -378,7 +394,7 @@ export class HowStore {
       return {
         content: documents[documents.length-1].content,
         hash: documents[documents.length-1].hash,
-        updated: documents[documents.length-1].actions[0].timestamp/1000
+        updated: documents[documents.length-1].actions[0].content.timestamp/1000
       }
     }
     return undefined
@@ -388,7 +404,7 @@ export class HowStore {
     let docs = get(this.documentPaths)[path]
     if (docs) {
       if (latestOnly) {
-        docs = docs.filter(doc => doc.updatedBy.length==0)
+        docs = docs.filter(doc => doc.updatedBy.length==0 && doc.deletedBy.length==0)
       }
       docs = docs.filter(d=>d.content.documentType==docType && serializeHash(d.content.unitHash) == unitEh)
       return docs

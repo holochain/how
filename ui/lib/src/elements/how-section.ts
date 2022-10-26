@@ -193,20 +193,20 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 button="save"
                 info="save"
                 infoPosition="right"
-                @click=${() => this.save()}
+                .click=${() => this.save()}
                 ></svg-button>`)
             controls.push(html`<svg-button
                 button="close"
                 info="cancel"
                 infoPosition="right"
-                @click=${() => this.editing=false}
+                .click=${() => this.editing=false}
                 ></svg-button>`)
         } else if (this.editable) {
             controls.push(html`<svg-button
                 button="edit"
                 info="edit"
                 infoPosition="right"
-                @click=${() => this.editing=true}
+                .click=${() => this.editing=true}
                 ></svg-button>`)
         }
         if (this.section.contentType == "text/markdown") {
@@ -215,14 +215,14 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 button="checked"
                 info="preview"
                 infoPosition="right"
-                @click=${() => this.preview=false}
+                .click=${() => this.preview=false}
                 ></svg-button>`
                 :
                 html`<svg-button
                 button="unchecked"
                 info="preview"
                 infoPosition="right"
-                @click=${() => this.preview=true}
+                .click=${() => this.preview=true}
                 ></svg-button>`
             )
         }

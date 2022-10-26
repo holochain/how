@@ -2,7 +2,7 @@
 
 import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 import { EntryRecord } from "@holochain-open-dev/utils";
-import { Action, EntryHash, Record, Timestamp } from "@holochain/client";
+import { Action, ActionHash, ActionHashed, EntryHash, Record, Timestamp } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
 import { HowStore } from "./how.store";
 
@@ -203,8 +203,9 @@ export interface DocumentInput {
 export interface DocumentOutput {
   hash: EntryHashB64,
   updatedBy: Array<EntryHash>,
+  deletedBy: Array<ActionHash>,
   content: Document,
-  actions: Array<Action>,
+  actions: Array<ActionHashed>,
 }
 
 export interface DocInfo {
@@ -294,3 +295,15 @@ export type CommentInfo = {
   commentText: string,
   suggestion: string | undefined
 }
+
+// export enum CommentState {
+//   Pending = "pending",
+//   Addressed = "addressed"
+// }
+
+// export class Comment {
+//   state: CommentState = CommentState.Pending
+//   constructor(
+//     public documentOutput: DocumentOutput ) {
+//   }
+// }

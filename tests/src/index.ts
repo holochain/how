@@ -1,4 +1,4 @@
-import { ActionHash, DnaSource } from "@holochain/client";
+import { ActionHash, DnaSource, EntryHash } from "@holochain/client";
 import { pause, runScenario, Scenario  } from "@holochain/tryorama";
 import { RecordBag, EntryRecord, deserializeHash } from '@holochain-open-dev/utils';
 
@@ -153,6 +153,13 @@ test("how basic tests", async (t) => {
       console.log("Rust tree updated node", tree.tree[4].val)
 
     } catch(e) {console.log("error in advance_state", e)}
+
+    docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
+
+    const deleteActionHash : ActionHash = await alice_how.callZome({zome_name:'how', fn_name:'delete_document', payload: docs[2].actions[0].hash} );
+    docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
+    console.log("DOCS DELETED:", docs)
+    t.equal(serializeHash(docs[2].deletedBy[0]),serializeHash(deleteActionHash))
 
   })
 })

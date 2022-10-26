@@ -210,7 +210,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       await this._store.pullDocuments(this.getCurrentPath())
       let docs = this.getUnitDocuments(unitEh, DocType.Document)
       if (docs) {
-        docs = docs.filter(doc => doc.updatedBy.length==0)
+        docs = docs.filter(doc => doc.updatedBy.length==0 && doc.deletedBy.length==0)
         if (docs.length > 0) {
           this._currentDocumentEh = docs[docs.length-1].hash
         }

@@ -1,11 +1,14 @@
 import {css, html, LitElement} from "lit";
-import {property, query, state} from "lit/decorators.js";
+import {property} from "lit/decorators.js";
+import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { DocumentOutput, HilightRange, Section } from "../types";
+import { DocumentOutput, HilightRange, howContext, Section } from "../types";
 import { serializeHash } from "@holochain-open-dev/utils";
 import { AgentAvatar } from "@holochain-open-dev/profiles";
+import { HowStore } from "../how.store";
+
 /**
  * @element info-item
  */
@@ -14,8 +17,12 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
     super();
   }
 
+  @contextProvided({ context: howContext })
+  _store!: HowStore;
+
   @property() comment: DocumentOutput | undefined;
   @property() selected: boolean = false;
+  
 
   select() {
     if (this.comment) {
@@ -35,11 +42,16 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       this.dispatchEvent(new CustomEvent('do-hilight', { detail: hilightRange, bubbles: true, composed: true }))
     }
   }
-
+  // edit() {
+  //   this.dispatchEvent(new CustomEvent('edit', { detail: this.comment, bubbles: true, composed: true }))
+  // }
+  delete () {
+    this.dispatchEvent(new CustomEvent('delete', { detail: this.comment, bubbles: true, composed: true }))
+  }
   render() {
     if (this.comment) {
       const commentDoc = this.comment.content
-      const created = new Date(this.comment.actions[0].timestamp/1000)
+      const created = new Date(this.comment.actions[0].content.timestamp/1000)
       let commentSection: Section | undefined
       let suggestionSection: Section | undefined
       commentDoc.content.forEach(section => {
@@ -52,14 +64,26 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       })
       const commentHTML = commentSection ? commentSection.content : ""
       const suggestionHTML = suggestionSection ? html`Suggestion: ${suggestionSection.content}`: ""
+      let controlsHTML
+      if (serializeHash(this.comment.actions[0].content.author) == this._store.myAgentPubKey) {
+        controlsHTML = html`
+         <svg-button
+              button="trash"
+              info="delete"
+              infoPosition="right"
+              .click=${() => this.delete()}
+            ></svg-button>
+        `
+      }
       return html` 
         <div class="comment ${this.selected ? "hilight": ""}" @click=${()=> this.select()}>
           <div class="comment-header row">
-            <agent-avatar agent-pub-key=${serializeHash(this.comment.actions[0].author)}> </agent-avatar>
+            <agent-avatar agent-pub-key=${serializeHash(this.comment.actions[0].content.author)}> </agent-avatar>
             ${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}
-            </div>
+          </div>
             ${commentHTML}
             ${suggestionHTML}
+            ${controlsHTML}
         </div>`
     }
   }
@@ -89,3 +113,4 @@ static get styles() {
     ];
   }
 }
+

@@ -5,12 +5,12 @@ import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {EntryHashB64, AgentPubKeyB64, Dictionary} from "@holochain-open-dev/core-types";
-import {Unit, howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo} from "../types";
+import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
-  Button, TextArea, TextField,
+  Button,
 } from "@scoped-elements/material-web";
 
 // @ts-ignore
@@ -21,6 +21,8 @@ import { HowComment } from "./how-comment";
 import { InfoItem } from "./info-item";
 import { serializeHash } from "@holochain-open-dev/utils";
 import { HowCommentBox } from "./how-comment-box";
+import { ActionHash } from "@holochain/client";
+import { HowConfirm } from "./how-confirm";
 
 /**
  * @element how-document
@@ -29,6 +31,9 @@ import { HowCommentBox } from "./how-comment-box";
     constructor() {
       super();
     }
+  
+    @query('how-confirm')
+    _confirmElem!: HowConfirm;
   
     @property() currentDocumentEh = "";
     @property() path = "";
@@ -178,6 +183,21 @@ import { HowCommentBox } from "./how-comment-box";
       }
     }
 
+    async deleteComment(comment: DocumentOutput) : Promise<ActionHash> {
+      const actionHash = await this._store.deleteDocument(this.path, comment);
+      this.highlitRange = undefined
+      return actionHash
+    }
+
+    handleConfirm(confirmation: any) {
+      this.deleteComment(confirmation)
+    }
+
+    private confirmCommentDelete(comment: DocumentOutput) {
+      this._confirmElem!.open("Are you sure you want to delete this comment?", comment)
+    }
+
+
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<DocumentOutput>) : TemplateResult {
       let maybeCommentBox
       if (this.commentingOn && this.commentingOn.name == section.name) {
@@ -212,6 +232,7 @@ import { HowCommentBox } from "./how-comment-box";
               <how-comment 
                 .comment=${c} 
                 @do-hilight=${(e:any) => this.hilight(e.detail)}
+                @delete=${(e:any) => this.confirmCommentDelete(e.detail)}
                 .selected=${this.highlitRange && this.highlitRange.commentHash == c.hash}
               ></how-comment>`)}
             </div>
@@ -233,7 +254,7 @@ import { HowCommentBox } from "./how-comment-box";
                 button="plus"
                 info="add section"
                 infoPosition="right"
-                @click=${() => this._newSectionDialog.open()}
+                .click=${() => this._newSectionDialog.open()}
                 ></svg-button>
           </div>
 
@@ -271,6 +292,7 @@ import { HowCommentBox } from "./how-comment-box";
             ${addSectionHTML}
           </div>
           <how-section-details id="details-dialog"> </how-section-details>
+          <how-confirm @confirmed=${(e:any) => this.handleConfirm(e.detail)}></how-confirm>
         `;
       
     }

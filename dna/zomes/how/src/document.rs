@@ -47,8 +47,9 @@ pub fn create_document(input: DocumentInput) -> ExternResult<EntryHashB64> {
 pub struct DocumentOutput {
     pub hash: EntryHashB64,
     pub updated_by: Vec<EntryHash>,
+    pub deleted_by: Vec<ActionHash>,
     pub content: Document,
-    pub actions: Vec<Action>,
+    pub actions: Vec<ActionHashed>,
 }
 
 #[hdk_extern]
@@ -71,14 +72,15 @@ fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
         .into_iter()
         .filter_map(|me| me)
         .filter_map(|details| match details {
-            Details::Entry(EntryDetails { entry, updates, actions , ..}) => {
+            Details::Entry(EntryDetails { entry, updates, actions , deletes, ..}) => {
                 let doc = entry.try_into().ok()?;
                 let hash = hash_entry(&doc).ok()?;
                 Some(DocumentOutput {
                     hash: hash.into(),
                     updated_by: updates.iter().map(|d| d.action().entry_hash().unwrap().clone()).collect(),
+                    deleted_by: deletes.iter().map(|d| d.hashed.hash.clone()).collect(),
                     content: doc,
-                    actions: actions.into_iter().map(|a| a.action().clone()).collect(),
+                    actions: actions.into_iter().map(|a| a.hashed.clone()).collect(),
                 })
             }
             _ => None,
@@ -103,4 +105,12 @@ pub fn update_document(input: UpdateDocumentInput) -> ExternResult<EntryHashB64>
     // TODO validate that old doc had the same path, or get the path some other way?
     link_document(hash.clone(), input.path)?;
     return Ok(hash.into());
+}
+
+#[hdk_extern]
+pub fn delete_document(input: ActionHash) -> ExternResult<ActionHash> {
+    let _record = get(input.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
+    let action_hash = delete_entry(input)?;
+    Ok(action_hash)
 }

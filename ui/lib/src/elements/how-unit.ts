@@ -167,7 +167,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           .map(
             (nextState) =>
               html`<svg-button 
-                @click=${() => this.confirmAdvance(this.currentUnitEh, nextState)}
+                .click=${() => this.confirmAdvance(this.currentUnitEh, nextState)}
                 .info=${`move to ${nextState}`}
                 .button=${nextState == SysState.Defunct ? "defunct" : "move"}>
                 </svg-button>`

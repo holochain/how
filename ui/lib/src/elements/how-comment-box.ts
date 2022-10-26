@@ -70,13 +70,13 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
             button="save"
             info="save"
             infoPosition="right"
-            @click=${() => this.save()} 
+            .click=${() => this.save()} 
           ></svg-button>
           <svg-button
               button="close"
               info="cancel"
               infoPosition="right"
-              @click=${() => this.cancel()}
+              .click=${() => this.cancel()}
             ></svg-button>
         </div>
       </div>
