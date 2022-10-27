@@ -144,6 +144,13 @@ test("how basic tests", async (t) => {
     t.equal(serializeHash(docs[0].updatedBy[0]), newDocHash)
     t.equal(docs[1].updatedBy.length, 0)
 
+    t.equal(docs[1].marks.length, 0)
+    const markActionHash = await alice_how.callZome({zome_name:'how', fn_name:'mark_document', payload: {hash: newDocHash, markType: 1, mark:"good"}} );
+    docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
+    console.log("MARKS:", docs[1].marks)
+
+    t.deepEqual(docs[1].marks[0], {markType: 1, mark:"good", author:aliceAgentKey})
+
     document1.state= "align"
     try {
       newDocHash = await alice_how.callZome({zome_name:'how', fn_name:'advance_state', payload: {newState: "align", unitHash: unit1Hash, documentHash: document1Hash, document: document1}} );

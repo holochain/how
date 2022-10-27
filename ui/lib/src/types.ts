@@ -200,12 +200,19 @@ export interface DocumentInput {
   document: Document,
 }
 
+export interface Mark {
+  markType: number,
+  mark: String,
+  author: AgentPubKeyB64,
+}
+
 export interface DocumentOutput {
   hash: EntryHashB64,
   updatedBy: Array<EntryHash>,
   deletedBy: Array<ActionHash>,
   content: Document,
   actions: Array<ActionHashed>,
+  marks: Array<Mark>,
 }
 
 export interface DocInfo {
@@ -225,6 +232,12 @@ export interface AdvanceStateInput {
   unitHash: EntryHash,
   documentHash: EntryHashB64,
   document: Document,
+}
+
+export interface MarkDocumentInput {
+  hash: EntryHashB64,
+  markType: number,
+  mark: String,
 }
 
 export type Signal =
@@ -302,6 +315,10 @@ export enum CommentStatus {
   Rejected = "rejected",
 }
 
+export enum MarkTypes {
+  CommentStatus = 1,
+}
+
 export type Offsets = {
   startOffset: number,
   endOffset: number
@@ -310,6 +327,12 @@ export class Comment {
   status: CommentStatus = CommentStatus.Pending
   constructor(
     public documentOutput: DocumentOutput ) {
+    const mark = this.documentOutput.marks.find(m => m.markType==MarkTypes.CommentStatus)
+    // TODO check that the mark was made by a steward
+    if (mark) {
+      // @ts-ignore
+      this.status = mark.mark
+    }
   }
   overlaps(comment: Comment) : boolean {
     const x = this.getOffsets()

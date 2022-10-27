@@ -19,6 +19,7 @@ import {
   DocInfo,
   UnitOutput,
   UnitInfo,
+  Mark,
 } from './types';
 import {
   ProfilesStore,
@@ -212,6 +213,16 @@ export class HowStore {
       }
     }
   }
+
+  private markDocumentMarked(path: string, hash: EntryHashB64, mark: Mark) {
+    const docs = get(this.documentPathStore)[path]
+    if (docs) {
+      let doc = docs.find(e=>e.hash == hash)
+      if (doc) {
+        doc.marks.push(mark); 
+      }
+    }
+  }
   
   async pullDocuments(path: string) : Promise<Array<DocumentOutput>> {
     let documents = await this.service.getDocuments(path)
@@ -238,6 +249,14 @@ export class HowStore {
   async deleteDocument(path: string, document: DocumentOutput) : Promise<ActionHash> {
     const actionHash = await this.service.deleteDocument(document.actions[0].hash)
     this.markDocumentDeleted(path, document.hash, actionHash)
+    this.pullDocuments(path)
+    return actionHash
+  }
+
+  async markDocument(path: string, hash: EntryHashB64, mark: string, markType: number) : Promise<ActionHash> {
+    const input = {hash, mark, markType};
+    const actionHash = await this.service.markDocument(input)
+    this.markDocumentMarked(path, hash, {mark, markType, author: this.myAgentPubKey})
     this.pullDocuments(path)
     return actionHash
   }

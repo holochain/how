@@ -111,6 +111,7 @@ pub enum LinkTypes {
     Document,
     Unit,
     Tree,
+    Mark,
 }
 
 #[hdk_extern]

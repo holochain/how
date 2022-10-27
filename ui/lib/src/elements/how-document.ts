@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -204,14 +204,11 @@ import { isEqual } from "lodash-es";
     }
 
     async approveComment(comment: Comment) {
-      comment.status = CommentStatus.Approved
-      console.log(comment)
-      this.requestUpdate()
+      this._store.markDocument(this.path, comment.hash(), CommentStatus.Approved, MarkTypes.CommentStatus)
     }
     
     async rejectComment(comment: Comment) {
-      comment.status = CommentStatus.Rejected
-      this.requestUpdate()
+      this._store.markDocument(this.path, comment.hash(), CommentStatus.Rejected, MarkTypes.CommentStatus)
     }
 
     handleConfirm(confirmation: any) {

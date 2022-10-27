@@ -2,6 +2,7 @@ use crate::error::*;
 use crate::tree::*;
 pub use hdk::prelude::Path;
 pub use hdk::prelude::*;
+use hdk::prelude::holo_hash::AgentPubKeyB64;
 use holo_hash::{EntryHashB64};
 use how_core::{Document, EntryTypes, LinkTypes};
 
@@ -43,6 +44,14 @@ pub fn create_document(input: DocumentInput) -> ExternResult<EntryHashB64> {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
+pub struct Mark {
+    mark_type: u8,
+    mark: String,
+    author: AgentPubKeyB64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 
 pub struct DocumentOutput {
     pub hash: EntryHashB64,
@@ -50,6 +59,7 @@ pub struct DocumentOutput {
     pub deleted_by: Vec<ActionHash>,
     pub content: Document,
     pub actions: Vec<ActionHashed>,
+    pub marks: Vec<Mark>,
 }
 
 #[hdk_extern]
@@ -75,12 +85,29 @@ fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
             Details::Entry(EntryDetails { entry, updates, actions , deletes, ..}) => {
                 let doc = entry.try_into().ok()?;
                 let hash = hash_entry(&doc).ok()?;
+                let links = get_link_details(hash.clone(), LinkTypes::Mark, None).ok()?;
+                let mut marks = vec![];
+                for (create,_) in links.into_inner() {
+                    let x = create.action();
+                    let y = CreateLink::try_from(x.clone()).ok()?;
+                    let mut tag_bytes = y.tag.into_inner();
+                    let mark_type = tag_bytes.pop().unwrap();
+                    let mark = String::from_utf8(tag_bytes)
+                    .map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert link tag to string")))).unwrap();
+                    
+                    marks.push(Mark {
+                        mark_type,
+                        mark,
+                        author: create.action().author().clone().into()
+                    });
+                }
                 Some(DocumentOutput {
                     hash: hash.into(),
                     updated_by: updates.iter().map(|d| d.action().entry_hash().unwrap().clone()).collect(),
                     deleted_by: deletes.iter().map(|d| d.hashed.hash.clone()).collect(),
                     content: doc,
                     actions: actions.into_iter().map(|a| a.hashed.clone()).collect(),
+                    marks,
                 })
             }
             _ => None,
@@ -112,5 +139,25 @@ pub fn delete_document(input: ActionHash) -> ExternResult<ActionHash> {
     let _record = get(input.clone(), GetOptions::default())?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
     let action_hash = delete_entry(input)?;
+    Ok(action_hash)
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct MarkDocumentInput {
+    pub hash: EntryHashB64,
+    pub mark_type: u8,
+    pub mark: String,
+}
+
+#[hdk_extern]
+pub fn mark_document(input: MarkDocumentInput) -> ExternResult<ActionHash> {
+    let _record = get(input.hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
+    let tag = LinkTag::new(input.mark);
+    let mut tag_bytes = tag.into_inner();
+    tag_bytes.push(input.mark_type);
+    let tag = LinkTag::from(tag_bytes);
+    let action_hash = create_link(input.hash.clone(), input.hash.clone(), LinkTypes::Mark, tag)?;
     Ok(action_hash)
 }
