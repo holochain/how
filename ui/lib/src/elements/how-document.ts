@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -197,16 +197,21 @@ import { isEqual } from "lodash-es";
       }
     }
 
-    async deleteComment(comment: DocumentOutput) : Promise<ActionHash> {
-      const actionHash = await this._store.deleteDocument(this.path, comment);
+    async deleteComment(comment: Comment) : Promise<ActionHash> {
+      const actionHash = await this._store.deleteDocument(this.path, comment.documentOutput);
       this.highlitRange = undefined
       return actionHash
     }
 
-    async approveComment(comment: DocumentOutput) {
+    async approveComment(comment: Comment) {
+      comment.status = CommentStatus.Approved
+      console.log(comment)
+      this.requestUpdate()
     }
     
-    async rejectComment(comment: DocumentOutput) {
+    async rejectComment(comment: Comment) {
+      comment.status = CommentStatus.Rejected
+      this.requestUpdate()
     }
 
     handleConfirm(confirmation: any) {

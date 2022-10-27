@@ -55,7 +55,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
   }
 
   canDelete(): boolean {
-    if (this.comment) {
+    if (this.comment  && this.comment.status == CommentStatus.Pending) {
       return this.comment.author() == this._store.myAgentPubKey
     }
     return false
@@ -68,69 +68,84 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
 
   render() {
     if (this.comment) {
+
       const commentDoc = this.comment.documentOutput.content
       const created = this.comment.created()
       let commentSection: Section | undefined
       let suggestionSection: Section | undefined
-      commentDoc.content.forEach(section => {
-        if (section.name == "comment") {
-          commentSection = section
-        }
-        if (section.name == "suggestion") {
-          suggestionSection = section
-        }
-      })
       let commentHTML
-      if (commentSection) {
-        commentHTML = this.section("General Comment",commentSection.content)
-      } 
       let suggestionHTML
-      if (suggestionSection) {
-        if (suggestionSection.content == "") {
-          suggestionHTML = this.section("Change Request", "Delete")
-        } else {
-          const meta = commentDoc.meta
-          suggestionHTML = this.section("Change Request", (meta["startOffset"]!=meta["endOffset"] ? "Replace with: " : "Insert: ")+suggestionSection.content)
-        }
-      } 
       let controlsHTML = []
-      if (this.canDelete()) {
-        controlsHTML.push(html`
+
+      if (this.comment.status == CommentStatus.Pending || this.selected) {
+        commentDoc.content.forEach(section => {
+          if (section.name == "comment") {
+            commentSection = section
+          }
+          if (section.name == "suggestion") {
+            suggestionSection = section
+          }
+        })
+        if (commentSection) {
+          commentHTML = this.section("General Comment",commentSection.content)
+        } 
+        if (suggestionSection) {
+          if (suggestionSection.content == "") {
+            suggestionHTML = this.section("Change Request", "Delete")
+          } else {
+            const meta = commentDoc.meta
+            suggestionHTML = this.section("Change Request", (meta["startOffset"]!=meta["endOffset"] ? "Replace with: " : "Insert: ")+suggestionSection.content)
+          }
+        } 
+        if (this.canDelete()) {
+          controlsHTML.push(html`
+            <svg-button
+              button="trash"
+              info="delete"
+              infoPosition="right"
+              .click=${() => this.dispatch('delete')}
+            ></svg-button>
+          `)
+        }
+        if (this.canAddress()) {
+          const action = this.overlaps ? 'resolve' : 'approve'
+          controlsHTML.push(html`
+            <svg-button
+              button=${`comment_${action}`}
+              info=${action}
+              infoPosition="right"
+              .click=${() => this.dispatch(action)}
+            ></svg-button>
+          `)
+          controlsHTML.push(html`
           <svg-button
-            button="trash"
-            info="delete"
+            button="comment_reject"
+            info="reject"
             infoPosition="right"
-            .click=${() => this.dispatch('delete')}
+            .click=${() => this.dispatch('reject')}
           ></svg-button>
         `)
-      }
-      if (this.canAddress()) {
-        const action = this.overlaps ? 'resolve' : 'approve'
-        controlsHTML.push(html`
-          <svg-button
-            button=${`comment_${action}`}
-            info=${action}
-            infoPosition="right"
-            .click=${() => this.dispatch(action)}
-          ></svg-button>
-        `)
-        controlsHTML.push(html`
-        <svg-button
-          button="comment_reject"
-          info="reject"
-          infoPosition="right"
-          .click=${() => this.dispatch('reject')}
-        ></svg-button>
-      `)
+        }
       }
       let statusClass = ""
       if(this.selected) {
         statusClass = "hilight"
+        if (this.comment.status != CommentStatus.Pending) {
+          controlsHTML.push(html`${this.comment.status}`)
+        }
       } else {
         switch (this.comment.status) {
           case CommentStatus.Approved: statusClass = "approved";break;
           case CommentStatus.Rejected: statusClass = "rejected";break;
         }
+      }
+      let commentSectionsHTML
+      if (commentHTML || suggestionHTML) {
+        commentSectionsHTML = html `
+          <div class="comment-sections column">
+            ${commentHTML}
+            ${suggestionHTML}
+          </div>`
       }
       return html` 
         <div class="comment ${statusClass}" @click=${()=> this.select()}>
@@ -138,10 +153,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
             <agent-avatar agent-pub-key=${this.comment.author()}> </agent-avatar>
             ${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}
           </div>
-          <div class="comment-sections column">
-            ${commentHTML}
-            ${suggestionHTML}
-          </div>
+          ${commentSectionsHTML}
           <div class="row comment-controls">
             ${controlsHTML}
           </div>
