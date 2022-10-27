@@ -1,7 +1,7 @@
 // TODO: add globally available interfaces for your elements
 
 import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
-import { EntryRecord } from "@holochain-open-dev/utils";
+import { EntryRecord, serializeHash } from "@holochain-open-dev/utils";
 import { Action, ActionHash, ActionHashed, EntryHash, Record, Timestamp } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
 import { HowStore } from "./how.store";
@@ -296,14 +296,44 @@ export type CommentInfo = {
   suggestion: string | undefined
 }
 
-// export enum CommentState {
-//   Pending = "pending",
-//   Addressed = "addressed"
-// }
+export enum CommentStatus {
+  Pending = "pending",
+  Approved = "approved",
+  Rejected = "rejected",
+}
 
-// export class Comment {
-//   state: CommentState = CommentState.Pending
-//   constructor(
-//     public documentOutput: DocumentOutput ) {
-//   }
-// }
+export type Offsets = {
+  startOffset: number,
+  endOffset: number
+}
+export class Comment {
+  status: CommentStatus = CommentStatus.Pending
+  constructor(
+    public documentOutput: DocumentOutput ) {
+  }
+  overlaps(comment: Comment) : boolean {
+    const x = this.getOffsets()
+    const y = comment.getOffsets()
+    return Math.max(x.startOffset,y.startOffset) <= Math.min(x.endOffset,y.endOffset)
+  }
+  getOffsets() : Offsets {
+    return {startOffset: parseInt(this.documentOutput.content.meta["startOffset"]),
+     endOffset: parseInt(this.documentOutput.content.meta["endOffset"])
+    }
+  }
+  getSectionName() : string {
+    return this.documentOutput.content.meta["section"]
+  }
+  getDocumentHash() : EntryHashB64 {
+    return this.documentOutput.content.meta["document"]
+  }
+  hash() : EntryHashB64 {
+    return this.documentOutput.hash
+  }
+  author() : AgentPubKeyB64 {
+    return serializeHash(this.documentOutput.actions[0].content.author)
+  }
+  created() : Date {
+    return new Date(this.documentOutput.actions[0].content.timestamp/1000)
+  }
+}

@@ -4,10 +4,11 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { DocumentOutput, HilightRange, howContext, Section } from "../types";
+import { CommentStatus, DocumentOutput, HilightRange, howContext, Section, Comment } from "../types";
 import { serializeHash } from "@holochain-open-dev/utils";
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { HowStore } from "../how.store";
+import { EntryHashB64 } from "@holochain-open-dev/core-types";
 
 /**
  * @element info-item
@@ -20,22 +21,22 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
   @contextProvided({ context: howContext })
   _store!: HowStore;
 
-  @property() comment: DocumentOutput | undefined;
+  @property() comment: Comment | undefined;
   @property() selected: boolean = false;
-  
+  @property() overlaps: boolean = false;
 
   select() {
     if (this.comment) {
-      //this.selected = true
-      const commentDoc = this.comment.content
-      const meta = commentDoc.meta
+      
+      const {startOffset, endOffset} = this.comment.getOffsets()
+      const commentDoc = this.comment.documentOutput.content
       const suggestionSection = commentDoc.getSection("suggestion")
       const replacement = suggestionSection ? suggestionSection.content : undefined
       const hilightRange: HilightRange = {
-        commentHash:this.comment.hash, 
-        sectionName: meta["section"], 
-        startOffset: parseInt(meta["startOffset"]), 
-        endOffset: parseInt(meta["endOffset"]),
+        commentHash:this.comment.hash(), 
+        sectionName: this.comment.getSectionName(), 
+        startOffset, 
+        endOffset,
         replacement,
       }
 
@@ -45,16 +46,30 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
   // edit() {
   //   this.dispatchEvent(new CustomEvent('edit', { detail: this.comment, bubbles: true, composed: true }))
   // }
-  delete () {
-    this.dispatchEvent(new CustomEvent('delete', { detail: this.comment, bubbles: true, composed: true }))
+  dispatch (action :string) {
+    this.dispatchEvent(new CustomEvent('action', { detail: {comment: this.comment, action}, bubbles: true, composed: true }))
   }
+
   section(header:string, content: string) : TemplateResult {
     return html`<div class="comment-section column"><div class="section-header">${header}</div><div class="section-content">${content}</div></div>`
   }
+
+  canDelete(): boolean {
+    if (this.comment) {
+      return this.comment.author() == this._store.myAgentPubKey
+    }
+    return false
+  }
+
+  canAddress(): boolean {
+    // TODO: check editor/steward status
+    return this.comment!.status == CommentStatus.Pending
+  }
+
   render() {
     if (this.comment) {
-      const commentDoc = this.comment.content
-      const created = new Date(this.comment.actions[0].content.timestamp/1000)
+      const commentDoc = this.comment.documentOutput.content
+      const created = this.comment.created()
       let commentSection: Section | undefined
       let suggestionSection: Section | undefined
       commentDoc.content.forEach(section => {
@@ -78,28 +93,58 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
           suggestionHTML = this.section("Change Request", (meta["startOffset"]!=meta["endOffset"] ? "Replace with: " : "Insert: ")+suggestionSection.content)
         }
       } 
-      let controlsHTML
-      if (serializeHash(this.comment.actions[0].content.author) == this._store.myAgentPubKey) {
-        controlsHTML = html`
+      let controlsHTML = []
+      if (this.canDelete()) {
+        controlsHTML.push(html`
           <svg-button
             button="trash"
             info="delete"
             infoPosition="right"
-            .click=${() => this.delete()}
+            .click=${() => this.dispatch('delete')}
           ></svg-button>
-        `
+        `)
+      }
+      if (this.canAddress()) {
+        const action = this.overlaps ? 'resolve' : 'approve'
+        controlsHTML.push(html`
+          <svg-button
+            button=${`comment_${action}`}
+            info=${action}
+            infoPosition="right"
+            .click=${() => this.dispatch(action)}
+          ></svg-button>
+        `)
+        controlsHTML.push(html`
+        <svg-button
+          button="comment_reject"
+          info="reject"
+          infoPosition="right"
+          .click=${() => this.dispatch('reject')}
+        ></svg-button>
+      `)
+      }
+      let statusClass = ""
+      if(this.selected) {
+        statusClass = "hilight"
+      } else {
+        switch (this.comment.status) {
+          case CommentStatus.Approved: statusClass = "approved";break;
+          case CommentStatus.Rejected: statusClass = "rejected";break;
+        }
       }
       return html` 
-        <div class="comment ${this.selected ? "hilight": ""}" @click=${()=> this.select()}>
+        <div class="comment ${statusClass}" @click=${()=> this.select()}>
           <div class="comment-header row">
-            <agent-avatar agent-pub-key=${serializeHash(this.comment.actions[0].content.author)}> </agent-avatar>
+            <agent-avatar agent-pub-key=${this.comment.author()}> </agent-avatar>
             ${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}
           </div>
           <div class="comment-sections column">
             ${commentHTML}
             ${suggestionHTML}
           </div>
-          ${controlsHTML}
+          <div class="row comment-controls">
+            ${controlsHTML}
+          </div>
         </div>`
     }
   }
@@ -137,6 +182,12 @@ static get styles() {
         }
         .section-content {
           margin-left: 5px;
+        }
+        .approved {
+          background-color: lightgreen;
+        }
+        .rejected {
+          background-color: lightcoral;
         }
       `,
     ];

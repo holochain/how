@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -23,6 +23,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
 import { HowCommentBox } from "./how-comment-box";
 import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
+import { isEqual } from "lodash-es";
 
 /**
  * @element how-document
@@ -161,21 +162,27 @@ import { HowConfirm } from "./how-confirm";
         return
       }
       this.commentingOn = undefined
-      this.highlitRange = range
+      if (this.highlitRange && (this.highlitRange.commentHash == range.commentHash)) {
+        this.highlitRange = undefined
+      } else {
+        this.highlitRange = range
+      }
     }
 
-    private getCommentDocs(doc: Document) : Dictionary<Array<DocumentOutput>> {
-      const comments: Dictionary<Array<DocumentOutput>> = {}
-      this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( comment => {
-        const commentDoc: EntryHashB64 = comment.content.meta["document"]
-        if (commentDoc == this.currentDocumentEh) {
-          const sectionName = comment.content.meta["section"]
+    private getCommentDocs(doc: Document) : Dictionary<Array<Comment>> {
+      const comments: Dictionary<Array<Comment>> = {}
+      this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( commentDoc => {
+        const comment = new Comment(commentDoc)
+        if (comment.getDocumentHash() == this.currentDocumentEh) {
+          const sectionName = comment.getSectionName()
           let sectionComments = comments[sectionName]
           if (sectionComments === undefined) {
             sectionComments = []
           }
           sectionComments.push(comment)
-          comments[sectionName] = sectionComments
+          comments[sectionName] = sectionComments.sort((a,b) => {
+            return parseInt(a.documentOutput.content.meta["startOffset"]) - parseInt(b.documentOutput.content.meta["startOffset"])
+          })
         }
       })
       return comments
@@ -196,16 +203,25 @@ import { HowConfirm } from "./how-confirm";
       return actionHash
     }
 
+    async approveComment(comment: DocumentOutput) {
+    }
+    
+    async rejectComment(comment: DocumentOutput) {
+    }
+
     handleConfirm(confirmation: any) {
-      this.deleteComment(confirmation)
+      switch(confirmation.action) {
+        case "delete": this.deleteComment(confirmation.comment); break;
+        case "reject": this.rejectComment(confirmation.comment); break;
+        case "approve": this.approveComment(confirmation.comment); break;
+      }
     }
 
-    private confirmCommentDelete(comment: DocumentOutput) {
-      this._confirmElem!.open("Are you sure you want to delete this comment?", comment)
+    private confirmAction(action: any) {
+      this._confirmElem!.open(`Are you sure you want to ${action.action} this comment?`, action)
     }
-
-
-    private sectionRow(doc:Document, section: Section, index: number, comments:Array<DocumentOutput>) : TemplateResult {
+ 
+    private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
       let maybeCommentBox
       if (this.commentingOn && this.commentingOn.name == section.name) {
         maybeCommentBox = html`<how-comment-box
@@ -231,7 +247,7 @@ import { HowConfirm } from "./how-confirm";
           ${doc.state == "refine" ? html`
           <svg-button
             .click=${async () => this.commentingOn=section} 
-            .button=${"new_comment"}>
+            .button=${"comment_new"}>
           </svg-button>
           ` : ''}
           
@@ -240,10 +256,11 @@ import { HowConfirm } from "./how-confirm";
             <div class="column">
               ${comments.map(c => html`
               <how-comment 
-                .comment=${c} 
+                .comment=${c}
+                .overlaps=${comments.find(comment=> comment != c && comment.overlaps(c))}
                 @do-hilight=${(e:any) => this.hilight(e.detail)}
-                @delete=${(e:any) => this.confirmCommentDelete(e.detail)}
-                .selected=${this.highlitRange && this.highlitRange.commentHash == c.hash}
+                @action=${(e:any) => e.detail.action == 'resolve' ?  alert(e.detail) : this.confirmAction(e.detail)}
+                .selected=${this.highlitRange && this.highlitRange.commentHash == c.documentOutput.hash}
               ></how-comment>`)}
             </div>
           `:''}
@@ -277,6 +294,14 @@ import { HowConfirm } from "./how-confirm";
         }
 
         const comments = this.getCommentDocs(doc)
+        // const overlaps : Dictionary<Dictionary<Array<EntryHashB64>>> = {}
+        // comments.entries.forEach(([sectionName, comments])=> {
+        //   let sectionComments = overlaps[sectionName]
+        //   if (sectionComments == undefined) {
+        //     sectionComments = {}
+        //   }
+        //   sectionComments[sectionName] = sectionComments
+        // })
 
         const sectionsHTML = doc.content.filter(section => section.sectionType != SectionType.Requirement).map((section, index) => 
           this.sectionRow(doc, section, index, comments[section.name]))
