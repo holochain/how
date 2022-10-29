@@ -72,9 +72,11 @@ export class SvgButton extends ScopedElementsMixin(LitElement) {
   @property() enabled = true;
   @property() click = ()=>{};
 
-  handleClick() {
-    if (this.enabled) 
+  handleClick(e:any) {
+    if (this.enabled) {
+      e.stopPropagation()
       this.click()
+    }
   }
   render() {
     //@ts-ignore

@@ -41,6 +41,7 @@
     "lodash": "^4.17.21",
     "@ts-stack/markdown": "^1.4.0",
     "@types/sanitize-html": "^2.6.2",
-    "wc-mermaid": "github:guillemcordoba/wc-mermaid#patch-1"
+    "wc-mermaid": "github:guillemcordoba/wc-mermaid#patch-1",
+    "s-ago": "2.2.0"
     }
 }

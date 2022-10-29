@@ -10,6 +10,8 @@ import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { HowStore } from "../how.store";
 import { EntryHashB64 } from "@holochain-open-dev/core-types";
 
+import ago from 's-ago'
+
 /**
  * @element info-item
  */
@@ -33,7 +35,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       const suggestionSection = commentDoc.getSection("suggestion")
       const replacement = suggestionSection ? suggestionSection.content : undefined
       const hilightRange: HilightRange = {
-        commentHash:this.comment.hash(), 
+        comments: [this.comment.hash()], 
         sectionName: this.comment.getSectionName(), 
         startOffset, 
         endOffset,
@@ -50,8 +52,8 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
     this.dispatchEvent(new CustomEvent('action', { detail: {comment: this.comment, action}, bubbles: true, composed: true }))
   }
 
-  section(header:string, content: string) : TemplateResult {
-    return html`<div class="comment-section column"><div class="section-header">${header}</div><div class="section-content">${content}</div></div>`
+  section(header:string, content: string, pre:boolean = false) : TemplateResult {
+    return html`<div class="comment-section column"><div class="section-header">${header}</div><div class="section-content">${pre ? html`<pre class="source">${content}</pre>`:content}</div></div>`
   }
 
   canDelete(): boolean {
@@ -76,7 +78,6 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       let commentHTML
       let suggestionHTML
       let controlsHTML = []
-
       if (this.comment.status == CommentStatus.Pending || this.selected) {
         commentDoc.content.forEach(section => {
           if (section.name == "comment") {
@@ -91,10 +92,9 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
         } 
         if (suggestionSection) {
           if (suggestionSection.content == "") {
-            suggestionHTML = this.section("Change Request", "Delete")
+            suggestionHTML = this.section("Change Request-- Delete", "")
           } else {
-            const meta = commentDoc.meta
-            suggestionHTML = this.section("Change Request", (meta["startOffset"]!=meta["endOffset"] ? "Replace with: " : "Insert: ")+suggestionSection.content)
+            suggestionHTML = this.section("Change Request-- " + (this.comment.startOffset() != this.comment.endOffset() ? "Replace with: " : "Insert: "), suggestionSection.content, this.comment.getSection()!.contentType == "text/markdown")
           }
         } 
         if (this.canDelete()) {
@@ -141,17 +141,20 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       }
       let commentSectionsHTML
       if (commentHTML || suggestionHTML) {
+        const text = this.comment.getCommentingOnText(true)
+        const commentingOnHTML = text ? this.section("Commenting on:", text) : undefined
         commentSectionsHTML = html `
           <div class="comment-sections column">
             ${commentHTML}
             ${suggestionHTML}
+            ${commentingOnHTML}
           </div>`
       }
       return html` 
         <div class="comment ${statusClass}" @click=${()=> this.select()}>
           <div class="comment-header row">
             <agent-avatar agent-pub-key=${this.comment.author()}> </agent-avatar>
-            ${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}
+            <span title=${`${created}`}>${ago(created)}</span>
           </div>
           ${commentSectionsHTML}
           <div class="row comment-controls">
@@ -187,12 +190,16 @@ static get styles() {
           padding: 10px;
           background: white;
         }
+        .comment-section {
+          margin-bottom: 10px;
+        }
         .section-header {
           font-weight: bold;
           color: gray;
           font-size: 70%;
         }
         .section-content {
+          max-width: 1000px;
           margin-left: 5px;
         }
         .approved {

@@ -23,7 +23,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
 import { HowCommentBox } from "./how-comment-box";
 import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
-import { isEqual } from "lodash-es";
+import { isEqual, over } from "lodash-es";
 
 /**
  * @element how-document
@@ -40,6 +40,7 @@ import { isEqual } from "lodash-es";
     @property() path = "";
     @state() commentingOn : Section|undefined = undefined;
     @state() highlitRange : HilightRange | undefined;
+    @state() overlapping : Comment[] | undefined
     private selectedCommentText: string = ""
 
     @query('how-new-section-dialog')
@@ -113,6 +114,7 @@ import { isEqual } from "lodash-es";
       this.selectedCommentText = ""
       this.highlitRange = undefined
       this.commentingOn = undefined
+      this.overlapping = undefined
     }
 
     comment(info: CommentInfo) {
@@ -122,15 +124,13 @@ import { isEqual } from "lodash-es";
       }
     }
 
-    openComment(section: Section) {
+    openCommentFromSelection(section: Section) {
       const doc = this._documents.value[this.currentDocumentEh]
       if (doc.state != "refine") {
         return
       }
 
       // TODO handle double-click     
-      this.commentingOn = undefined
-      this.commentingOn = section
       const sel = document.getSelection()
       if (sel) {
         const range = sel.getRangeAt(0)
@@ -145,15 +145,23 @@ import { isEqual } from "lodash-es";
               extra = this.highlitRange.endOffset - range.startContainer.parentElement!.textContent!.length
           }
         }
-        this.highlitRange = {
+        const highlitRange = {
           startOffset: range.startOffset+extra,
           endOffset: range.startOffset+range.toString().length+extra, // not endOffset because it might be in the part 1 hilight divs!
           sectionName: section.name,
           replacement: undefined,
-          commentHash: undefined
+          comments: undefined
         }
-        this.selectedCommentText = section.content.substring(this.highlitRange.startOffset,this.highlitRange.endOffset)
+        this.openCommentFromHilitRange(section, highlitRange)
       }
+    }
+
+    openCommentFromHilitRange(section: Section, highlitRange: HilightRange) {
+      this.commentingOn = undefined
+      this.commentingOn = section
+      this.highlitRange = highlitRange
+      this.selectedCommentText = section.content.substring(this.highlitRange.startOffset,this.highlitRange.endOffset)
+
     }
 
     hilight(range: HilightRange) {
@@ -162,17 +170,14 @@ import { isEqual } from "lodash-es";
         return
       }
       this.commentingOn = undefined
-      if (this.highlitRange && (this.highlitRange.commentHash == range.commentHash)) {
-        this.highlitRange = undefined
-      } else {
-        this.highlitRange = range
-      }
+      this.overlapping = undefined
+      this.highlitRange = range
     }
 
     private getCommentDocs(doc: Document) : Dictionary<Array<Comment>> {
       const comments: Dictionary<Array<Comment>> = {}
       this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( commentDoc => {
-        const comment = new Comment(commentDoc)
+        const comment = new Comment(commentDoc, doc)
         if (comment.getDocumentHash() == this.currentDocumentEh) {
           const sectionName = comment.getSectionName()
           let sectionComments = comments[sectionName]
@@ -181,7 +186,7 @@ import { isEqual } from "lodash-es";
           }
           sectionComments.push(comment)
           comments[sectionName] = sectionComments.sort((a,b) => {
-            return parseInt(a.documentOutput.content.meta["startOffset"]) - parseInt(b.documentOutput.content.meta["startOffset"])
+            return a.startOffset() - b.startOffset()
           })
         }
       })
@@ -203,12 +208,56 @@ import { isEqual } from "lodash-es";
       return actionHash
     }
 
+    removeCommentFromHilight(comment: Comment) {
+      if (this.highlitRange && this.highlitRange.comments) {
+        const index = this.highlitRange.comments.findIndex(c => c == comment.hash());
+        if (index > -1) {
+          this.highlitRange.comments.splice(index, 1);
+        }
+        // for (const c of this.highlitRange.comments) {
+        //     c.startOffset = Math.min(this.hilightRange.startOffset,c.startOffset())
+        //     hilightRange.endOffset = Math.max(hilightRange.endOffset,c.endOffset())
+        //     overlapping.push(c); hilightRange.comments!.push(c.hash())
+        //   }
+      }
+    }
+
     async approveComment(comment: Comment) {
+      this.clearCommenting()
       this._store.markDocument(this.path, comment.hash(), CommentStatus.Approved, MarkTypes.CommentStatus)
     }
     
     async rejectComment(comment: Comment) {
+      this.clearCommenting()
       this._store.markDocument(this.path, comment.hash(), CommentStatus.Rejected, MarkTypes.CommentStatus)
+    }
+
+    setResolveHilighiting(comment: Comment) {
+      const doc = this._documents.value[this.currentDocumentEh]
+      if (doc) {
+        const sectionName = comment.getSectionName()
+        const comments = this.getCommentDocs(doc)[sectionName]
+        const overlapping = [comment]
+        const hilightRange : HilightRange = {sectionName, endOffset:comment.endOffset(), startOffset:comment.startOffset(), comments: [comment.hash()], replacement: undefined}
+        let count = 0;
+        while (count < overlapping.length) {
+          const current = overlapping[count]
+          for (const c of comments) {
+            if (c.status == CommentStatus.Pending && !overlapping.find(x=>x.hash() == c.hash()) && c.overlaps(current)) {
+              hilightRange.startOffset = Math.min(hilightRange.startOffset,c.startOffset())
+              hilightRange.endOffset = Math.max(hilightRange.endOffset,c.endOffset())
+              overlapping.push(c); hilightRange.comments!.push(c.hash())
+            }
+          }
+          count += 1
+        }
+        this.overlapping = overlapping
+        this.openCommentFromHilitRange(comment.getSection()!,hilightRange)
+      }
+    }
+
+    async resolveComment(comment: Comment) {
+      this.setResolveHilighiting(comment)
     }
 
     handleConfirm(confirmation: any) {
@@ -231,13 +280,14 @@ import { isEqual } from "lodash-es";
         @save=${(e:any)=>this.comment(e.detail)}
         @suggestion-changed=${(e:any)=>this.handleCommentChange(index, e.detail)}
         .selectedCommentText=${this.selectedCommentText}
+        .resolve=${this.overlapping != undefined}
         ></how-comment-box>`
       }
 
       return html`
       <div class="section row">
         <how-section id=${'section-'+index}
-          @selection=${(e:any)=>this.openComment(e.detail)}
+          @selection=${(e:any)=>this.openCommentFromSelection(e.detail)}
           @section-changed=${(e:any) => this.updateSection(e.detail, index)}
           .section=${section} 
           .index=${index}
@@ -259,10 +309,10 @@ import { isEqual } from "lodash-es";
               ${comments.map(c => html`
               <how-comment 
                 .comment=${c}
-                .overlaps=${comments.find(comment=> comment != c && comment.overlaps(c))}
+                .overlaps=${comments.find(comment=> comment.status == CommentStatus.Pending && comment != c && comment.overlaps(c))}
                 @do-hilight=${(e:any) => this.hilight(e.detail)}
-                @action=${(e:any) => e.detail.action == 'resolve' ?  alert(e.detail) : this.confirmAction(e.detail)}
-                .selected=${this.highlitRange && this.highlitRange.commentHash == c.documentOutput.hash}
+                @action=${(e:any) => e.detail.action == 'resolve' ?  this.resolveComment(e.detail.comment) : this.confirmAction(e.detail)}
+                .selected=${this.highlitRange && this.highlitRange.comments && this.highlitRange.comments.includes(c.documentOutput.hash)}
               ></how-comment>`)}
             </div>
           `:''}
@@ -296,14 +346,6 @@ import { isEqual } from "lodash-es";
         }
 
         const comments = this.getCommentDocs(doc)
-        // const overlaps : Dictionary<Dictionary<Array<EntryHashB64>>> = {}
-        // comments.entries.forEach(([sectionName, comments])=> {
-        //   let sectionComments = overlaps[sectionName]
-        //   if (sectionComments == undefined) {
-        //     sectionComments = {}
-        //   }
-        //   sectionComments[sectionName] = sectionComments
-        // })
 
         const sectionsHTML = doc.content.filter(section => section.sectionType != SectionType.Requirement).map((section, index) => 
           this.sectionRow(doc, section, index, comments[section.name]))

@@ -30,4 +30,10 @@ export const sharedStyles = css`
   .deleted {
     text-decoration: line-through;
   }
+  .source {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -pre-wrap;
+    word-wrap: break-word;
+  }
 `;

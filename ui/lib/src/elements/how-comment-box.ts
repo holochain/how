@@ -16,6 +16,7 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
     super();
   }
   @property() selectedCommentText : string = ""
+  @property() resolve=  false
   @state() valid = false
 
   private getCommentInfo() : CommentInfo | undefined {
@@ -63,7 +64,7 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
         @keyup=${(e:any)=>{if (e.code=="Escape"){this.cancel()}}}
       >
         <div class="row comment-header">
-          Add Comment:
+        ${this.resolve?"Resolve Overlapping Comments": "Add Comment"}:
         </div>
         <mwc-textarea @input=${() => this.input()}
           cols="50" id="comment" .value=${this.selectedCommentText ? `\`\`\`suggestion\n${this.selectedCommentText}\n\`\`\`` : ""} cols="100" .rows=${5} autoValidate=true required>

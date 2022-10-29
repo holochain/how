@@ -290,12 +290,6 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 font-size: 76%;
                 padding: 0 3px 0 3px;
             }
-        .source {
-            overflow-x: auto;
-            white-space: pre-wrap;
-            white-space: -pre-wrap;
-            word-wrap: break-word;
-          }
         .cursor {
           width: 0px;
           display: inline-block;

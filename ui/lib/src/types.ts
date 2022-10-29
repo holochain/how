@@ -300,7 +300,7 @@ export type HilightRange = {
   sectionName: string,
   startOffset: number,
   endOffset: number,
-  commentHash: EntryHashB64 | undefined,
+  comments: Array<EntryHashB64> | undefined,
   replacement: string | undefined,  // undefined = no replacement.  empty string = delete
 }
 
@@ -323,10 +323,14 @@ export type Offsets = {
   startOffset: number,
   endOffset: number
 }
+export const offsetsOverlap = (x:Offsets,y:Offsets) : boolean => {
+  return Math.max(x.startOffset,y.startOffset) <= Math.min(x.endOffset,y.endOffset)
+}
 export class Comment {
   status: CommentStatus = CommentStatus.Pending
   constructor(
-    public documentOutput: DocumentOutput ) {
+    public documentOutput: DocumentOutput,
+    public commentingOn: Document ) {
     const mark = this.documentOutput.marks.find(m => m.markType==MarkTypes.CommentStatus)
     // TODO check that the mark was made by a steward
     if (mark) {
@@ -337,15 +341,32 @@ export class Comment {
   overlaps(comment: Comment) : boolean {
     const x = this.getOffsets()
     const y = comment.getOffsets()
-    return Math.max(x.startOffset,y.startOffset) <= Math.min(x.endOffset,y.endOffset)
+    return offsetsOverlap(x,y)
   }
   getOffsets() : Offsets {
-    return {startOffset: parseInt(this.documentOutput.content.meta["startOffset"]),
-     endOffset: parseInt(this.documentOutput.content.meta["endOffset"])
+    return {startOffset: this.startOffset(),
+     endOffset: this.endOffset()
     }
+  }
+  startOffset() : number {
+    return parseInt(this.documentOutput.content.meta["startOffset"])
+  }
+  endOffset() : number {
+    return parseInt(this.documentOutput.content.meta["endOffset"])
   }
   getSectionName() : string {
     return this.documentOutput.content.meta["section"]
+  }
+  getSection() : Section | undefined {
+    return this.commentingOn.getSection(this.getSectionName())
+  }
+  getCommentingOnText(prune: boolean) : string | undefined{
+    const section = this.getSection()
+    if (section) {
+      let text = section.content.substring(this.startOffset(),this.endOffset())
+      return prune && text.length> 140 ? text.substring(0,65)+' ... '+text.substring(text.length - 65, text.length) : text
+    }
+    return undefined
   }
   getDocumentHash() : EntryHashB64 {
     return this.documentOutput.content.meta["document"]
