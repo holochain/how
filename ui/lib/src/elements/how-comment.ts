@@ -4,11 +4,9 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { CommentStatus, DocumentOutput, HilightRange, howContext, Section, Comment } from "../types";
-import { serializeHash } from "@holochain-open-dev/utils";
+import { CommentStatus, HilightRange, howContext, Section, Comment } from "../types";
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { HowStore } from "../how.store";
-import { EntryHashB64 } from "@holochain-open-dev/core-types";
 
 import ago from 's-ago'
 
@@ -137,6 +135,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
         switch (this.comment.status) {
           case CommentStatus.Approved: statusClass = "approved";break;
           case CommentStatus.Rejected: statusClass = "rejected";break;
+          case CommentStatus.Modified: statusClass = "modified";break;
         }
       }
       let commentSectionsHTML
@@ -207,6 +206,9 @@ static get styles() {
         }
         .rejected {
           background-color: lightcoral;
+        }
+        .modified {
+          background-color: lightblue;
         }
       `,
     ];

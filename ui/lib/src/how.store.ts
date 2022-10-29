@@ -20,6 +20,7 @@ import {
   UnitOutput,
   UnitInfo,
   Mark,
+  MarkDocumentInput,
 } from './types';
 import {
   ProfilesStore,
@@ -253,10 +254,11 @@ export class HowStore {
     return actionHash
   }
 
-  async markDocument(path: string, hash: EntryHashB64, mark: string, markType: number) : Promise<ActionHash> {
-    const input = {hash, mark, markType};
+  async markDocument(path: string, input: Array<MarkDocumentInput>) : Promise<ActionHash> {
     const actionHash = await this.service.markDocument(input)
-    this.markDocumentMarked(path, hash, {mark, markType, author: this.myAgentPubKey})
+    for (const mark of input) {
+      this.markDocumentMarked(path, mark.hash, {mark: mark.mark, markType: mark.markType, author: this.myAgentPubKey})
+    }
     this.pullDocuments(path)
     return actionHash
   }

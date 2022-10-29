@@ -5,6 +5,7 @@ pub use hdk::prelude::*;
 use hdk::prelude::holo_hash::AgentPubKeyB64;
 use holo_hash::{EntryHashB64};
 use how_core::{Document, EntryTypes, LinkTypes};
+use crate::utils::*;
 
 pub const DOC_DOCUMENT: &str = "_document";
 pub const DOC_COMMENT: &str = "_comment";
@@ -151,13 +152,17 @@ pub struct MarkDocumentInput {
 }
 
 #[hdk_extern]
-pub fn mark_document(input: MarkDocumentInput) -> ExternResult<ActionHash> {
-    let _record = get(input.hash.clone(), GetOptions::default())?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
-    let tag = LinkTag::new(input.mark);
-    let mut tag_bytes = tag.into_inner();
-    tag_bytes.push(input.mark_type);
-    let tag = LinkTag::from(tag_bytes);
-    let action_hash = create_link(input.hash.clone(), input.hash.clone(), LinkTypes::Mark, tag)?;
-    Ok(action_hash)
+pub fn mark_document(marks: Vec<MarkDocumentInput>) -> ExternResult<Vec<ActionHash>> {
+    let mut results = vec![];
+    for input in marks {
+        let _record = get(input.hash.clone(), GetOptions::default())?
+            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
+        let tag = LinkTag::new(input.mark);
+        let mut tag_bytes = tag.into_inner();
+        tag_bytes.push(input.mark_type);
+        let tag = LinkTag::from(tag_bytes);
+        let action_hash = create_link_relaxed(input.hash.clone(), input.hash.clone(), LinkTypes::Mark, tag)?;
+        results.push(action_hash);
+    }
+    Ok(results)
 }

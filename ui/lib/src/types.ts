@@ -313,6 +313,7 @@ export enum CommentStatus {
   Pending = "pending",
   Approved = "approved",
   Rejected = "rejected",
+  Modified = "modified",
 }
 
 export enum MarkTypes {

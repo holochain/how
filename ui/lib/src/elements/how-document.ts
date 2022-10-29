@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -71,7 +71,7 @@ import { isEqual, over } from "lodash-es";
       this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
     }
 
-    addComment(commentText: string, suggestion: string | undefined, section: Section) {
+    async addComment(commentText: string, suggestion: string | undefined, section: Section) : Promise<EntryHashB64|undefined> {
       const document = this._documents.value[this.currentDocumentEh]
       const sections = []
 
@@ -106,8 +106,9 @@ import { isEqual, over } from "lodash-es";
             endOffset: `${this.highlitRange?.endOffset}`,
           }
         })
-        this._store.addDocument(this.path, comment)
+        return this._store.addDocument(this.path, comment)
       }
+      return undefined
     }
 
     clearCommenting() {
@@ -117,9 +118,17 @@ import { isEqual, over } from "lodash-es";
       this.overlapping = undefined
     }
 
-    comment(info: CommentInfo) {
+    async comment(info: CommentInfo) {
       if (this.commentingOn) {
-        this.addComment(info.commentText, info.suggestion, this.commentingOn)
+        const commentHash = await this.addComment(info.commentText, info.suggestion, this.commentingOn)
+        if (commentHash && this.overlapping) {
+          const input : Array<MarkDocumentInput> = []
+          this.overlapping.forEach(comment =>
+            input.push({mark: CommentStatus.Modified, hash: comment.hash(), markType: MarkTypes.CommentStatus})
+          )
+          input.push({mark: CommentStatus.Approved, hash: commentHash, markType: MarkTypes.CommentStatus })
+          this._store.markDocument(this.path, input)
+        }
         this.clearCommenting()
       }
     }
@@ -224,12 +233,12 @@ import { isEqual, over } from "lodash-es";
 
     async approveComment(comment: Comment) {
       this.clearCommenting()
-      this._store.markDocument(this.path, comment.hash(), CommentStatus.Approved, MarkTypes.CommentStatus)
+      this._store.markDocument(this.path, [{hash:comment.hash(), mark: CommentStatus.Approved, markType: MarkTypes.CommentStatus}])
     }
     
     async rejectComment(comment: Comment) {
       this.clearCommenting()
-      this._store.markDocument(this.path, comment.hash(), CommentStatus.Rejected, MarkTypes.CommentStatus)
+      this._store.markDocument(this.path, [{hash:comment.hash(), mark: CommentStatus.Rejected, markType: MarkTypes.CommentStatus}])
     }
 
     setResolveHilighiting(comment: Comment) {

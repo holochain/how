@@ -38,7 +38,7 @@ export class HowService {
     return this.callZome('delete_document', input);
   }
 
-  async markDocument(input: MarkDocumentInput): Promise<ActionHash> {
+  async markDocument(input: Array<MarkDocumentInput>): Promise<ActionHash> {
     return this.callZome('mark_document', input);
   }
 

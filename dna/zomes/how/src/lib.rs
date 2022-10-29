@@ -9,6 +9,8 @@ pub mod unit;
 pub mod document;
 pub mod tree;
 pub mod signals;
+pub mod utils;
+
 use hdk::prelude::holo_hash::AgentPubKeyB64;
 use how_core::{Unit, Section, Document};
 use unit::create_unit_inner;

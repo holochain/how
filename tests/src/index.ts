@@ -145,7 +145,7 @@ test("how basic tests", async (t) => {
     t.equal(docs[1].updatedBy.length, 0)
 
     t.equal(docs[1].marks.length, 0)
-    const markActionHash = await alice_how.callZome({zome_name:'how', fn_name:'mark_document', payload: {hash: newDocHash, markType: 1, mark:"good"}} );
+    const markActionHashes = await alice_how.callZome({zome_name:'how', fn_name:'mark_document', payload: [{hash: newDocHash, markType: 1, mark:"good"}]} );
     docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
     console.log("MARKS:", docs[1].marks)
 
