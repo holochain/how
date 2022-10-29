@@ -327,6 +327,12 @@ export type Offsets = {
 export const offsetsOverlap = (x:Offsets,y:Offsets) : boolean => {
   return Math.max(x.startOffset,y.startOffset) <= Math.min(x.endOffset,y.endOffset)
 }
+
+export type CommentAction = {
+  action: string,
+  comment: Comment,
+}
+
 export class Comment {
   status: CommentStatus = CommentStatus.Pending
   constructor(

@@ -106,23 +106,27 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
           `)
         }
         if (this.canAddress()) {
-          const action = this.overlaps ? 'resolve' : 'approve'
-          controlsHTML.push(html`
+          const actions = []
+          if (this.overlaps) {
+            actions.push(['edit',"resolve"])
+            actions.push(["reject",'reject'])
+          } else if (commentSection && !suggestionSection) {
+            actions.push(['approve',"got-it"])
+          } else {
+            actions.push(["approve",'approve'])
+            actions.push(['edit',"modify"])
+            actions.push(["reject",'reject'])
+          }
+          for (const [button, action] of actions) {
+            controlsHTML.push(html`
             <svg-button
-              button=${`comment_${action}`}
+              button=${`comment_${button}`}
               info=${action}
               infoPosition="right"
               .click=${() => this.dispatch(action)}
             ></svg-button>
-          `)
-          controlsHTML.push(html`
-          <svg-button
-            button="comment_reject"
-            info="reject"
-            infoPosition="right"
-            .click=${() => this.dispatch('reject')}
-          ></svg-button>
-        `)
+            `)
+          }
         }
       }
       let statusClass = ""

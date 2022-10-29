@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -241,7 +241,7 @@ import { isEqual, over } from "lodash-es";
       this._store.markDocument(this.path, [{hash:comment.hash(), mark: CommentStatus.Rejected, markType: MarkTypes.CommentStatus}])
     }
 
-    setResolveHilighiting(comment: Comment) {
+    setResolveHilighiting(comment: Comment) : HilightRange | undefined {
       const doc = this._documents.value[this.currentDocumentEh]
       if (doc) {
         const sectionName = comment.getSectionName()
@@ -261,26 +261,46 @@ import { isEqual, over } from "lodash-es";
           count += 1
         }
         this.overlapping = overlapping
+        return hilightRange
+      }
+      return undefined
+    }
+
+    async resolveComments(comment: Comment) {
+      const hilightRange = this.setResolveHilighiting(comment)
+      if (hilightRange) {
         this.openCommentFromHilitRange(comment.getSection()!,hilightRange)
       }
     }
-
-    async resolveComment(comment: Comment) {
-      this.setResolveHilighiting(comment)
+    async modifyComment(comment: Comment) {
+      const sectionName = comment.getSectionName()
+      const hilightRange : HilightRange = {sectionName, endOffset:comment.endOffset(), startOffset:comment.startOffset(), comments: [comment.hash()], replacement: undefined}
+      this.overlapping = [comment]
+      this.openCommentFromHilitRange(comment.getSection()!,hilightRange)
     }
 
-    handleConfirm(confirmation: any) {
+    handleConfirm(confirmation: CommentAction) {
       switch(confirmation.action) {
         case "delete": this.deleteComment(confirmation.comment); break;
         case "reject": this.rejectComment(confirmation.comment); break;
         case "approve": this.approveComment(confirmation.comment); break;
+        case "got-it": this.approveComment(confirmation.comment); break;
       }
     }
 
-    private confirmAction(action: any) {
+    private confirmAction(action: CommentAction) {
       this._confirmElem!.open(`Are you sure you want to ${action.action} this comment?`, action)
     }
  
+    handleCommentAction(action:CommentAction) {
+      switch (action.action) {
+        case 'resolve': this.resolveComments(action.comment); break;
+        case 'modify' : this.modifyComment(action.comment); break;
+        default:
+          this.confirmAction(action)
+      }
+    }
+
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
       let maybeCommentBox
       if (this.commentingOn && this.commentingOn.name == section.name) {
@@ -320,7 +340,7 @@ import { isEqual, over } from "lodash-es";
                 .comment=${c}
                 .overlaps=${comments.find(comment=> comment.status == CommentStatus.Pending && comment != c && comment.overlaps(c))}
                 @do-hilight=${(e:any) => this.hilight(e.detail)}
-                @action=${(e:any) => e.detail.action == 'resolve' ?  this.resolveComment(e.detail.comment) : this.confirmAction(e.detail)}
+                @action=${(e:any) => this.handleCommentAction(e.detail)}
                 .selected=${this.highlitRange && this.highlitRange.comments && this.highlitRange.comments.includes(c.documentOutput.hash)}
               ></how-comment>`)}
             </div>
