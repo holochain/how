@@ -387,4 +387,8 @@ export class Comment {
   created() : Date {
     return new Date(this.documentOutput.actions[0].content.timestamp/1000)
   }
+  replacement() : string | undefined {
+    const suggestionSection = this.documentOutput.content.getSection("suggestion")
+    return suggestionSection ? suggestionSection.content : undefined
+  }
 }

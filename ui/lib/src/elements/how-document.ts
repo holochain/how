@@ -322,6 +322,7 @@ import { isEqual, over } from "lodash-es";
           .index=${index}
           .highlitRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
           .editable=${doc.isEditable(section.name)}
+          .comments=${comments}
           >
         </how-section>
         <div class="column">

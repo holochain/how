@@ -5,7 +5,7 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange } from "../types";
+import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Comment, CommentStatus } from "../types";
 import { TextArea, TextField } from "@scoped-elements/material-web";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
@@ -32,6 +32,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   @property() editable = false;
   @property() click = ()=>{};
   @property() highlitRange: HilightRange | undefined = undefined;
+  @property() comments:Array<Comment> = []
 
   @state() editing = false;
   @state() preview = false;
@@ -102,11 +103,21 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
       return html`${content}`
     }
   }
-
+  private applyApprovedComments(text: string) : string {
+    for (let i= this.comments.length-1; i >=0 ; i-=1) {
+      const c: Comment = this.comments[i]
+      if (c.status == CommentStatus.Approved) {
+        const replacement = c.replacement()
+        if (replacement != undefined) {
+          text = text.substring(0,c.startOffset())+replacement+text.substring(c.endOffset())
+        }
+      }
+    }
+    return text
+  }
   private async sectionViewWidget() : Promise<TemplateResult>{
     if (this.section) {
       const section = this.section
-      const sourceOnly = !this.preview
 
       if (section.sectionType != SectionType.Content) {
           const reqInfo = parseRequirementInfo(section)
@@ -120,17 +131,21 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           </div>`
       }
       if (section.contentType == "text/markdown") {
-          if (sourceOnly) {
+          if (this.preview) {
+            const content = this.applyApprovedComments(section.content)
+            return html`<div class="section-content markdown">${unsafeHTML(Marked.parse(content))}</div>`
+          } else {
             return html`<div class="section-content"
-           
             @click=${(e:any)=>this.handleSelect(e)}
             ><pre class="source">${this.highlitContent(this.highlitRange, section.content)}</pre></div>`
-          } else {
-            return html`<div class="section-content markdown">${unsafeHTML(Marked.parse(section.content))}</div>`
           }
       } else {
-          return html`<div class="section-content" 
-           
+          if (this.preview) {
+            const content = this.applyApprovedComments(section.content)
+            return html`<div class="section-content"        
+            ><p>${content}</p></div>`
+          }
+          return html`<div class="section-content"        
             @click=${(e:any)=>this.handleSelect(e)}
           ><p>${this.highlitContent(this.highlitRange,section.content)}</p></div>`
       }
@@ -179,7 +194,11 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         this.dispatchEvent(new CustomEvent('section-changed', { detail: this.section, bubbles: true, composed: true }));
     }
   }
-
+  private previewable() {
+    return this.section && 
+      ((this.section.contentType == "text/markdown") || 
+       (this.comments && this.comments.length>0 && this.comments.find(c=>c.status==CommentStatus.Approved  && (c.replacement() != undefined))))
+  }
   render() {
     if (this.section) {
         const controls = [html`
@@ -209,7 +228,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 .click=${() => this.editing=true}
                 ></svg-button>`)
         }
-        if (this.section.contentType == "text/markdown") {
+        if (this.previewable()) {
             controls.push(this.preview ?
                 html`<svg-button
                 button="checked"

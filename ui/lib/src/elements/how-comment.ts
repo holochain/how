@@ -29,9 +29,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
     if (this.comment) {
       
       const {startOffset, endOffset} = this.comment.getOffsets()
-      const commentDoc = this.comment.documentOutput.content
-      const suggestionSection = commentDoc.getSection("suggestion")
-      const replacement = suggestionSection ? suggestionSection.content : undefined
+      const replacement = this.comment.replacement()
       const hilightRange: HilightRange = {
         comments: [this.comment.hash()], 
         sectionName: this.comment.getSectionName(), 
