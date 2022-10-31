@@ -7,13 +7,14 @@ import {
   Dialog,
 } from "@scoped-elements/material-web";
 
+const DEFAULT_CONFIRM_MESSAGE = "Please confirm!"
 /**
  * @element how-new-section-dialog
  */
 export class HowConfirm extends ScopedElementsMixin(LitElement) {
 
   @property() 
-  message: string = "Please confirm!";
+  message: string = DEFAULT_CONFIRM_MESSAGE;
   @query('#confirm-dialog')
   _dialogElem!: Dialog;
 
@@ -23,6 +24,8 @@ export class HowConfirm extends ScopedElementsMixin(LitElement) {
     this.userData = userData
     if (message) {
       this.message = message
+    } else {
+      message = DEFAULT_CONFIRM_MESSAGE
     }
     this._dialogElem!.open = true
   }

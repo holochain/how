@@ -402,14 +402,14 @@ export class HowStore {
     return hash
   }
 
-  async getCurrentDocumentPull(path:string, unitHash: EntryHashB64) : Promise<DocInfo | undefined> {
+  async getCurrentDocumentPull(path:string, unitHash: EntryHashB64|undefined) : Promise<DocInfo | undefined> {
     if (!get(this.documentPaths)[path]) {
       await this.pullDocuments(path)
     }
     return this.getCurrentDocument(path, unitHash)
   }
 
-  getCurrentDocument(path:string, unitHash: EntryHashB64 ) : DocInfo | undefined {
+  getCurrentDocument(path:string, unitHash: EntryHashB64 | undefined ) : DocInfo | undefined {
     const documents = this.getDocumentsFiltered(path, unitHash, DocType.Document, true)
     if (documents.length> 0) {
       return {
@@ -421,13 +421,14 @@ export class HowStore {
     return undefined
   }
 
-  getDocumentsFiltered(path: string, unitEh: EntryHashB64, docType: DocType, latestOnly: boolean) : Array<DocumentOutput> {
+  getDocumentsFiltered(path: string, unitEh: EntryHashB64 | undefined, docType: DocType, latestOnly: boolean) : Array<DocumentOutput> {
     let docs = get(this.documentPaths)[path]
     if (docs) {
       if (latestOnly) {
         docs = docs.filter(doc => doc.updatedBy.length==0 && doc.deletedBy.length==0)
       }
-      docs = docs.filter(d=>d.content.documentType==docType && serializeHash(d.content.unitHash) == unitEh)
+      console.log("HASH", serializeHash(docs[0].content.unitHash), unitEh)
+      docs = docs.filter(d=>d.content.documentType==docType && (unitEh == undefined || serializeHash(d.content.unitHash) == unitEh))
       return docs
     }
     return []

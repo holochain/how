@@ -90,7 +90,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     return content
   }
 
-  private confirmAdvance(unitHash: EntryHashB64, newState: string) {
+  private async confirmAdvance(unitHash: EntryHashB64, newState: string) {
     let message = ""
     if (newState == SysState.Defunct) {
       message = "Are you sure you want to move this item to Defunct?  This can not be undone."
@@ -99,7 +99,8 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
       const process_path = unit.processPathForState(unitInfo.state)
       console.log("cprod path", process_path)
-      const docInfo = this._store.getCurrentDocument(process_path, unitHash)
+      // TODO we should be using a unitHash, not a process path to prevent dups
+      const docInfo = await this._store.getCurrentDocumentPull(process_path, undefined)
       const threshold = docInfo?.content.getSection("threshold")
       if (threshold) {
         message = threshold.content
