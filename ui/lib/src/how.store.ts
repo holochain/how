@@ -427,7 +427,6 @@ export class HowStore {
       if (latestOnly) {
         docs = docs.filter(doc => doc.updatedBy.length==0 && doc.deletedBy.length==0)
       }
-      console.log("HASH", serializeHash(docs[0].content.unitHash), unitEh)
       docs = docs.filter(d=>d.content.documentType==docType && (unitEh == undefined || serializeHash(d.content.unitHash) == unitEh))
       return docs
     }

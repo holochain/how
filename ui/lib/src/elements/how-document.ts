@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -41,6 +41,7 @@ import { isEqual, over } from "lodash-es";
     @state() commentingOn : Section|undefined = undefined;
     @state() highlitRange : HilightRange | undefined;
     @state() overlapping : Comment[] | undefined
+    @state() commentStats : CommentStats | undefined;
     private selectedCommentText: string = ""
 
     @query('how-new-section-dialog')
@@ -63,7 +64,7 @@ import { isEqual, over } from "lodash-es";
         contentType: e.detail.contentType, 
         sectionType:e.detail.sectionType,
         sourcePath: SourceManual,
-        content: "{}"
+        content: ""
       }
       const document = this._documents.value[this.currentDocumentEh]
       document.content.push(section)
@@ -170,7 +171,6 @@ import { isEqual, over } from "lodash-es";
       this.commentingOn = section
       this.highlitRange = highlitRange
       this.selectedCommentText = section.content.substring(this.highlitRange.startOffset,this.highlitRange.endOffset)
-
     }
 
     hilight(range: HilightRange) {
@@ -185,8 +185,15 @@ import { isEqual, over } from "lodash-es";
 
     private getCommentDocs(doc: Document) : Dictionary<Array<Comment>> {
       const comments: Dictionary<Array<Comment>> = {}
+      let pending = 0
+      let suggestions = 0
+      let total = 0
+
       this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( commentDoc => {
         const comment = new Comment(commentDoc, doc)
+        total += 1;
+        if (comment.status == CommentStatus.Pending) {pending += 1}
+        if (comment.suggestion() != undefined) {suggestions += 1}
         if (comment.getDocumentHash() == this.currentDocumentEh) {
           const sectionName = comment.getSectionName()
           let sectionComments = comments[sectionName]
@@ -199,6 +206,8 @@ import { isEqual, over } from "lodash-es";
           })
         }
       })
+      this.commentStats = {total, pending,suggestions}
+
       return comments
     }
 
@@ -285,13 +294,18 @@ import { isEqual, over } from "lodash-es";
         case "reject": this.rejectComment(confirmation.comment); break;
         case "approve": this.approveComment(confirmation.comment); break;
         case "got-it": this.approveComment(confirmation.comment); break;
+        case "apply": this.applySuggestions();break;
       }
     }
 
     private confirmAction(action: CommentAction) {
       this._confirmElem!.open(`Are you sure you want to ${action.action} this comment?`, action)
     }
- 
+
+    private confirmApply() {
+      this._confirmElem!.open(`Are you sure you want to apply all suggestions to the document?`, {action:"apply",comment:undefined})
+    }
+
     handleCommentAction(action:CommentAction) {
       switch (action.action) {
         case 'resolve': this.resolveComments(action.comment); break;
@@ -300,6 +314,19 @@ import { isEqual, over } from "lodash-es";
           this.confirmAction(action)
       }
     }
+
+    private async applySuggestions() {
+      const doc : Document = this._documents.value[this.currentDocumentEh]
+      const comments = await this.getCommentDocs(doc)
+      for (const section of doc.content) {
+        if (comments[section.name]) {
+          console.log("FISH", comments[section.name])
+          section.content = applyApprovedComments(section.content,comments[section.name])
+        }
+      }
+      const newDocumentHash = await this._store.updateDocument(this.currentDocumentEh, doc);
+      this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+  }
 
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
       let maybeCommentBox
@@ -388,6 +415,18 @@ import { isEqual, over } from "lodash-es";
         }
         return html`
           <div id="header">
+            ${this.commentStats && this.commentStats.pending > 0 ? html`
+              ${this.commentStats.pending} comments need addressing
+            `:''}
+            ${this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0 ? html`
+              <div><svg-button
+                button="plus"
+                info="apply suggestions"
+                infoPosition="right"
+                .click=${() => this.confirmApply()}
+                ></svg-button>
+              </div>
+            `:""}
             <div id="editors" class="row">
               Editors:
               ${Object.entries(doc.editors).map(
