@@ -404,20 +404,30 @@ import { isEqual, over } from "lodash-es";
 
         const comments = this.getCommentDocs(doc)
 
-        const sectionsHTML = doc.content.filter(section => section.sectionType != SectionType.Requirement).map((section, index) => 
+        const sections = doc.content.filter(section => section.sectionType != SectionType.Requirement)
+        const sectionsHTML = sections.map((section, index) => 
           this.sectionRow(doc, section, index, comments[section.name]))
-        let requirementsHTML = doc.content.filter(section => section.sectionType == SectionType.Requirement).map((section, index) => 
+        const requirements =  doc.content.filter(section => section.sectionType == SectionType.Requirement)
+        let requirementsHTML = requirements.map((section, index) => 
           this.sectionRow(doc, section, index, comments[section.name]))
         if (requirementsHTML.length > 0) {
           requirementsHTML.unshift(html`
             <info-item item="Requirements" name="sections that this standard requires of sub-nodes"></info-item>
           `)
         }
+        let emptySections = 0
+        sections.forEach(section=>{if(section.content=="") emptySections+=1})
+        requirements.forEach(section=>{if(section.content=="") emptySections+=1})
+        let tasksHTML = []
+        if (emptySections > 0) {
+          tasksHTML.push(html`<div class="task">${emptySections} sections need editing</div>`)
+        }
+        if (this.commentStats && this.commentStats.pending > 0) {
+          tasksHTML.push(html`<div class="task">${this.commentStats.pending} comments need addressing</div>`)
+        }
         return html`
           <div id="header">
-            ${this.commentStats && this.commentStats.pending > 0 ? html`
-              ${this.commentStats.pending} comments need addressing
-            `:''}
+            ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
             ${this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0 ? html`
               <div><svg-button
                 button="plus"
