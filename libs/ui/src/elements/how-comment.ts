@@ -48,7 +48,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
     this.dispatchEvent(new CustomEvent('action', { detail: {comment: this.comment, action}, bubbles: true, composed: true }))
   }
 
-  section(header:string, content: string, pre:boolean = false) : TemplateResult {
+  sectionHTML(header:string, content: string, pre:boolean = false) : TemplateResult {
     return html`<div class="comment-section column"><div class="section-header">${header}</div><div class="section-content">${pre ? html`<pre class="source">${content}</pre>`:content}</div></div>`
   }
 
@@ -74,6 +74,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       let commentHTML
       let suggestionHTML
       let controlsHTML = []
+      const isPre = this.comment.getSection()!.contentType == "text/markdown"
       if (this.comment.status == CommentStatus.Pending || this.selected) {
         commentDoc.content.forEach(section => {
           if (section.name == "comment") {
@@ -84,13 +85,13 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
           }
         })
         if (commentSection) {
-          commentHTML = this.section("General Comment",commentSection.content)
+          commentHTML = this.sectionHTML("General Comment",commentSection.content)
         } 
         if (suggestionSection) {
           if (suggestionSection.content == "") {
-            suggestionHTML = this.section("Change Request-- Delete", "")
+            suggestionHTML = this.sectionHTML("Change Request-- Delete", "")
           } else {
-            suggestionHTML = this.section("Change Request-- " + (this.comment.startOffset() != this.comment.endOffset() ? "Replace with: " : "Insert: "), suggestionSection.content, this.comment.getSection()!.contentType == "text/markdown")
+            suggestionHTML = this.sectionHTML("Change Request-- " + (this.comment.startOffset() != this.comment.endOffset() ? "Replace with: " : "Insert: "), suggestionSection.content, isPre)
           }
         } 
         if (this.canDelete()) {
@@ -143,7 +144,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
       let commentSectionsHTML
       if (commentHTML || suggestionHTML) {
         const text = this.comment.getCommentingOnText(true)
-        const commentingOnHTML = text ? this.section("Commenting on:", text) : undefined
+        const commentingOnHTML = text ? this.sectionHTML("Commenting on:", text, isPre) : undefined
         commentSectionsHTML = html `
           <div class="comment-sections column">
             ${commentHTML}
