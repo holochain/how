@@ -60,8 +60,8 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
   }
 
   canAddress(): boolean {
-    // TODO: check editor/steward status
-    return this.comment!.status == CommentStatus.Pending
+    const commentDoc = this.comment!.documentOutput.content
+    return this.comment!.status == CommentStatus.Pending && commentDoc.editors.includes(this._store.myAgentPubKey)
   }
 
   render() {

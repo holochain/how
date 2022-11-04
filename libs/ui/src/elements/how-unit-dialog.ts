@@ -133,13 +133,16 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
     }
 
     const processes = this.getProcessesValue()
-
+    const stewards = Object.keys(this._stewards).map((agent)=> agent)
+    if (stewards.length == 0) {
+      stewards.push(this._store.myAgentPubKey)
+    }
     const unit = new Unit({
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
       version: `${this._versioningTypeSelect.value}${this._versionField.value}`, // max 100 chars
       pathAbbreviation: this._nameField.value, // max 10 char
       shortName: this._titleField.value,
-      stewards: Object.keys(this._stewards).map((agent)=> agent),  // people who can change this document
+      stewards,  // people who can change this document
       processes,
       });
 

@@ -133,15 +133,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const path = this.getPath()
     const docInfo = this._store.getCurrentDocument(path, serializeHash(unitInfo.hash))
 
-
-    // const documents = docs ? docs.filter(doc => !doc.updated).map(docOutput => {
-    //   const doc = docOutput.content
-    //   const title = doc.getSection("title")
-    //   return html`
-    //   <div class="document" @click=${()=>this.handleDocumentClick(docOutput.hash)}>
-    //     <div class="document-title">${title ? this.renderType(title.contentType,title.content):docOutput.hash}</div>
-    // </div>`
-    // }) : ""
+    const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
     let stewards = []
     for (const agentHash of unit.stewards) {
       const agent = this._store.getProfileSync(agentHash)
@@ -163,20 +155,22 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       updated = new Date(docInfo.updated)
       const document = docInfo.content
       state = document.state
-      controlsHTML = controlsHTML.concat(unit
-          .nextStatesFrom(document.state)
-          .map(
-            (nextState) =>
-              html`<svg-button 
-                .click=${() => this.confirmAdvance(this.currentUnitEh, nextState)}
-                .info=${`move to ${nextState}`}
-                .button=${nextState == SysState.Defunct ? "defunct" : "move"}>
-                </svg-button>`
-          ))
+      if (isSteward) {
+        controlsHTML = controlsHTML.concat(unit
+            .nextStatesFrom(document.state)
+            .map(
+              (nextState) =>
+                html`<svg-button 
+                  .click=${() => this.confirmAdvance(this.currentUnitEh, nextState)}
+                  .info=${`move to ${nextState}`}
+                  .button=${nextState == SysState.Defunct ? "defunct" : "move"}>
+                  </svg-button>`
+            ))
+      }
     } else {
       state = unitInfo.state
     }
-    if (state == SysState.Alive) {
+    if (state == SysState.Alive && isSteward) {
       controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
