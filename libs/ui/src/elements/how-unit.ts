@@ -73,8 +73,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
   }
 
-  handleDocumentClick(hash: string) {
-    console.log("clicked on document", hash)
+  handleDocumentClick(hash: EntryHashB64) {
     this.dispatchEvent(new CustomEvent('select-document', { detail: hash, bubbles: true, composed: true }));
   }
 
