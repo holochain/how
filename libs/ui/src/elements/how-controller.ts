@@ -20,7 +20,7 @@ import {
   ListItem,
   Select,
   IconButton,
-  Button, TextField, TopAppBar, Drawer, List, Icon, Switch, Formfield,
+  Button, TextField, List, Icon,
 } from "@scoped-elements/material-web";
 import {
   profilesStoreContext,
@@ -57,9 +57,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   /** Private properties */
 
-  @query('#my-drawer')
-  private _drawer!: Drawer;
-
   @query('#tree')
   private _tree!: HowTree;
   @query('#document')
@@ -69,6 +66,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   @state() _currentDocumentEh = "";
   @state() _treeType = "tree";
 
+  @state()
   private initialized = false;
   private initializing = false;
 
@@ -114,9 +112,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   private async subscribeProfile() {
 
     this._myProfile = await this._profiles.fetchMyProfile()
-      if (this._myProfile) {
-        await this.checkInit();
-      }
   }
 
   async firstUpdated() {
@@ -162,16 +157,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
     //console.log("   current unit: ",  units[this._currentUnitEh].shortName, this._currentUnitEh);
 
-    // request the update so the drawer will be findable
-    await this.requestUpdate();
-
-    /** Drawer */
-    if (this._drawer) {
-      const container = this._drawer.parentNode!;
-      container.addEventListener('MDCTopAppBar:nav', () => {
-        this._drawer.open = !this._drawer.open;
-      });
-    }
     // - Done
     this.initializing = false
     this.initialized = true
@@ -260,6 +245,16 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     await this._store.pullTree()
   }
   render() {
+    if (!this.initialized) {
+      return html`
+      <mwc-button
+          id="primary-action-button"
+          slot="primaryAction"
+          @click=${()=>this.checkInit()}
+          >Initialize</mwc-button
+        > 
+      `
+    }
     const tree = html`
       <how-tree id="tree"
         .treeType=${this._treeType}
@@ -310,8 +305,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   static get scopedElements() {
     return {
-      "mwc-switch": Switch,
-      "mwc-top-app-bar": TopAppBar,
       "mwc-textfield": TextField,
       "mwc-select": Select,
       "mwc-list": List,
@@ -322,9 +315,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "how-unit-dialog" : HowUnitDialog,
       "how-unit": HowUnit,
       "how-tree": HowTree,
-      "mwc-formfield": Formfield,
       "how-document": HowDocument,
-      'sl-avatar': SlAvatar,
     };
   }
 
