@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, DocumentOutput, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -23,7 +23,6 @@ import { serializeHash } from "@holochain-open-dev/utils";
 import { HowCommentBox } from "./how-comment-box";
 import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
-import { isEqual, over } from "lodash-es";
 
 /**
  * @element how-document
@@ -415,12 +414,10 @@ import { isEqual, over } from "lodash-es";
             <info-item item="Requirements" name="sections that this standard requires of sub-nodes"></info-item>
           `)
         }
-        let emptySections = 0
-        sections.forEach(section=>{if(section.content=="") emptySections+=1})
-        requirements.forEach(section=>{if(section.content=="") emptySections+=1})
+        const docStats: DocumentStats = doc.getStats()
         let tasksHTML = []
-        if (emptySections > 0) {
-          tasksHTML.push(html`<div class="task">${emptySections} sections need editing</div>`)
+        if (docStats.emptySections > 0) {
+          tasksHTML.push(html`<div class="task">${docStats.emptySections} sections need editing</div>`)
         }
         if (this.commentStats && this.commentStats.pending > 0) {
           tasksHTML.push(html`<div class="task">${this.commentStats.pending} comments need addressing</div>`)

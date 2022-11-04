@@ -155,7 +155,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       updated = new Date(docInfo.updated)
       const document = docInfo.content
       state = document.state
-      if (isSteward) {
+      if (isSteward  && document.getStats().emptySections == 0) {
         controlsHTML = controlsHTML.concat(unit
             .nextStatesFrom(document.state)
             .map(

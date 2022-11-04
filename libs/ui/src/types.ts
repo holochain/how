@@ -193,6 +193,16 @@ export class Document {
   public getSectionsByType(sectionType: SectionType) : Array<Section> {
     return this.content.filter((section) => section.sectionType == sectionType)
   }
+
+  public getStats() : DocumentStats {
+    let emptySections = 0
+    this.content.forEach(section=>{if(section.content=="") emptySections+=1})
+    return {emptySections}
+  }
+}
+
+export type DocumentStats = {
+  emptySections: number
 }
 
 export interface DocumentInput {
