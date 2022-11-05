@@ -1,5 +1,5 @@
 import {css, html, LitElement} from "lit";
-import {property, query} from "lit/decorators.js";
+import {property, query, state} from "lit/decorators.js";
 
 import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
@@ -43,6 +43,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   }
 
   @property() currentUnitEh = "";
+  @state() versionIndex: number | undefined = undefined;
 
   @contextProvided({ context: howContext })
   _store!: HowStore;
@@ -73,8 +74,8 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
   }
 
-  handleDocumentClick(hash: EntryHashB64) {
-    this.dispatchEvent(new CustomEvent('select-document', { detail: hash, bubbles: true, composed: true }));
+  handleDocumentClick(hash: EntryHashB64, readOnly: boolean) {
+    this.dispatchEvent(new CustomEvent('select-document', { detail: {hash, readOnly}, bubbles: true, composed: true }));
   }
 
   getPath() : string {
@@ -130,7 +131,8 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const action: Action = this._unitsActions.value[this.currentUnitEh]
 
     const path = this.getPath()
-    const docInfo = this._store.getCurrentDocument(path, serializeHash(unitInfo.hash))
+    const docInfo = this._store.getCurrentDocument(path, this.currentUnitEh)
+    let allDocs = this._store.getDocumentsFiltered(path, this.currentUnitEh , DocType.Document, false)
 
     const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
     let stewards = []
@@ -188,8 +190,19 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     } else {
       stateHTML = html`<div class="info-item">${getCurrentStateName(unit, state)}<div class="info-item-name">state: ${state}</div></div>`
     }
-
     const stateName = docInfo ? docInfo.content.state : unitInfo.state
+
+    let versionsHTML
+    if (allDocs.length > 1) {
+      const v = []
+      for (let i=0; i<allDocs.length;i+=1){
+        v.push(html`<div class="version" @click=${()=>this.handleDocumentClick(allDocs[i].hash, i!=allDocs.length-1)}>${i+1}</div>`) 
+      }
+      versionsHTML = html`
+      <div class="versions row">
+        ${v}
+      </div>`
+    } 
     return html`
       <div class="unit row">
         <div class="column">
@@ -218,6 +231,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           </div>
         </div>
       </div>
+      ${versionsHTML}
       <how-unit-details id="details-dialog" .state=${stateName}> </how-unit-details>
       <how-confirm @confirmed=${(e:any) => this.handleConfirm(e.detail)}></how-confirm>
     `;
@@ -261,6 +275,12 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         border: solid .1em #666;
         border-radius: .2em;
         padding: 0 6px 0 6px;
+      }
+      .version {
+        cursor: pointer;
+        text-decoration: underline;
+        color: purple;
+        margin: 0 2px;
       }
       `,
     ];

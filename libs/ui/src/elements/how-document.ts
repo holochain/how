@@ -37,6 +37,7 @@ import { HowConfirm } from "./how-confirm";
   
     @property() currentDocumentEh = "";
     @property() path = "";
+    @property() readOnly = false;
     @state() commentingOn : Section|undefined = undefined;
     @state() highlitRange : HilightRange | undefined;
     @state() overlapping : Comment[] | undefined
@@ -135,7 +136,7 @@ import { HowConfirm } from "./how-confirm";
 
     openCommentFromSelection(section: Section) {
       const doc = this._documents.value[this.currentDocumentEh]
-      if (doc.state != "refine") {
+      if (doc.state != "refine" || this.readOnly) {
         return
       }
 
@@ -186,12 +187,18 @@ import { HowConfirm } from "./how-confirm";
       const comments: Dictionary<Array<Comment>> = {}
       let pending = 0
       let suggestions = 0
+      let approved = 0
+      let rejected = 0
+      let modified = 0
       let total = 0
 
       this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( commentDoc => {
         const comment = new Comment(commentDoc, doc)
         total += 1;
         if (comment.status == CommentStatus.Pending) {pending += 1}
+        if (comment.status == CommentStatus.Approved) {approved += 1}
+        if (comment.status == CommentStatus.Rejected) {rejected += 1}
+        if (comment.status == CommentStatus.Modified) {modified += 1}
         if (comment.suggestion() != undefined) {suggestions += 1}
         if (comment.getDocumentHash() == this.currentDocumentEh) {
           const sectionName = comment.getSectionName()
@@ -205,7 +212,7 @@ import { HowConfirm } from "./how-confirm";
           })
         }
       })
-      this.commentStats = {total, pending,suggestions}
+      this.commentStats = {total, pending, approved, rejected, modified, suggestions}
 
       return comments
     }
@@ -302,10 +309,16 @@ import { HowConfirm } from "./how-confirm";
     }
 
     private confirmApply() {
+      if (this.readOnly) {
+        return
+      }
       this._confirmElem!.open(`Are you sure you want to apply all suggestions to the document?`, {action:"apply",comment:undefined})
     }
 
     handleCommentAction(action:CommentAction) {
+      if (this.readOnly) {
+        return
+      }
       switch (action.action) {
         case 'resolve': this.resolveComments(action.comment); break;
         case 'modify' : this.modifyComment(action.comment); break;
@@ -315,6 +328,9 @@ import { HowConfirm } from "./how-confirm";
     }
 
     private async applySuggestions() {
+      if (this.readOnly) {
+        return
+      }
       const doc : Document = this._documents.value[this.currentDocumentEh]
       const comments = await this.getCommentDocs(doc)
       for (const section of doc.content) {
@@ -329,7 +345,7 @@ import { HowConfirm } from "./how-confirm";
 
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
       let maybeCommentBox
-      if (this.commentingOn && this.commentingOn.name == section.name) {
+      if (!this.readOnly && this.commentingOn && this.commentingOn.name == section.name) {
         maybeCommentBox = html`<how-comment-box
         @cancel=${()=>this.clearCommenting()}
         @save=${(e:any)=>this.comment(e.detail)}
@@ -347,12 +363,12 @@ import { HowConfirm } from "./how-confirm";
           .section=${section} 
           .index=${index}
           .highlitRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
-          .editable=${doc.isEditable(section.name)}
+          .editable=${doc.isEditable(section.name) && !this.readOnly}
           .comments=${comments}
           >
         </how-section>
         <div class="column">
-          ${doc.state == "refine" ? html`
+          ${doc.state == "refine"  && !this.readOnly ? html`
           <svg-button
             .click=${async () => this.commentingOn=section} 
             .button=${"comment_new"}>
@@ -383,7 +399,7 @@ import { HowConfirm } from "./how-confirm";
         }
         const doc : Document = this._documents.value[this.currentDocumentEh]
         let addSectionHTML
-        if (doc.canAddSection()) {
+        if (doc.canAddSection() && !this.readOnly) {
           addSectionHTML = html`
           <svg-button
                 button="plus"
@@ -422,10 +438,11 @@ import { HowConfirm } from "./how-confirm";
         if (this.commentStats && this.commentStats.pending > 0) {
           tasksHTML.push(html`<div class="task">${this.commentStats.pending} comments need addressing</div>`)
         }
+        const canApplySuggestions = !this.readOnly && this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions == 0
         return html`
           <div id="header">
             ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
-            ${this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0 ? html`
+            ${canApplySuggestions ? html`
               <div><svg-button
                 button="plus"
                 info="apply suggestions"

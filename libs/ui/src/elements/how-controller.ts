@@ -64,6 +64,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   @state() _currentUnitEh = "";
   @state() _currentDocumentEh = "";
+  @state() _documentReadOnly = false;
   @state() _treeType = "tree";
 
   @state()
@@ -196,6 +197,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       let docs = this._store.getDocumentsFiltered(this.getCurrentPath(), unitEh,DocType.Document, true)
       if (docs.length > 0) {
         this._currentDocumentEh = docs[docs.length-1].hash
+        this._documentReadOnly = false
       }
       else {
         this._currentDocumentEh = ""
@@ -236,10 +238,15 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     await this._store.pullTree()
 
     this._currentDocumentEh = e.detail
+    this._documentReadOnly = false
   }
   async handleUnitUpdated(e:any) {
     console.log("calling handDocUnitUpdated")
     await this._store.pullTree()
+  }
+  selectDocumentVersion(hash: EntryHashB64, readOnly: boolean) {
+    this._currentDocumentEh = hash
+    this._documentReadOnly = readOnly
   }
   render() {
     if (!this.initialized) {
@@ -262,12 +269,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <how-unit id="how-unit" .currentUnitEh=${this._currentUnitEh}
         @document-updated=${this.handleDocumentUpdated}
         @unit-updated=${this.handleUnitUpdated}
-        @select-document=${(e:any)=>{this._currentDocumentEh = e.detail}}
+        @select-document=${(e:any)=>this.selectDocumentVersion(e.detail.hash, e.detail.readOnly)}
         @select-node=${(e: any)=>{const hash = this._unitsPath.value[e.detail]; this.handleUnitSelect(hash)}}
         @add-child=${this.handleAddChild}
      />`
      const document = this._currentDocumentEh ? 
-     html`<how-document id="document" .currentDocumentEh=${this._currentDocumentEh}
+     html`<how-document id="document" 
+          .currentDocumentEh=${this._currentDocumentEh}
+          .readOnly=${this._documentReadOnly}
           @document-updated=${this.handleDocumentUpdated}
           .path=${this.getCurrentPath()}
      >

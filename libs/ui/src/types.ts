@@ -406,6 +406,9 @@ export class Comment {
 export type CommentStats = {
   total: number
   pending: number
+  approved: number
+  rejected: number
+  modified: number
   suggestions: number
 }
 
