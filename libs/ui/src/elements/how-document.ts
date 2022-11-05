@@ -194,13 +194,14 @@ import { HowConfirm } from "./how-confirm";
 
       this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( commentDoc => {
         const comment = new Comment(commentDoc, doc)
-        total += 1;
-        if (comment.status == CommentStatus.Pending) {pending += 1}
-        if (comment.status == CommentStatus.Approved) {approved += 1}
-        if (comment.status == CommentStatus.Rejected) {rejected += 1}
-        if (comment.status == CommentStatus.Modified) {modified += 1}
-        if (comment.suggestion() != undefined) {suggestions += 1}
         if (comment.getDocumentHash() == this.currentDocumentEh) {
+          total += 1;
+          if (comment.status == CommentStatus.Pending) {pending += 1}
+          if (comment.status == CommentStatus.Approved) {approved += 1}
+          if (comment.status == CommentStatus.Rejected) {rejected += 1}
+          if (comment.status == CommentStatus.Modified) {modified += 1}
+          if (comment.suggestion() != undefined) {suggestions += 1}
+  
           const sectionName = comment.getSectionName()
           let sectionComments = comments[sectionName]
           if (sectionComments === undefined) {
@@ -438,7 +439,7 @@ import { HowConfirm } from "./how-confirm";
         if (this.commentStats && this.commentStats.pending > 0) {
           tasksHTML.push(html`<div class="task">${this.commentStats.pending} comments need addressing</div>`)
         }
-        const canApplySuggestions = !this.readOnly && this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions == 0
+        const canApplySuggestions = !this.readOnly && this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0
         return html`
           <div id="header">
             ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}

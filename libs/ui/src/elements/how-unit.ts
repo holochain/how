@@ -192,15 +192,25 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     }
     const stateName = docInfo ? docInfo.content.state : unitInfo.state
 
-    let versionsHTML
+    let historyHTML
     if (allDocs.length > 1) {
-      const v = []
-      for (let i=0; i<allDocs.length;i+=1){
-        v.push(html`<div class="version" @click=${()=>this.handleDocumentClick(allDocs[i].hash, i!=allDocs.length-1)}>${i+1}</div>`) 
+      const historyItemsHTML = []
+      for (let i=allDocs.length-1; i>= 0;i-=1){
+        const date = new Date(allDocs[i].actions[0].content.timestamp/1000)
+        historyItemsHTML.push(html`
+          <mwc-list-item value=${i} @click=${()=>this.handleDocumentClick(allDocs[i].hash, i!=allDocs.length-1)}>
+          ${i==allDocs.length-1 ? "Current:":''} ${date.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} ${date.toLocaleTimeString('en-US')}
+          </mwc-list-item>`) 
       }
-      versionsHTML = html`
-      <div class="versions row">
-        ${v}
+      historyHTML = html`
+      <div class="history row">
+        <mwc-select
+          class="history-item" 
+          label="Change History" 
+          @closing=${(e: any) => e.stopPropagation()}
+          >
+        ${historyItemsHTML}
+        </mwc-select>
       </div>`
     } 
     return html`
@@ -231,7 +241,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           </div>
         </div>
       </div>
-      ${versionsHTML}
+      ${historyHTML}
       <how-unit-details id="details-dialog" .state=${stateName}> </how-unit-details>
       <how-confirm @confirmed=${(e:any) => this.handleConfirm(e.detail)}></how-confirm>
     `;
@@ -276,11 +286,8 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         border-radius: .2em;
         padding: 0 6px 0 6px;
       }
-      .version {
-        cursor: pointer;
-        text-decoration: underline;
-        color: purple;
-        margin: 0 2px;
+      .history-item {
+        width: 340px;
       }
       `,
     ];

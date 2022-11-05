@@ -11,7 +11,7 @@
     "start:playground": "npm run build:launcher && concurrently \"npm run start:agent:playground\"",
     "network": "npm run build:launcher && concurrently-repeat \"npm run start:agent\"",
     "network:playground": "npm run build:launcher && concurrently-repeat \"npm run start:agent:playground\"",
-    "start:agent": "cross-env HC_PORT=$(port) concurrently \"npm run dev:libs\" \"npm run start:happ\" \"sleep 20 && npm run start -w how-app\"",
+    "start:agent": "cross-env HC_PORT=$(port) concurrently \"npm run dev:libs\" \"npm run start:happ\" \"sleep 10 && npm run start -w how-app\"",
     "dev:libs": "npm run build -w @how/elements",
     "start-proxied": "npm run build:launcher && npm run build -w @how/elements && cross-env HC_PORT=$(port) concurrently -k \"npm run start:happ-proxied\" \"npm run start -w how-app\"",
     "start-rerun": "cross-env HC_PORT=8888 concurrently -k \"npm run build:watch -w @how/elements\" \"echo \"pass\" | hc s --piped run 0 -p 8888\" \"npm run start -w how-app\"",
