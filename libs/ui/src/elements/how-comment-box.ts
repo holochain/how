@@ -4,8 +4,6 @@ import {property, query, state} from "lit/decorators.js";
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { CommentInfo, DocumentOutput, HilightRange, Section } from "../types";
-import { serializeHash } from "@holochain-open-dev/utils";
-import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { TextArea } from "@scoped-elements/material-web";
 import { SvgButton } from "./svg-button";
 /**
@@ -18,27 +16,24 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
   @property() selectedCommentText : string = ""
   @property() resolve=  false
   @state() valid = false
+  @state() insertText = false
 
   private getCommentInfo() : CommentInfo | undefined {
     const commentBox = this.shadowRoot!.getElementById("comment") as TextArea
-    if (commentBox) {
-      const info: CommentInfo = {
-        commentText: "",
-        suggestion: undefined
-      }
-      const matches = commentBox.value.match(/([\s\S]*)```suggestion\s*([\s\S]*)\n```([\s\S]*)/)
-      if (matches) {
-        if (this.selectedCommentText != matches[2]) {
-          info.suggestion = matches[2]
-        }
-        info.commentText = matches[1]+matches[3]
-      } else {
-        info.commentText = commentBox.value
-      }
-      this.valid = !(info.suggestion == undefined && info.commentText == "")
-      return info
+
+    if (!commentBox) {
+      return undefined
     }
-    return undefined
+    const suggestionBox = this.shadowRoot!.getElementById("suggestion") as TextArea
+    const info: CommentInfo = {
+      commentText: commentBox.value,
+      suggestion: undefined
+    }
+    if (this.selectedCommentText && suggestionBox.value != this.selectedCommentText) {
+      info.suggestion = suggestionBox.value
+    }
+    this.valid = !(info.suggestion == undefined && info.commentText == "")
+    return info
   }
 
   cancel() {
@@ -58,17 +53,49 @@ export class HowCommentBox extends ScopedElementsMixin(LitElement) {
       this.dispatchEvent(new CustomEvent('suggestion-changed', { detail: info!.suggestion, bubbles: true, composed: true }));
     }
   }
+  suggest() {
+    this.insertText = !this.insertText
+  }
   render() {
+    let suggestionHTML
+    if (this.selectedCommentText || this.insertText) {
+      let suggestionHeaderText
+      if (this.selectedCommentText) {
+        const commentBox = this.shadowRoot!.getElementById("comment") as TextArea
+        if (commentBox) {
+          if (commentBox.value) {
+            suggestionHeaderText = commentBox.value ? "Replace With:" : "Delete"
+          }
+        }
+      } else {
+        suggestionHeaderText = "Insert:"
+      }
+      suggestionHTML = html`
+        <div class="row comment-header">
+          ${this.resolve ? "Modify " :""}Suggestion --  ${suggestionHeaderText}
+        </div>
+        <mwc-textarea @input=${() => this.input()}
+          cols="50" id="suggestion" .value=${this.selectedCommentText ? this.selectedCommentText : ""} cols="100" .rows=${5} autoValidate=true required>
+        </mwc-textarea>
+      `
+    }
     return html`
       <div class="comment-box column"
         @keyup=${(e:any)=>{if (e.code=="Escape"){this.cancel()}}}
       >
         <div class="row comment-header">
-        ${this.resolve?"Modify Suggestions": "Add Comment"}:
+          <span>General Comment:</span>${!this.selectedCommentText ? html`
+          <svg-button
+            button="plus"
+            info="suggestion"
+            infoPosition="right"
+            .click=${() => this.suggest()} 
+          ></svg-button>` : ''}
         </div>
         <mwc-textarea @input=${() => this.input()}
-          cols="50" id="comment" .value=${this.selectedCommentText ? `\`\`\`suggestion\n${this.selectedCommentText}\n\`\`\`` : ""} cols="100" .rows=${5} autoValidate=true required>
+          cols="50" id="comment" cols="100" .rows=${5} autoValidate=true required>
         </mwc-textarea>
+        ${suggestionHTML}
 
         <div class="row comment-controls">
           <svg-button
