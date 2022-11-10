@@ -577,11 +577,11 @@ function mintNFT(uint256 memory target_) external {
               contentType: "text/markdown",
               content: "Refinement can complete after the specified number of weeks in the period.",
             },
-            { name: "period", 
-              content: '{"description": "number of weeks in the comment period"}', 
+            { name: "commenting", 
+              content: '{"description": "commenting and making change suggestions"}', 
               sourcePath:SourceManual,
               sectionType: SectionType.Process,
-              contentType: "text/integer" 
+              contentType: "control/comments" 
             },
           ],
           editors: [progenitor],

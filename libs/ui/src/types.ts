@@ -194,6 +194,22 @@ export class Document {
     return this.content.filter((section) => section.sectionType == sectionType)
   }
 
+  // return a list of controls enabled by state
+  public enabledControls() : Array<string> {
+    const controls = this.content.filter((section) => section.contentType.startsWith("control/"))
+    const enabled: Array<string> = []
+    controls.forEach((section)=>{
+      try {
+        const control = JSON.parse(section.content)
+        if (control.enabled) {
+          enabled.push(section.contentType.split('/')[1])
+        }
+      } catch(e) {}
+    }
+    )
+    return enabled
+  }
+
   public getStats() : DocumentStats {
     let emptySections = 0
     this.content.forEach(section=>{if(section.content=="") emptySections+=1})
@@ -303,6 +319,17 @@ export type RequirementInfo = {
 }
 
 export const parseRequirementInfo =  (section: Section) : RequirementInfo => {
+  return JSON.parse(section.content)
+} 
+
+export type CommentControlState = {
+  enabled: boolean,
+}
+
+export const parseCommentControlState =  (section: Section) : CommentControlState => {
+  if (section.content == "") {
+    return {enabled: false}
+  }
   return JSON.parse(section.content)
 } 
 

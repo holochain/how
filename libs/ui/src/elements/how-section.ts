@@ -5,8 +5,8 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Comment, CommentStatus, applyApprovedComments } from "../types";
-import { TextArea, TextField } from "@scoped-elements/material-web";
+import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Comment, CommentStatus, applyApprovedComments, parseCommentControlState } from "../types";
+import { Switch, TextArea, TextField } from "@scoped-elements/material-web";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
 import { HowSectionDetails } from "./how-section-details";
@@ -64,17 +64,23 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           id="${id}" maxlength="255" autoValidate=true value="${value}" required></mwc-textfield>`
   }
 
+  private switchWidget(id: string, on: boolean) : TemplateResult {
+    return on ? html`<mwc-switch id=${id} selected></mwc-switch>` : html`<mwc-switch id=${id} ></mwc-switch>`
+  }
+
   private sectionEditWidget() : TemplateResult {
     if (this.section) {
       const section = this.section
       const index = this.index
       const id = `section-${index}`
-      console.log("EDIT", section)
       if (section.sectionType != SectionType.Content) {
           const reqInfo = parseRequirementInfo(section)
           return this.inputWidget(id, reqInfo.description)
       }
       switch (section.contentType) {
+        case "control/comments":
+          const commentsControl = parseCommentControlState(section)
+          return html`Commenting Enabled: ${this.switchWidget(id, commentsControl.enabled)}`
         case "text/plain":
           return this.inputWidget(id, section.content)
         case "text/plain:long":
@@ -119,6 +125,12 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             <p>Section Description: ${description}</p>
           </div>`
       }
+      if (section.contentType == "control/comments") {
+          const commentsControl = parseCommentControlState(section)
+          return commentsControl.enabled ? 
+            html`<div class="section-content">Commenting: Enabled</div>` :
+            html`<div class="section-content">Commenting: Disabled</div>`
+      } else 
       if (section.contentType == "text/markdown") {
           if (this.preview) {
             const content = applyApprovedComments(section.content, this.comments)
@@ -169,18 +181,34 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
     }
   }
   save() {
-    console.log
     if (this.section) {
-        this.editing=false
-        const valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextField
-        if (this.section.sectionType != SectionType.Content) {
-            const reqInfo = parseRequirementInfo(this.section)
-            reqInfo.description = valElement.value
-            this.section.content = JSON.stringify(reqInfo)
-        } else {
+      this.editing=false
+      let valElement
+      if (this.section.sectionType != SectionType.Content) {
+        const reqInfo = parseRequirementInfo(this.section)
+        valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextField
+        reqInfo.description = valElement.value
+        this.section.content = JSON.stringify(reqInfo)
+      } else {
+        switch(this.section.contentType) {
+          case "control/comments":
+            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as Switch
+            this.section.content = JSON.stringify({enabled: valElement.selected})
+            break
+          case "text/plain":
+            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextField
             this.section.content = valElement.value
+            break;
+          case "text/plain:long":
+          case "text/markdown":
+            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextArea
+            this.section.content = valElement.value
+            break;
+          default:
+            console.log("unknown content type:", this.section.contentType)
         }
-        this.dispatchEvent(new CustomEvent('section-changed', { detail: this.section, bubbles: true, composed: true }));
+      }
+      this.dispatchEvent(new CustomEvent('section-changed', { detail: this.section, bubbles: true, composed: true }));
     }
   }
   private previewable() {
@@ -263,6 +291,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   static get scopedElements() {
     return {
       "how-section-details": HowSectionDetails,
+      "mwc-switch": Switch,
     }
   }
   static get styles() {

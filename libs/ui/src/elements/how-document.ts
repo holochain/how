@@ -342,34 +342,34 @@ import { HowConfirm } from "./how-confirm";
       }
       const newDocumentHash = await this._store.updateDocument(this.currentDocumentEh, doc);
       this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
-  }
+    }
+
+    private canMakeComments(doc:Document, section: Section) : boolean {
+      // TODO check that the section can accept comments
+      return !this.readOnly && this.canSeeComments(doc, section) && doc.state == "refine"
+    }
+
+    private canSeeComments(doc:Document, section: Section) : boolean {
+      return doc.enabledControls().includes("comments")
+    }
 
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
-      let maybeCommentBox
-      if (!this.readOnly && this.commentingOn && this.commentingOn.name == section.name) {
-        maybeCommentBox = html`<how-comment-box
-        @cancel=${()=>this.clearCommenting()}
-        @save=${(e:any)=>this.comment(e.detail)}
-        @suggestion-changed=${(e:any)=>this.handleCommentChange(index, e.detail)}
-        .selectedCommentText=${this.selectedCommentText}
-        .resolve=${this.overlapping != undefined}
-        ></how-comment-box>`
-      }
-
-      return html`
-      <div class="section row">
-        <how-section id=${'section-'+index}
-          @selection=${(e:any)=>this.openCommentFromSelection(e.detail)}
-          @section-changed=${(e:any) => this.updateSection(e.detail, index)}
-          .section=${section} 
-          .index=${index}
-          .highlitRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
-          .editable=${doc.isEditable(section.name) && !this.readOnly}
-          .comments=${comments}
-          >
-        </how-section>
-        <div class="column">
-          ${doc.state == "refine"  && !this.readOnly ? html`
+      let commentsHTML
+      if (this.canSeeComments(doc, section)) {
+        const canMakeComments = this.canMakeComments(doc, section)
+        let maybeCommentBox
+        if (canMakeComments && this.commentingOn && this.commentingOn.name == section.name) {
+          maybeCommentBox = html`<how-comment-box
+          @cancel=${()=>this.clearCommenting()}
+          @save=${(e:any)=>this.comment(e.detail)}
+          @suggestion-changed=${(e:any)=>this.handleCommentChange(index, e.detail)}
+          .selectedCommentText=${this.selectedCommentText}
+          .resolve=${this.overlapping != undefined}
+          ></how-comment-box>`
+        }
+        commentsHTML = html`
+        <div class="section-comments column">
+          ${canMakeComments ? html`
           <svg-button
             .click=${async () => this.commentingOn=section} 
             .button=${"comment_new"}>
@@ -390,6 +390,22 @@ import { HowConfirm } from "./how-confirm";
             </div>
           `:''}
         </div>
+        `
+      }
+
+      return html`
+      <div class="section row">
+        <how-section id=${'section-'+index}
+          @selection=${(e:any)=>this.openCommentFromSelection(e.detail)}
+          @section-changed=${(e:any) => this.updateSection(e.detail, index)}
+          .section=${section} 
+          .index=${index}
+          .highlitRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
+          .editable=${doc.isEditable(section.name) && !this.readOnly}
+          .comments=${comments}
+          >
+        </how-section>
+        ${commentsHTML}
       </div>
       `
     }
