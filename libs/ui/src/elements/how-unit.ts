@@ -135,15 +135,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     let allDocs = this._store.getDocumentsFiltered(path, this.currentUnitEh , DocType.Document, false)
 
     const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
-    let stewards = []
-    for (const agentHash of unit.stewards) {
-      const agent = this._store.getProfileSync(agentHash)
-      if (agent) {
-        stewards.push(html`<agent-avatar agent-pub-key="${agentHash}"></agent-avatar>`)
-      } else {
-        html`<span class="agent" title="${agentHash}">${agentHash}</span>`
-      }
-    }
+    let stewardsHTML = html`<how-agent-list .agents=${unit.stewards}></how-agent-list>`
+
+    
     const created = new Date(action.timestamp)
     const creatorHash = serializeHash(action.author)
     const creator = this._store.getProfileSync(creatorHash)
@@ -224,7 +218,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           .item=${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="created">
         </info-item>
         ${ updated ? html`<info-item title=${`Last modified ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="modified"></info-item>`:''}
-        <div class="info-item">${stewards}
+        <div class="info-item">${stewardsHTML}
         <div class="info-item-name">stewards</div></div>
         </div>
         <div class="column">

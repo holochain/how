@@ -519,10 +519,7 @@ import { HowConfirm } from "./how-confirm";
               </div>
             `:""}
             <div id="editors" class="row">
-              Editors:
-              ${Object.entries(doc.editors).map(
-                ([key, pubkey]) => html`<agent-avatar agent-pub-key="${pubkey}"></agent-avatar>`
-              )}
+              Editors: <how-agent-list layout="row" .agents=${doc.editors}></how-agent-list>
             </div>
           </div>
           <div id="sections" }>

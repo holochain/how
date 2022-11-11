@@ -5,7 +5,7 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Document, Comment, CommentStatus, applyApprovedComments, parseCommentControlState, parseVotingControlState, MarkTypes } from "../types";
+import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Document, Comment, CommentStatus, applyApprovedComments, parseCommentControlState, parseVotingControlState, MarkTypes, parseAgentArray } from "../types";
 import { Switch, TextArea, TextField } from "@scoped-elements/material-web";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
@@ -13,6 +13,8 @@ import { HowSectionDetails } from "./how-section-details";
 import { HowStore } from "../how.store";
 import { serializeHash } from "@holochain-open-dev/utils";
 import { AgentPubKeyB64, Dictionary } from "@holochain-open-dev/core-types";
+import { HowEditAgentList } from "./how-edit-agent-list";
+import { HowAgentList } from "./how-agent-list";
 
 
 const MAX_LINES= 100
@@ -69,6 +71,11 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   private switchWidget(id: string, on: boolean) : TemplateResult {
     return on ? html`<mwc-switch id=${id} selected></mwc-switch>` : html`<mwc-switch id=${id} ></mwc-switch>`
   }
+  private agentsWidget(id: string, agents: Array<AgentPubKeyB64>) : TemplateResult {
+    return html`
+      <how-edit-agent-list id=${id} .agents=${agents}></how-edit-agent-list>
+    `
+  }
 
   private sectionEditWidget() : TemplateResult {
     if (this.section) {
@@ -80,6 +87,9 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           return this.inputWidget(id, reqInfo.description)
       }
       switch (section.contentType) {
+        case "json/agents":
+          const agents = parseAgentArray(section)
+          return html`Agents: ${this.agentsWidget(id, agents)}`
         case "control/voting":
           const votingControl = parseVotingControlState(section)
           return html`Voting Enabled: ${this.switchWidget(id, votingControl.enabled)}`
@@ -115,7 +125,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
     }
   }
 
-  private async sectionViewWidget() : Promise<TemplateResult>{
+  private async sectionViewWidget() : Promise<TemplateResult|Array<TemplateResult>>{
     if (this.section) {
       const section = this.section
 
@@ -131,6 +141,9 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           </div>`
       }
       switch (section.contentType) {
+        case "json/agents":
+          const agents = parseAgentArray(section)
+          return html`<how-agent-list .agents=${agents}></how-agent-list>`
         case "control/comments":
           const commentsControl = parseCommentControlState(section)
           return commentsControl.enabled ? 
@@ -218,6 +231,10 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         this.section.content = JSON.stringify(reqInfo)
       } else {
         switch(this.section.contentType) {
+          case "json/agents":
+            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as HowEditAgentList
+            this.section.content = JSON.stringify(valElement.agents)
+            break;
           case "control/voting":
           case "control/comments":
             valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as Switch
@@ -320,6 +337,9 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
     return {
       "how-section-details": HowSectionDetails,
       "mwc-switch": Switch,
+      'how-edit-agent-list': HowEditAgentList,
+      'how-agent-list': HowAgentList,
+
     }
   }
   static get styles() {

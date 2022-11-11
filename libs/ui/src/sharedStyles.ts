@@ -9,12 +9,6 @@ export const sharedStyles = css`
     display: flex;
     flex-direction: row;
   }
-  .agent {
-    background-color: lightsteelblue;
-    margin-right: 5px;
-    padding: 0 2px 0 2px;
-    border-radius: 0.2em;
-  }
   .info-item {
     font-size: 1.1em;
     font-weight: bold;

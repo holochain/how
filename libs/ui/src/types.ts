@@ -324,6 +324,14 @@ export const parseRequirementInfo =  (section: Section) : RequirementInfo => {
   return JSON.parse(section.content)
 } 
 
+export const parseAgentArray =  (section: Section) : Array<AgentPubKeyB64> => {
+  try {
+    return JSON.parse(section.content)
+  } catch (e) {
+    return []
+  }
+} 
+
 // TODO refactor control states into interface and their own types
 export type CommentControlState = {
   enabled: boolean,

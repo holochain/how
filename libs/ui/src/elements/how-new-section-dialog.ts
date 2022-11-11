@@ -94,7 +94,9 @@ export class HowNewSectionDialog extends ScopedElementsMixin(LitElement) {
         <mwc-list-item selected value="text/plain">Plain text (short)</mwc-list-item>
         <mwc-list-item selected value="text/plain:long">Plain text (long)</mwc-list-item>
         <mwc-list-item selected value="text/markdown">Markdown</mwc-list-item>
-        <mwc-list-item selected value="text/json">JSON</mwc-list-item>
+        <mwc-list-item selected value="json/agent">Agent List</mwc-list-item>
+        <mwc-list-item selected value="control/comments">Commenting Control</mwc-list-item>
+        <mwc-list-item selected value="control/voting">Voting Control</mwc-list-item>
       </mwc-select>
 
 
