@@ -14,7 +14,7 @@ import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 const std_procs: Array<[ProcessType, ProcessName]> = [
   ["soc_proto.process.define", "declaration"],
   ["soc_proto.process.refine", "comment_period"],
-  ["soc_proto.process.align", "consensus"],
+  ["soc_proto.process.align", "vote"],
 ];
 
 export function initialTree(progenitor: AgentPubKeyB64) {
@@ -605,10 +605,15 @@ function mintNFT(uint256 memory target_) external {
               contentType: "text/markdown",
               content: "The Votes alignment variant specifies a voting group, and a count of those votes",
             },
-            { name: "voters", content: '{"description": "list of people who may vote"}', sectionType: SectionType.Process,
-            contentType: "text/plain", sourcePath:SourceManual },
-            { name: "votes", content: '{"description": "record of the votes taken"}', sectionType: SectionType.Process,
-            contentType: "text/plain", sourcePath:SourceManual },
+            {
+              name: "threshold",
+              sourcePath:"soc_proto.process.align",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
+              content: "Voting can move to Alive when the voting criteria have been fulfilled.",
+            },
+            { name: "vote", content: '{"description": "voting afforadance"}', sectionType: SectionType.Process,
+            contentType: "control/voting", sourcePath:SourceManual },
           ],
           editors: [progenitor],
           meta: {},
@@ -630,6 +635,13 @@ function mintNFT(uint256 memory target_) external {
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "The Consensus alignment variant specifies an outcome of consensus decision that a group has taken",
+            },
+            {
+              name: "threshold",
+              sourcePath:"soc_proto.process.align",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
+              content: "Consensus can move to Alive when the consensus outcome has been recorded in the outcome section.",
             },
             { name: "outcome", content: '{"description": "results of the consensus decision"}', sectionType: SectionType.Process,
             contentType: "text/markdown", sourcePath:SourceManual },
@@ -654,6 +666,13 @@ function mintNFT(uint256 memory target_) external {
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "The Sortition alignment variant specifies a group of people who will decide on the unit and it's outcome of consensus decision that a group has taken",
+            },
+            {
+              name: "threshold",
+              sourcePath:"soc_proto.process.align",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
+              content: "Sortition can move to Alive when the sortition decision has been recorded in the outcome section by the stewards and the agents in the people section have all marked it as approved.",
             },
             { name: "people", content: '{"description": "list of people who will decide"}', sectionType: SectionType.Process,
             contentType: "text/plain", sourcePath:SourceManual },

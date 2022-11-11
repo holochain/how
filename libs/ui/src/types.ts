@@ -116,12 +116,14 @@ export interface DocumentInitializer {
 }
 
 export class Document {
+  documentHash: EntryHashB64 | undefined
   unitHash: EntryHash = new Uint8Array
   documentType: DocType = DocType.Document
   editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
   state: string = "define"
+  marks: Array<Mark> = []
   protected sectionsMap: Dictionary<number> = {}
 
   constructor(init?: Partial<Document> ) {
@@ -322,11 +324,23 @@ export const parseRequirementInfo =  (section: Section) : RequirementInfo => {
   return JSON.parse(section.content)
 } 
 
+// TODO refactor control states into interface and their own types
 export type CommentControlState = {
   enabled: boolean,
 }
 
 export const parseCommentControlState =  (section: Section) : CommentControlState => {
+  if (section.content == "") {
+    return {enabled: false}
+  }
+  return JSON.parse(section.content)
+} 
+
+export type VotingControlState = {
+  enabled: boolean,
+}
+
+export const parseVotingControlState =  (section: Section) : VotingControlState => {
   if (section.content == "") {
     return {enabled: false}
   }
@@ -355,6 +369,7 @@ export enum CommentStatus {
 
 export enum MarkTypes {
   CommentStatus = 1,
+  Vote = 2,
 }
 
 export type Offsets = {

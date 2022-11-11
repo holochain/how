@@ -229,9 +229,11 @@ export class HowStore {
     let documents = await this.service.getDocuments(path)
     documents.forEach(doc => {
       doc.content = new Document(doc.content)
+      doc.content.documentHash = doc.hash
+      doc.content.marks = doc.marks
     })
-    for (const s of documents) {
-      this.updateDocumentStores(path, s)
+    for (const doc of documents) {
+      this.updateDocumentStores(path, doc)
     }
     return get(this.documentPathStore)[path]
   }
@@ -399,9 +401,10 @@ export class HowStore {
   }
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {
-    const hash = await this.service.createDocument({path, document})
+    document.documentHash = await this.service.createDocument({path, document})
+    
     await this.pullDocuments(path)
-    return hash
+    return document.documentHash
   }
 
   async getCurrentDocumentPull(path:string, unitHash: EntryHashB64|undefined) : Promise<DocInfo | undefined> {

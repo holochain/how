@@ -5,13 +5,14 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Comment, CommentStatus, applyApprovedComments, parseCommentControlState } from "../types";
+import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Document, Comment, CommentStatus, applyApprovedComments, parseCommentControlState, parseVotingControlState, MarkTypes } from "../types";
 import { Switch, TextArea, TextField } from "@scoped-elements/material-web";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
 import { HowSectionDetails } from "./how-section-details";
 import { HowStore } from "../how.store";
 import { serializeHash } from "@holochain-open-dev/utils";
+import { AgentPubKeyB64, Dictionary } from "@holochain-open-dev/core-types";
 
 
 const MAX_LINES= 100
@@ -33,6 +34,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   @property() click = ()=>{};
   @property() highlitRange: HilightRange | undefined = undefined;
   @property() comments:Array<Comment> = []
+  @property() document: Document | undefined
 
   @state() editing = false;
   @state() preview = false;
@@ -78,6 +80,9 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           return this.inputWidget(id, reqInfo.description)
       }
       switch (section.contentType) {
+        case "control/voting":
+          const votingControl = parseVotingControlState(section)
+          return html`Voting Enabled: ${this.switchWidget(id, votingControl.enabled)}`
         case "control/comments":
           const commentsControl = parseCommentControlState(section)
           return html`Commenting Enabled: ${this.switchWidget(id, commentsControl.enabled)}`
@@ -125,13 +130,35 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             <p>Section Description: ${description}</p>
           </div>`
       }
-      if (section.contentType == "control/comments") {
+      switch (section.contentType) {
+        case "control/comments":
           const commentsControl = parseCommentControlState(section)
           return commentsControl.enabled ? 
             html`<div class="section-content">Commenting: Enabled</div>` :
             html`<div class="section-content">Commenting: Disabled</div>`
-      } else 
-      if (section.contentType == "text/markdown") {
+        case "control/voting":
+          const votingControl = parseCommentControlState(section)
+          if (votingControl.enabled) {
+            let votes : Dictionary<number> = {}
+            this.document!.marks.forEach(m => {if (m.markType==MarkTypes.Vote) {
+              if (votes[m.author] == undefined) {
+                votes[m.author] = 0
+              }
+              if (m.mark == "approve") votes[m.author] += 1
+              if (m.mark == "reject") votes[m.author] -= 1
+            }})
+            let votesFor: Array<AgentPubKeyB64> = []
+            let votesAgainst: Array<AgentPubKeyB64> = []
+            Object.entries(votes).forEach(([voter,vote]) => {if (vote>0) votesFor.push(voter); if (vote<0) votesAgainst.push(voter)})
+            return html`<div class="section-content">
+              <div>Voting: Enabled</div>
+              <div class="row">For: ${votesFor.length} <div class="row">${votesFor.map(voter=>html`<agent-avatar agent-pub-key=${voter}> </agent-avatar>`)}</div></div>
+              <div class="row">Against: ${votesAgainst.length} <div class="row">${votesAgainst.map(voter=>html`<agent-avatar agent-pub-key=${voter}> </agent-avatar>`)}</div></div>
+            </div>`            
+          } else {
+            return html`<div class="section-content">Voting: Disabled</div>`
+          }
+        case "text/markdown":
           if (this.preview) {
             const content = applyApprovedComments(section.content, this.comments)
             return html`<div class="section-content markdown">${unsafeHTML(Marked.parse(content))}</div>`
@@ -140,15 +167,15 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             @click=${(e:any)=>this.handleSelect(e)}
             ><pre class="source">${this.highlitContent(this.highlitRange, section.content)}</pre></div>`
           }
-      } else {
-          if (this.preview) {
-            const content = applyApprovedComments(section.content, this.comments)
-            return html`<div class="section-content"        
-            ><p>${content}</p></div>`
-          }
+        default:  
+        if (this.preview) {
+          const content = applyApprovedComments(section.content, this.comments)
           return html`<div class="section-content"        
-            @click=${(e:any)=>this.handleSelect(e)}
-          ><p>${this.highlitContent(this.highlitRange,section.content)}</p></div>`
+          ><p>${content}</p></div>`
+        }
+        return html`<div class="section-content"        
+          @click=${(e:any)=>this.handleSelect(e)}
+        ><p>${this.highlitContent(this.highlitRange,section.content)}</p></div>`
       }
     }
     return html`Section Missing`
@@ -191,6 +218,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         this.section.content = JSON.stringify(reqInfo)
       } else {
         switch(this.section.contentType) {
+          case "control/voting":
           case "control/comments":
             valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as Switch
             this.section.content = JSON.stringify({enabled: valElement.selected})

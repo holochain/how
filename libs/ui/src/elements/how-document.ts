@@ -295,18 +295,33 @@ import { HowConfirm } from "./how-confirm";
       this.openCommentFromHilitRange(comment.getSection()!,hilightRange)
     }
 
-    handleConfirm(confirmation: CommentAction) {
-      switch(confirmation.action) {
-        case "delete": this.deleteComment(confirmation.comment); break;
-        case "reject": this.rejectComment(confirmation.comment); break;
-        case "approve": this.approveComment(confirmation.comment); break;
-        case "got-it": this.approveComment(confirmation.comment); break;
-        case "apply": this.applySuggestions();break;
+    async vote(vote: boolean) {
+      const doc : Document = this._documents.value[this.currentDocumentEh]
+      this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: vote?"approve":"reject", markType: MarkTypes.Vote}])
+    } 
+
+    handleConfirm(confirmation: any) {
+      // TODO refactor for different confirmation types, right now  boolean is for votes
+      if (typeof confirmation == "boolean") {
+          this.vote(confirmation)
+      } else {
+        // confirmation is a CommentAction
+        switch(confirmation.action) {
+          case "delete": this.deleteComment(confirmation.comment); break;
+          case "reject": this.rejectComment(confirmation.comment); break;
+          case "approve": this.approveComment(confirmation.comment); break;
+          case "got-it": this.approveComment(confirmation.comment); break;
+          case "apply": this.applySuggestions();break;
+        }
       }
     }
 
     private confirmAction(action: CommentAction) {
       this._confirmElem!.open(`Are you sure you want to ${action.action} this comment?`, action)
+    }
+
+    private confirmVote(vote: boolean) {
+      this._confirmElem!.open(`Please confirm voting to ${vote ? 'approve' : 'reject'} this document?`, vote)
     }
 
     private confirmApply() {
@@ -336,7 +351,6 @@ import { HowConfirm } from "./how-confirm";
       const comments = await this.getCommentDocs(doc)
       for (const section of doc.content) {
         if (comments[section.name]) {
-          console.log("FISH", comments[section.name])
           section.content = applyApprovedComments(section.content,comments[section.name])
         }
       }
@@ -346,11 +360,19 @@ import { HowConfirm } from "./how-confirm";
 
     private canMakeComments(doc:Document, section: Section) : boolean {
       // TODO check that the section can accept comments
-      return !this.readOnly && this.canSeeComments(doc, section) && doc.state == "refine"
+      return !this.readOnly && this.canSeeComments(doc, section) && doc.state == "refine" //TODO the state check should probably come from elsewhere?
     }
 
     private canSeeComments(doc:Document, section: Section) : boolean {
       return doc.enabledControls().includes("comments")
+    }
+
+    private canMakeVote(doc:Document) : boolean {
+      return !this.readOnly && this.canSeeVoting(doc) && doc.state == "align" //TODO the state check should probably come from elsewhere?
+    }
+
+    private canSeeVoting(doc:Document) : boolean {
+      return doc.enabledControls().includes("voting")
     }
 
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
@@ -396,6 +418,7 @@ import { HowConfirm } from "./how-confirm";
       return html`
       <div class="section row">
         <how-section id=${'section-'+index}
+          .document=${doc}
           @selection=${(e:any)=>this.openCommentFromSelection(e.detail)}
           @section-changed=${(e:any) => this.updateSection(e.detail, index)}
           .section=${section} 
@@ -448,6 +471,32 @@ import { HowConfirm } from "./how-confirm";
           `)
         }
         const docStats: DocumentStats = doc.getStats()
+        let affordancesHTML = []
+        if (this.canMakeVote(doc)) {
+          let vote = 0
+          doc.marks.forEach(m => {if (m.markType==MarkTypes.Vote && m.author == this._store.myAgentPubKey) {
+            if (m.mark == "approve") vote += 1
+            if (m.mark == "reject") vote -= 1
+          }})
+
+          affordancesHTML.push(html`
+            <div> My Vote: ${vote >0 ? 'Approve' : vote<0 ? 'Reject' : 'Abstain'}</div>
+            <div class="row">
+            Cast Vote: <svg-button
+                button="like"
+                info="approve"
+                infoPosition="right"
+                .click=${() => this.confirmVote(true)}
+                ></svg-button>
+                <svg-button
+                button="dislike"
+                info="reject"
+                infoPosition="right"
+                .click=${() => this.confirmVote(false)}
+                ></svg-button>
+            </div>
+          `)
+        }
         let tasksHTML = []
         if (docStats.emptySections > 0) {
           tasksHTML.push(html`<div class="task">${docStats.emptySections} sections need editing</div>`)
@@ -458,6 +507,7 @@ import { HowConfirm } from "./how-confirm";
         const canApplySuggestions = !this.readOnly && this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0
         return html`
           <div id="header">
+            ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}
             ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
             ${canApplySuggestions ? html`
               <div><svg-button
