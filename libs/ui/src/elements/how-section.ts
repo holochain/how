@@ -5,8 +5,8 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Document, Comment, CommentStatus, applyApprovedComments, parseCommentControlState, parseVotingControlState, MarkTypes, parseAgentArray } from "../types";
-import { Switch, TextArea, TextField } from "@scoped-elements/material-web";
+import { Section, SectionType, howContext, RequirementInfo, parseRequirementInfo, HilightRange, Document, Comment, CommentStatus, applyApprovedComments, parseCommentControlState, parseVotingControlState, MarkTypes, parseAgentArray, parseApprovalControlState } from "../types";
+import { Select, Switch, TextArea, TextField } from "@scoped-elements/material-web";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
 import { HowSectionDetails } from "./how-section-details";
@@ -90,6 +90,26 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         case "json/agents":
           const agents = parseAgentArray(section)
           return html`Agents: ${this.agentsWidget(id, agents)}`
+        case "control/approval":
+          if (this.document) {
+            const agentsSections = this.document.content.filter(section=>section.contentType==="json/agents")
+            if (agentsSections.length == 0) {
+              return html`There are no agent list sections to select as approvers!`
+            } else {
+              const approvalControl = parseApprovalControlState(section)
+              return html`
+              <div class="row"><span>Approval Enabled:</span> ${this.switchWidget(id, approvalControl.enabled)}</div>
+              <mwc-textfield id=${`threshold-field-${index}`} value=${approvalControl.threshold} minlength="1" maxlength="3" label="Threshold" autoValidate=true required></mwc-textfield>
+              <mwc-select id=${`agent-section-name-field-${index}`} value=${approvalControl.agentsSectionName} @closing=${(e: any) => e.stopPropagation()} label="Agent List Section">
+              ${agentsSections.map(section => 
+                  html`<mwc-list-item value=${section.name}>${section.name}</mwc-list-item>`
+                )
+              }
+              </mwc-select>
+              `
+            }
+          }
+          break;
         case "control/voting":
           const votingControl = parseVotingControlState(section)
           return html`Voting Enabled: ${this.switchWidget(id, votingControl.enabled)}`
@@ -144,6 +164,39 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         case "json/agents":
           const agents = parseAgentArray(section)
           return html`<how-agent-list .agents=${agents}></how-agent-list>`
+        case "control/approval":
+          const approvalControl = parseApprovalControlState(section)
+          let approversTotal = 0
+          let approvers:Array<AgentPubKeyB64> = []
+          if (approvalControl.enabled){
+            const approversSection = this.document!.getSection(approvalControl.agentsSectionName)
+            if (approversSection) {
+              const approval:Dictionary<number> =  {}
+              approvers = parseAgentArray(approversSection)
+              approversTotal = approvers.length
+              approvers.forEach(agent=>approval[agent] = 0)
+              this.document!.marks.forEach(m => {if (m.markType==MarkTypes.Approval) {
+                if (m.mark == "approve") approval[m.author] += 1
+                if (m.mark == "retract") approval[m.author] -= 1
+              }})
+              Object.entries(approval).forEach(([agent, value])=>{
+                if (value<=0) {
+                  const index = approvers.indexOf(agent);
+                  if (index > -1) { 
+                    approvers.splice(index, 1); 
+                  }
+                }
+              })
+            }
+          }
+          return html`
+            <div>Approval Enabled: ${approvalControl.enabled ? "Enabled" : "Disabled"}</div>
+            <div>Approval Threshold Required: ${approvalControl.threshold}%</div>
+            ${approvalControl.enabled ? html`Approvals: ${approvers.length}/${approversTotal} (${approvers.length/approversTotal * 100}%)
+              <how-agent-list .agents=${approvers}></how-agent-list>
+            ` : ''}
+            <div>Agent List Section: ${approvalControl.agentsSectionName}</div>
+          `
         case "control/comments":
           const commentsControl = parseCommentControlState(section)
           return commentsControl.enabled ? 
@@ -235,6 +288,16 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as HowEditAgentList
             this.section.content = JSON.stringify(valElement.agents)
             break;
+          case "control/approval":
+            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as Switch
+            const thresholdField = this.shadowRoot!.getElementById(`threshold-field-${this.index}`) as TextField
+            const agentsSectionNameField = this.shadowRoot!.getElementById(`agent-section-name-field-${this.index}`) as Select
+            this.section.content = JSON.stringify({
+              threshold: parseInt(thresholdField.value),
+              agentsSectionName: agentsSectionNameField.value,
+              enabled: valElement.selected,
+            })
+            break
           case "control/voting":
           case "control/comments":
             valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as Switch

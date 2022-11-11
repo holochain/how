@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, parseApprovalControlState, parseAgentArray} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -295,18 +295,26 @@ import { HowConfirm } from "./how-confirm";
       this.openCommentFromHilitRange(comment.getSection()!,hilightRange)
     }
 
-    async vote(vote: boolean) {
+    async vote(action: VoteAction) {
+      console.log("vote")
+
       const doc : Document = this._documents.value[this.currentDocumentEh]
-      this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: vote?"approve":"reject", markType: MarkTypes.Vote}])
+      this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: action.vote?"approve":"reject", markType: MarkTypes.Vote}])
+    } 
+    async approve(action: ApprovalAction) {
+      console.log("approve")
+      const doc : Document = this._documents.value[this.currentDocumentEh]
+      this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: action.approval?"approve":"retract", markType: MarkTypes.Approval}])
     } 
 
     handleConfirm(confirmation: any) {
-      // TODO refactor for different confirmation types, right now  boolean is for votes
-      if (typeof confirmation == "boolean") {
-          this.vote(confirmation)
-      } else {
-        // confirmation is a CommentAction
-        switch(confirmation.action) {
+      switch((confirmation as DocumentAction).actionType) {
+        case "VoteAction":
+          this.vote(confirmation); break;
+        case "ApprovalAction":
+          this.approve(confirmation); break;
+        case "CommentAction":
+         switch(confirmation.action) {
           case "delete": this.deleteComment(confirmation.comment); break;
           case "reject": this.rejectComment(confirmation.comment); break;
           case "approve": this.approveComment(confirmation.comment); break;
@@ -321,23 +329,27 @@ import { HowConfirm } from "./how-confirm";
     }
 
     private confirmVote(vote: boolean) {
-      this._confirmElem!.open(`Please confirm voting to ${vote ? 'approve' : 'reject'} this document?`, vote)
+      this._confirmElem!.open(`Please confirm voting to ${vote ? 'approve' : 'reject'} this document?`, new VoteAction(vote))
+    }
+
+    private confirmApproval(approval: boolean) {
+      this._confirmElem!.open(`Please confirm ${approval ? 'approving' : 'retracting approval for'} this document?`, new ApprovalAction(approval))
     }
 
     private confirmApply() {
       if (this.readOnly) {
         return
       }
-      this._confirmElem!.open(`Are you sure you want to apply all suggestions to the document?`, {action:"apply",comment:undefined})
+      this._confirmElem!.open(`Are you sure you want to apply all suggestions to the document?`, new CommentAction("apply", undefined))
     }
 
-    handleCommentAction(action:CommentAction) {
+    handleCommentAction(action: CommentAction) {
       if (this.readOnly) {
         return
       }
       switch (action.action) {
-        case 'resolve': this.resolveComments(action.comment); break;
-        case 'modify' : this.modifyComment(action.comment); break;
+        case 'resolve': this.resolveComments(action.comment!); break;
+        case 'modify' : this.modifyComment(action.comment!); break;
         default:
           this.confirmAction(action)
       }
@@ -373,6 +385,27 @@ import { HowConfirm } from "./how-confirm";
 
     private canSeeVoting(doc:Document) : boolean {
       return doc.enabledControls().includes("voting")
+    }
+
+    private canMakeApproval(doc:Document) : boolean {
+      if (!this.readOnly) {
+        const controls = doc.content.filter((section) => section.contentType == "control/approval")
+        for (const section of controls) {
+          const approvalControl = parseApprovalControlState(section)
+          const approversSection = doc.getSection(approvalControl.agentsSectionName)
+          if (approversSection) {
+            const approvers = parseAgentArray(approversSection)
+            if (approvers.includes(this._store.myAgentPubKey)) {
+              return true
+            }
+          }
+        }
+      }
+      return false
+    }
+
+    private canSeeApprovals(doc:Document) : boolean {
+      return doc.enabledControls().includes("approval")
     }
 
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
@@ -494,6 +527,32 @@ import { HowConfirm } from "./how-confirm";
                 infoPosition="right"
                 .click=${() => this.confirmVote(false)}
                 ></svg-button>
+            </div>
+          `)
+        }
+
+        if (this.canMakeApproval(doc)) {
+          let approval = 0
+
+          doc.marks.forEach(m => {if (m.markType==MarkTypes.Approval && m.author == this._store.myAgentPubKey) {
+            if (m.mark == "approve") approval += 1
+            if (m.mark == "retract") approval -= 1
+          }})
+          affordancesHTML.push(html`
+            <div> My approval: ${approval >0 ? 'Given' : 'Not given'}</div>
+            <div class="row">
+              ${approval <= 0 ? html`<svg-button
+                button="like"
+                info="approve"
+                infoPosition="right"
+                .click=${() => this.confirmApproval(true)}
+                ></svg-button>` :html `
+                <svg-button
+                button="dislike"
+                info="retract"
+                infoPosition="right"
+                .click=${() => this.confirmApproval(false)}
+                ></svg-button>`}
             </div>
           `)
         }

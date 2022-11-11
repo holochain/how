@@ -4,7 +4,7 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { CommentStatus, HilightRange, howContext, Section, Comment } from "../types";
+import { CommentStatus, HilightRange, howContext, Section, Comment, CommentAction } from "../types";
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { HowStore } from "../how.store";
 
@@ -45,7 +45,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
   //   this.dispatchEvent(new CustomEvent('edit', { detail: this.comment, bubbles: true, composed: true }))
   // }
   dispatch (action :string) {
-    this.dispatchEvent(new CustomEvent('action', { detail: {comment: this.comment, action}, bubbles: true, composed: true }))
+    this.dispatchEvent(new CustomEvent('action', { detail: new CommentAction(action, this.comment), bubbles: true, composed: true }))
   }
 
   sectionHTML(header:string, content: string, pre:boolean = false) : TemplateResult {

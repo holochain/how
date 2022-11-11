@@ -355,6 +355,19 @@ export const parseVotingControlState =  (section: Section) : VotingControlState 
   return JSON.parse(section.content)
 } 
 
+export type ApprovalControlState = {
+  enabled: boolean,
+  threshold: number,
+  agentsSectionName: string,
+}
+
+export const parseApprovalControlState =  (section: Section) : ApprovalControlState => {
+  if (section.content == "") {
+    return {enabled: false, threshold: 100, agentsSectionName:""}
+  }
+  return JSON.parse(section.content)
+} 
+
 export type HilightRange = {
   sectionName: string,
   startOffset: number,
@@ -378,6 +391,7 @@ export enum CommentStatus {
 export enum MarkTypes {
   CommentStatus = 1,
   Vote = 2,
+  Approval = 3,
 }
 
 export type Offsets = {
@@ -388,9 +402,35 @@ export const offsetsOverlap = (x:Offsets,y:Offsets) : boolean => {
   return Math.max(x.startOffset,y.startOffset) <= Math.min(x.endOffset,y.endOffset)
 }
 
-export type CommentAction = {
-  action: string,
-  comment: Comment,
+export interface DocumentAction {
+  actionType: string
+}
+
+export class CommentAction implements DocumentAction {
+  public actionType: string
+  constructor(
+    public action: string,
+    public comment: Comment | undefined
+  ) {
+    this.actionType = "CommentAction"
+  }
+}
+
+export class VoteAction implements DocumentAction {
+  public actionType: string
+  constructor(
+    public vote: boolean
+  ) {
+    this.actionType = "VoteAction"
+  }
+}
+export class ApprovalAction implements DocumentAction {
+  public actionType: string
+  constructor(
+    public approval: boolean
+  ) {
+    this.actionType = "ApprovalAction"
+  }
 }
 
 export class Comment {
