@@ -6,7 +6,7 @@ import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, Dictionary} from "@holochain-open-dev/core-types";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, parseApprovalControlState, parseAgentArray} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, parseAgentArray} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -23,6 +23,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
 import { HowCommentBox } from "./how-comment-box";
 import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
+import { Control } from "../controls";
 
 /**
  * @element how-document
@@ -296,13 +297,10 @@ import { HowConfirm } from "./how-confirm";
     }
 
     async vote(action: VoteAction) {
-      console.log("vote")
-
       const doc : Document = this._documents.value[this.currentDocumentEh]
       this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: action.vote?"approve":"reject", markType: MarkTypes.Vote}])
     } 
     async approve(action: ApprovalAction) {
-      console.log("approve")
       const doc : Document = this._documents.value[this.currentDocumentEh]
       this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: action.approval?"approve":"retract", markType: MarkTypes.Approval}])
     } 
@@ -326,14 +324,6 @@ import { HowConfirm } from "./how-confirm";
 
     private confirmAction(action: CommentAction) {
       this._confirmElem!.open(`Are you sure you want to ${action.action} this comment?`, action)
-    }
-
-    private confirmVote(vote: boolean) {
-      this._confirmElem!.open(`Please confirm voting to ${vote ? 'approve' : 'reject'} this document?`, new VoteAction(vote))
-    }
-
-    private confirmApproval(approval: boolean) {
-      this._confirmElem!.open(`Please confirm ${approval ? 'approving' : 'retracting approval for'} this document?`, new ApprovalAction(approval))
     }
 
     private confirmApply() {
@@ -376,36 +366,10 @@ import { HowConfirm } from "./how-confirm";
     }
 
     private canSeeComments(doc:Document, section: Section) : boolean {
-      return doc.enabledControls().includes("comments")
-    }
-
-    private canMakeVote(doc:Document) : boolean {
-      return !this.readOnly && this.canSeeVoting(doc) && doc.state == "align" //TODO the state check should probably come from elsewhere?
-    }
-
-    private canSeeVoting(doc:Document) : boolean {
-      return doc.enabledControls().includes("voting")
-    }
-
-    private canMakeApproval(doc:Document) : boolean {
-      if (!this.readOnly) {
-        const controls = doc.content.filter((section) => section.contentType == "control/approval")
-        for (const section of controls) {
-          const approvalControl = parseApprovalControlState(section)
-          const approversSection = doc.getSection(approvalControl.agentsSectionName)
-          if (approversSection) {
-            const approvers = parseAgentArray(approversSection)
-            if (approvers.includes(this._store.myAgentPubKey)) {
-              return true
-            }
-          }
-        }
+      for (const control of this.controls) {
+        if (control.contentType() == "control/comments" && control.state.enabled) return true
       }
       return false
-    }
-
-    private canSeeApprovals(doc:Document) : boolean {
-      return doc.enabledControls().includes("approval")
     }
 
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
@@ -465,7 +429,7 @@ import { HowConfirm } from "./how-confirm";
       </div>
       `
     }
-
+    controls: Array<Control> = []
     render() {
         if (!this.currentDocumentEh) {
           return;
@@ -493,6 +457,9 @@ import { HowConfirm } from "./how-confirm";
         const comments = this.getCommentDocs(doc)
 
         const sections = doc.content.filter(section => section.sectionType != SectionType.Requirement)
+
+        this.controls = doc.controls()
+
         const sectionsHTML = sections.map((section, index) => 
           this.sectionRow(doc, section, index, comments[section.name]))
         const requirements =  doc.content.filter(section => section.sectionType == SectionType.Requirement)
@@ -504,57 +471,13 @@ import { HowConfirm } from "./how-confirm";
           `)
         }
         const docStats: DocumentStats = doc.getStats()
-        let affordancesHTML = []
-        if (this.canMakeVote(doc)) {
-          let vote = 0
-          doc.marks.forEach(m => {if (m.markType==MarkTypes.Vote && m.author == this._store.myAgentPubKey) {
-            if (m.mark == "approve") vote += 1
-            if (m.mark == "reject") vote -= 1
-          }})
-
-          affordancesHTML.push(html`
-            <div> My Vote: ${vote >0 ? 'Approve' : vote<0 ? 'Reject' : 'Abstain'}</div>
-            <div class="row">
-            Cast Vote: <svg-button
-                button="like"
-                info="approve"
-                infoPosition="right"
-                .click=${() => this.confirmVote(true)}
-                ></svg-button>
-                <svg-button
-                button="dislike"
-                info="reject"
-                infoPosition="right"
-                .click=${() => this.confirmVote(false)}
-                ></svg-button>
-            </div>
-          `)
-        }
-
-        if (this.canMakeApproval(doc)) {
-          let approval = 0
-
-          doc.marks.forEach(m => {if (m.markType==MarkTypes.Approval && m.author == this._store.myAgentPubKey) {
-            if (m.mark == "approve") approval += 1
-            if (m.mark == "retract") approval -= 1
-          }})
-          affordancesHTML.push(html`
-            <div> My approval: ${approval >0 ? 'Given' : 'Not given'}</div>
-            <div class="row">
-              ${approval <= 0 ? html`<svg-button
-                button="like"
-                info="approve"
-                infoPosition="right"
-                .click=${() => this.confirmApproval(true)}
-                ></svg-button>` :html `
-                <svg-button
-                button="dislike"
-                info="retract"
-                infoPosition="right"
-                .click=${() => this.confirmApproval(false)}
-                ></svg-button>`}
-            </div>
-          `)
+        let affordancesHTML: Array<TemplateResult> = []
+        if (!this.readOnly) {
+          this.controls.forEach(control=>{
+            if (control.canDo(this._store.myAgentPubKey, doc)) {
+              affordancesHTML = affordancesHTML.concat(control.doWidget(this._store.myAgentPubKey, doc, this._confirmElem!))
+            }
+          })
         }
         let tasksHTML = []
         if (docStats.emptySections > 0) {

@@ -4,6 +4,7 @@ import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 import { EntryRecord, serializeHash } from "@holochain-open-dev/utils";
 import { Action, ActionHash, ActionHashed, EntryHash, Record, Timestamp } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
+import { ApprovalControl, CommentControl, Control, sectionControl, VotingControl } from "./controls";
 import { HowStore } from "./how.store";
 
 export const howContext = createContext<HowStore>('how/service');
@@ -195,21 +196,17 @@ export class Document {
   public getSectionsByType(sectionType: SectionType) : Array<Section> {
     return this.content.filter((section) => section.sectionType == sectionType)
   }
-
-  // return a list of controls enabled by state
-  public enabledControls() : Array<string> {
-    const controls = this.content.filter((section) => section.contentType.startsWith("control/"))
-    const enabled: Array<string> = []
-    controls.forEach((section)=>{
-      try {
-        const control = JSON.parse(section.content)
-        if (control.enabled) {
-          enabled.push(section.contentType.split('/')[1])
-        }
-      } catch(e) {}
-    }
-    )
-    return enabled
+  
+  // return the various controls in the document
+  public controls() : Array<Control> {
+    const controls: Array<Control> = []
+    this.content.forEach((section) => {
+      const control = sectionControl(section)
+      if (control) {
+        controls.push(control)
+      }
+    })
+    return controls
   }
 
   public getStats() : DocumentStats {
@@ -330,42 +327,6 @@ export const parseAgentArray =  (section: Section) : Array<AgentPubKeyB64> => {
   } catch (e) {
     return []
   }
-} 
-
-// TODO refactor control states into interface and their own types
-export type CommentControlState = {
-  enabled: boolean,
-}
-
-export const parseCommentControlState =  (section: Section) : CommentControlState => {
-  if (section.content == "") {
-    return {enabled: false}
-  }
-  return JSON.parse(section.content)
-} 
-
-export type VotingControlState = {
-  enabled: boolean,
-}
-
-export const parseVotingControlState =  (section: Section) : VotingControlState => {
-  if (section.content == "") {
-    return {enabled: false}
-  }
-  return JSON.parse(section.content)
-} 
-
-export type ApprovalControlState = {
-  enabled: boolean,
-  threshold: number,
-  agentsSectionName: string,
-}
-
-export const parseApprovalControlState =  (section: Section) : ApprovalControlState => {
-  if (section.content == "") {
-    return {enabled: false, threshold: 100, agentsSectionName:""}
-  }
-  return JSON.parse(section.content)
 } 
 
 export type HilightRange = {

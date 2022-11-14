@@ -233,7 +233,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this._treeType = this._tree.treeType
   }
   async handleDocumentUpdated(e:any) {
-    console.log("calling handDocUpdate")
     await this._store.pullDocuments(this.getCurrentPath())
     await this._store.pullTree()
 
@@ -241,7 +240,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this._documentReadOnly = false
   }
   async handleUnitUpdated(e:any) {
-    console.log("calling handDocUnitUpdated")
     await this._store.pullTree()
   }
   selectDocumentVersion(hash: EntryHashB64, readOnly: boolean) {
