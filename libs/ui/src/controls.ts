@@ -12,6 +12,18 @@ export interface ControlState {
     enabled: boolean
 }
 export class Control {
+    static newFromSection(section: Section) {
+        switch (section.contentType) {
+          case "control/approval":
+            return new ApprovalControl(section)
+          case "control/voting":
+            return new VotingControl(section)
+          case "control/comments":
+            return new CommentControl(section)
+        }
+        return undefined
+    }
+
     public state: ControlState
     constructor(section: Section) {
         if (section.content) {
@@ -19,6 +31,7 @@ export class Control {
                 this.state = JSON.parse(section.content)
                 return
             } catch(e) {
+                console.log("Error while parsing control from content", e ,section.content)
             }
         }
         this.state = this.defaultState()
@@ -47,18 +60,6 @@ export class Control {
     affordances(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
         return []
     }
-}
-
-export const sectionControl = (section: Section) => {
-    switch (section.contentType) {
-      case "control/approval":
-        return new ApprovalControl(section)
-      case "control/voting":
-        return new VotingControl(section)
-      case "control/comments":
-        return new CommentControl(section)
-    }
-    return undefined
 }
 
 export class CommentControl extends Control {

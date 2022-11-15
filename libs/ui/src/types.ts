@@ -4,7 +4,7 @@ import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 import { EntryRecord, serializeHash } from "@holochain-open-dev/utils";
 import { Action, ActionHash, ActionHashed, EntryHash, Record, Timestamp } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
-import { ApprovalControl, CommentControl, Control, sectionControl, VotingControl } from "./controls";
+import { Control } from "./controls";
 import { HowStore } from "./how.store";
 
 export const howContext = createContext<HowStore>('how/service');
@@ -201,7 +201,7 @@ export class Document {
   public controls() : Array<Control> {
     const controls: Array<Control> = []
     this.content.forEach((section) => {
-      const control = sectionControl(section)
+      const control = Control.newFromSection(section)
       if (control) {
         controls.push(control)
       }

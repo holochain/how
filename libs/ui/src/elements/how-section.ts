@@ -15,7 +15,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
 import { AgentPubKeyB64, Dictionary } from "@holochain-open-dev/core-types";
 import { HowEditAgentList } from "./how-edit-agent-list";
 import { HowAgentList } from "./how-agent-list";
-import { ApprovalControl, CommentControl, sectionControl, VotingControl } from "../controls";
+import { ApprovalControl, CommentControl, Control, VotingControl } from "../controls";
 
 
 const MAX_LINES= 100
@@ -84,19 +84,16 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           const reqInfo = parseRequirementInfo(section)
           return this.inputWidget(id, reqInfo.description)
       }
+      if (this.section.contentType.startsWith("control/")) {
+        const control = Control.newFromSection(section)
+        if (control) {
+          return control.sectionEditWidget(index, this.document!)
+        }
+      }
       switch (section.contentType) {
         case "json/agents":
           const agents = parseAgentArray(section)
           return html`Agents: ${this.agentsWidget(id, agents)}`
-        case "control/approval":
-          const approvalControl = new ApprovalControl(section)
-          return approvalControl.sectionEditWidget(index, this.document!)
-        case "control/voting":
-          const votingControl = new VotingControl(section)
-          return votingControl.sectionEditWidget(index, this.document!)
-        case "control/comments":
-          const commentsControl = new CommentControl(section)
-          return commentsControl.sectionEditWidget(index, this.document!)
         case "text/plain":
           return this.inputWidget(id, section.content)
         case "text/plain:long":
@@ -141,19 +138,16 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
             <p>Section Description: ${description}</p>
           </div>`
       }
+      if (this.section.contentType.startsWith("control/")) {
+        const control = Control.newFromSection(section)
+        if (control) {
+          return control.sectionViewWidget(this.document!)
+        }
+      }
       switch (section.contentType) {
         case "json/agents":
           const agents = parseAgentArray(section)
           return html`<how-agent-list .agents=${agents}></how-agent-list>`
-        case "control/approval":
-          const approvalControl = new ApprovalControl(section)
-          return approvalControl.sectionViewWidget( this.document!)
-        case "control/comments":
-          const commentControl = new CommentControl(section)
-          return commentControl.sectionViewWidget( this.document!)
-        case "control/voting":
-          const votingControl = new VotingControl(section)
-          return votingControl.sectionViewWidget(this.document!)
         case "text/markdown":
           if (this.preview) {
             const content = applyApprovedComments(section.content, this.comments)
@@ -213,32 +207,30 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
         reqInfo.description = valElement.value
         this.section.content = JSON.stringify(reqInfo)
       } else {
-        switch(this.section.contentType) {
-          case "json/agents":
-            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as HowEditAgentList
-            this.section.content = JSON.stringify(valElement.agents)
-            break;
-          case "control/approval":
-          case "control/voting":
-          case "control/comments":
-            const control = sectionControl(this.section)
-            if (control) {
-              const state = control.getEditWidgetValue(this.shadowRoot!, this.index)
-              console.log("SAVE", state)
-              this.section.content = JSON.stringify(state)
-            }
-            break
-          case "text/plain":
-            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextField
-            this.section.content = valElement.value
-            break;
-          case "text/plain:long":
-          case "text/markdown":
-            valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextArea
-            this.section.content = valElement.value
-            break;
-          default:
-            console.log("unknown content type:", this.section.contentType)
+        if (this.section.contentType.startsWith("control/")) {
+          const control = Control.newFromSection(this.section)
+          if (control) {
+            const state = control.getEditWidgetValue(this.shadowRoot!, this.index)
+            this.section.content = JSON.stringify(state)
+          }
+        } else {
+          switch(this.section.contentType) {
+            case "json/agents":
+              valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as HowEditAgentList
+              this.section.content = JSON.stringify(valElement.agents)
+              break;
+            case "text/plain":
+              valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextField
+              this.section.content = valElement.value
+              break;
+            case "text/plain:long":
+            case "text/markdown":
+              valElement = this.shadowRoot!.getElementById(`section-${this.index}`) as TextArea
+              this.section.content = valElement.value
+              break;
+            default:
+              console.log("unknown content type:", this.section.contentType)
+          }
         }
       }
       this.dispatchEvent(new CustomEvent('section-changed', { detail: this.section, bubbles: true, composed: true }));
