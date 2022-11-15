@@ -44,7 +44,7 @@ export class Control {
     canDo(agent: AgentPubKeyB64, document: Document): boolean {
         return false
     }
-    doWidget(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
+    affordances(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
         return []
     }
 }
@@ -75,7 +75,7 @@ export class CommentControl extends Control {
     canDo(agent: AgentPubKeyB64, document: Document): boolean {
         return document.state === "refine" && this.canSee(document)
     }
-    doWidget(agent: AgentPubKeyB64, document: Document, confirmFn: any) : TemplateResult|Array<TemplateResult> {
+    affordances(agent: AgentPubKeyB64, document: Document, confirmFn: any) : TemplateResult|Array<TemplateResult> {
         return []
     }
 }
@@ -110,30 +110,34 @@ export class VotingControl extends Control {
     canDo(agent: AgentPubKeyB64, document: Document): boolean {
         return document.state === "align" && this.canSee(document)
     }
-    doWidget(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
-        let vote = 0
-        document.marks.forEach(m => {if (m.markType==MarkTypes.Vote && m.author == agent) {
-          if (m.mark == "approve") vote += 1
-          if (m.mark == "reject") vote -= 1
-        }})
-
-        return html`
-          <div> My Vote: ${vote >0 ? 'Approve' : vote<0 ? 'Reject' : 'Abstain'}</div>
-          <div class="row">
-          Cast Vote: <svg-button
-              button="like"
-              info="approve"
-              infoPosition="right"
-              .click=${() => confirmElem.open(`Please confirm voting to approve this document?`, new VoteAction(true))}
-              ></svg-button>
-              <svg-button
-              button="dislike"
-              info="reject"
-              infoPosition="right"
-              .click=${() => confirmElem.open(`Please confirm voting to reject this document?`, new VoteAction(false))}
-              ></svg-button>
-          </div>
-        `
+    affordances(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
+        if (this.canDo(agent, document)) {
+            let vote = 0
+            document.marks.forEach(m => {if (m.markType==MarkTypes.Vote && m.author == agent) {
+              if (m.mark == "approve") vote += 1
+              if (m.mark == "reject") vote -= 1
+            }})
+    
+            return html`
+              <div> My Vote: ${vote >0 ? 'Approve' : vote<0 ? 'Reject' : 'Abstain'}</div>
+              <div class="row">
+              Cast Vote: <svg-button
+                  button="like"
+                  info="approve"
+                  infoPosition="right"
+                  .click=${() => confirmElem.open(`Please confirm voting to approve this document?`, new VoteAction(true))}
+                  ></svg-button>
+                  <svg-button
+                  button="dislike"
+                  info="reject"
+                  infoPosition="right"
+                  .click=${() => confirmElem.open(`Please confirm voting to reject this document?`, new VoteAction(false))}
+                  ></svg-button>
+              </div>
+            `
+        }
+        return []
+        
   }
 }
 
@@ -224,29 +228,32 @@ export class ApprovalControl extends Control {
         }
         return false
     }
-    doWidget(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
-        let approval = 0
-        document.marks.forEach(m => {if (m.markType==MarkTypes.Approval && m.author == agent) {
-          if (m.mark == "approve") approval += 1
-          if (m.mark == "retract") approval -= 1
-        }})
-        return html`
-          <div> My approval: ${approval >0 ? 'Given' : 'Not given'}</div>
-          <div class="row">
-            ${approval <= 0 ? html`<svg-button
-              button="like"
-              info="approve"
-              infoPosition="right"
-              .click=${() => confirmElem.open(`Please approving this document?`, new ApprovalAction(true))}
-              ></svg-button>` :html `
-              <svg-button
-              button="dislike"
-              info="retract"
-              infoPosition="right"
-              .click=${() => confirmElem.open(`Please retracting approval for this document?`, new ApprovalAction(false))}
-              ></svg-button>`}
-          </div>
-        `
+    affordances(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
+        if (this.canDo(agent, document)) {
+            let approval = 0
+            document.marks.forEach(m => {if (m.markType==MarkTypes.Approval && m.author == agent) {
+            if (m.mark == "approve") approval += 1
+            if (m.mark == "retract") approval -= 1
+            }})
+            return html`
+            <div> My approval: ${approval >0 ? 'Given' : 'Not given'}</div>
+            <div class="row">
+                ${approval <= 0 ? html`<svg-button
+                button="like"
+                info="approve"
+                infoPosition="right"
+                .click=${() => confirmElem.open(`Please approving this document?`, new ApprovalAction(true))}
+                ></svg-button>` :html `
+                <svg-button
+                button="dislike"
+                info="retract"
+                infoPosition="right"
+                .click=${() => confirmElem.open(`Please retracting approval for this document?`, new ApprovalAction(false))}
+                ></svg-button>`}
+            </div>
+            `
+        }
+        return []
   }
 }
 

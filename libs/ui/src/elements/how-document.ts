@@ -474,10 +474,21 @@ import { Control } from "../controls";
         let affordancesHTML: Array<TemplateResult> = []
         if (!this.readOnly) {
           this.controls.forEach(control=>{
-            if (control.canDo(this._store.myAgentPubKey, doc)) {
-              affordancesHTML = affordancesHTML.concat(control.doWidget(this._store.myAgentPubKey, doc, this._confirmElem!))
-            }
+            affordancesHTML = affordancesHTML.concat(control.affordances(this._store.myAgentPubKey, doc, this._confirmElem!))
           })
+
+          // TODO refactor into Controls.
+          const canApplySuggestions = this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0
+          if (canApplySuggestions) {
+            affordancesHTML.push(html`
+                <div><svg-button
+                  button="plus"
+                  info="apply suggestions"
+                  infoPosition="right"
+                  .click=${() => this.confirmApply()}
+                  ></svg-button>
+                </div>`)
+          }
         }
         let tasksHTML = []
         if (docStats.emptySections > 0) {
@@ -486,25 +497,15 @@ import { Control } from "../controls";
         if (this.commentStats && this.commentStats.pending > 0) {
           tasksHTML.push(html`<div class="task">${this.commentStats.pending} comments need addressing</div>`)
         }
-        const canApplySuggestions = !this.readOnly && this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0
         return html`
           <div id="header">
-            ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}
             ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
-            ${canApplySuggestions ? html`
-              <div><svg-button
-                button="plus"
-                info="apply suggestions"
-                infoPosition="right"
-                .click=${() => this.confirmApply()}
-                ></svg-button>
-              </div>
-            `:""}
+            ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}
             <div id="editors" class="row">
               Editors: <how-agent-list layout="row" .agents=${doc.editors}></how-agent-list>
             </div>
           </div>
-          <div id="sections" }>
+          <div id="sections" >
             ${sectionsHTML}
             ${requirementsHTML}
             ${addSectionHTML}
