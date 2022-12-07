@@ -47,7 +47,7 @@ static get styles() {
     return [
       sharedStyles,
       css`
-         .agent-list {
+         .edit-agent-list {
 
          }
       `,

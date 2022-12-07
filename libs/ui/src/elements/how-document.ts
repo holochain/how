@@ -23,7 +23,7 @@ import { serializeHash } from "@holochain-open-dev/utils";
 import { HowCommentBox } from "./how-comment-box";
 import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
-import { Control } from "../controls";
+import { CommentControl, Control } from "../controls";
 
 /**
  * @element how-document
@@ -477,9 +477,7 @@ import { Control } from "../controls";
             affordancesHTML = affordancesHTML.concat(control.affordances(this._store.myAgentPubKey, doc, this._confirmElem!))
           })
 
-          // TODO refactor into Controls.
-          const canApplySuggestions = this.commentStats && this.commentStats.pending == 0 && this.commentStats.suggestions > 0
-          if (canApplySuggestions) {
+          if (CommentControl.canApplySuggestions(this.commentStats)) {
             affordancesHTML.push(html`
                 <div><svg-button
                   button="plus"
@@ -490,14 +488,17 @@ import { Control } from "../controls";
                 </div>`)
           }
         }
-        let tasksHTML = []
+        let tasksHTML: Array<TemplateResult> = []
         if (docStats.emptySections > 0) {
           tasksHTML.push(html`<div class="task">${docStats.emptySections} sections need editing</div>`)
         }
         if (this.commentStats && this.commentStats.pending > 0) {
           tasksHTML.push(html`<div class="task">${this.commentStats.pending} comments need addressing</div>`)
         }
-        return html`
+        this.controls.forEach(control=>{
+          tasksHTML = tasksHTML.concat(control.tasks(this._store.myAgentPubKey, doc))
+        })
+      return html`
           <div id="header">
             ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
             ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}

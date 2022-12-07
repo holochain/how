@@ -2,7 +2,7 @@ import { AgentPubKeyB64, Dictionary } from "@holochain-open-dev/core-types"
 import { Select, Switch, TextField } from "@scoped-elements/material-web"
 import { html, TemplateResult } from "lit"
 import { HowConfirm } from "./elements/how-confirm"
-import { Section, Document, parseAgentArray, MarkTypes, VoteAction, ApprovalAction } from "./types"
+import { Section, Document, parseAgentArray, MarkTypes, VoteAction, ApprovalAction, CommentStats } from "./types"
 
 const switchWidget = (id: string, on: boolean) : TemplateResult => {
     return on ? html`<mwc-switch id=${id} selected></mwc-switch>` : html`<mwc-switch id=${id} ></mwc-switch>`
@@ -60,9 +60,18 @@ export class Control {
     affordances(agent: AgentPubKeyB64, document: Document, confirmElem: HowConfirm) : TemplateResult|Array<TemplateResult> {
         return []
     }
+    tasks(agent: AgentPubKeyB64, document: Document) : TemplateResult|Array<TemplateResult> {
+        return []
+    }
 }
 
 export class CommentControl extends Control {
+    static canApplySuggestions(commentStats: CommentStats|undefined) : boolean {
+        if (commentStats) {
+            return commentStats.pending == 0 && commentStats.suggestions > 0
+        }
+        return false
+    }
     contentType(): String {return "control/comments"}
     sectionViewWidget(document: Document) : TemplateResult|Array<TemplateResult> {
         return this.state.enabled ? 
@@ -80,25 +89,36 @@ export class CommentControl extends Control {
         return []
     }
 }
+
+export type VotingStats = {
+    votesFor: Array<AgentPubKeyB64>,
+    votesAgainst: Array<AgentPubKeyB64>,
+}
 export class VotingControl extends Control {
     contentType(): String {return "control/voting"}
+    stats(document: Document): VotingStats {
+        const stats: VotingStats = {
+            votesFor: [],
+            votesAgainst: []
+        }
+        let votes : Dictionary<number> = {}
+        document.marks.forEach(m => {if (m.markType==MarkTypes.Vote) {
+          if (votes[m.author] == undefined) {
+            votes[m.author] = 0
+          }
+          if (m.mark == "approve") votes[m.author] += 1
+          if (m.mark == "reject") votes[m.author] -= 1
+        }})
+        Object.entries(votes).forEach(([voter,vote]) => {if (vote>0) stats.votesFor.push(voter); if (vote<0) stats.votesAgainst.push(voter)})
+        return stats
+    }
     sectionViewWidget(document: Document) : TemplateResult|Array<TemplateResult> {
         if (this.state.enabled) {
-            let votes : Dictionary<number> = {}
-            document.marks.forEach(m => {if (m.markType==MarkTypes.Vote) {
-              if (votes[m.author] == undefined) {
-                votes[m.author] = 0
-              }
-              if (m.mark == "approve") votes[m.author] += 1
-              if (m.mark == "reject") votes[m.author] -= 1
-            }})
-            let votesFor: Array<AgentPubKeyB64> = []
-            let votesAgainst: Array<AgentPubKeyB64> = []
-            Object.entries(votes).forEach(([voter,vote]) => {if (vote>0) votesFor.push(voter); if (vote<0) votesAgainst.push(voter)})
+            const stats: VotingStats = this.stats(document)
             return html`<div class="section-content">
               <div>Voting: Enabled</div>
-              <div class="row">For: ${votesFor.length} <div class="row">${votesFor.map(voter=>html`<agent-avatar agent-pub-key=${voter}> </agent-avatar>`)}</div></div>
-              <div class="row">Against: ${votesAgainst.length} <div class="row">${votesAgainst.map(voter=>html`<agent-avatar agent-pub-key=${voter}> </agent-avatar>`)}</div></div>
+              <div class="row">For: ${stats.votesFor.length} <div class="row">${stats.votesFor.map(voter=>html`<agent-avatar agent-pub-key=${voter}> </agent-avatar>`)}</div></div>
+              <div class="row">Against: ${stats.votesAgainst.length} <div class="row">${stats.votesAgainst.map(voter=>html`<agent-avatar agent-pub-key=${voter}> </agent-avatar>`)}</div></div>
             </div>`            
         } else {
         return html`<div class="section-content">Voting: Disabled</div>`
@@ -147,6 +167,11 @@ export interface ApprovalControlState extends ControlState {
     agentsSectionName: string
 }
 
+export type ApprovalStats = {
+    approversTotal: number,
+    approvedBy: Array<AgentPubKeyB64>,
+}
+
 export class ApprovalControl extends Control {
     // @ts-ignore
     public state: ApprovalControlState
@@ -157,7 +182,11 @@ export class ApprovalControl extends Control {
         return {enabled: false, threshold: 100, agentsSectionName:""}
     }
     contentType(): String {return "control/approval"}
-    sectionViewWidget(document: Document) : TemplateResult|Array<TemplateResult> {
+    stats(document: Document): ApprovalStats {
+        const approvalStats : ApprovalStats = {
+            approversTotal: 0,
+            approvedBy: []
+        }
         let approversTotal = 0
         let approvers:Array<AgentPubKeyB64> = []
         if (this.state.enabled){
@@ -181,11 +210,15 @@ export class ApprovalControl extends Control {
             })
           }
         }
+        return approvalStats
+    }
+    sectionViewWidget(document: Document) : TemplateResult|Array<TemplateResult> {
+        const stats = this.stats(document)
         return html`
           <div>Approval Enabled: ${this.state.enabled ? "Enabled" : "Disabled"}</div>
           <div>Approval Threshold Required: ${this.state.threshold}%</div>
-          ${this.state.enabled ? html`Approvals: ${approvers.length}/${approversTotal} (${approvers.length/approversTotal * 100}%)
-            <how-agent-list .agents=${approvers}></how-agent-list>
+          ${this.state.enabled ? html`Approvals: ${stats.approvedBy.length}/${stats.approversTotal} (${stats.approvedBy.length/stats.approversTotal * 100}%)
+            <how-agent-list .agents=${stats.approvedBy}></how-agent-list>
           ` : ''}
           <div>Agent List Section: ${this.state.agentsSectionName}</div>
         `
@@ -243,13 +276,13 @@ export class ApprovalControl extends Control {
                 button="like"
                 info="approve"
                 infoPosition="right"
-                .click=${() => confirmElem.open(`Please approving this document?`, new ApprovalAction(true))}
+                .click=${() => confirmElem.open(`Please confirm approving this document?`, new ApprovalAction(true))}
                 ></svg-button>` :html `
                 <svg-button
                 button="dislike"
                 info="retract"
                 infoPosition="right"
-                .click=${() => confirmElem.open(`Please retracting approval for this document?`, new ApprovalAction(false))}
+                .click=${() => confirmElem.open(`Please confirm retracting approval for this document?`, new ApprovalAction(false))}
                 ></svg-button>`}
             </div>
             `
