@@ -166,7 +166,7 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
          .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Unit not found"))))?;
     let unit: Unit = record
         .entry()
-        .to_app_option().map_err(|err| wasm_error!(format!("{:?}",err)))?
+        .to_app_option().map_err(|err| wasm_error!(err))?
 
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
     let new_doc_hash = update_document(UpdateDocumentInput { 

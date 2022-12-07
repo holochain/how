@@ -48,7 +48,7 @@ fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult
         let v = path.as_ref();
         let (units, documents) = get_entry_hashes(&path)?;
         let val = Content {
-            name: String::try_from(&v[v.len()-1]).map_err(|e| wasm_error!(format!("{:?}",e)))?,
+            name: String::try_from(&v[v.len()-1]).map_err(|e| wasm_error!(e))?,
             units,
             documents,
         };
