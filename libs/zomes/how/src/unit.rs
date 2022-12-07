@@ -135,7 +135,7 @@ fn get_units_inner(base: EntryHash) -> HowResult<Vec<UnitOutput>> {
 
     let get_input = links
         .into_iter()
-        .map(|link| GetInput::new(link.target.into(), GetOptions::default()))
+        .map(|link| GetInput::new(EntryHash::from(link.target).into(), GetOptions::default()))
         .collect();
 
     let unit_records = HDK.with(|hdk| hdk.borrow().get(get_input))?.into_iter()
@@ -166,7 +166,7 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
          .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Unit not found"))))?;
     let unit: Unit = record
         .entry()
-        .to_app_option().map_err(|err| wasm_error!(err.into()))?
+        .to_app_option().map_err(|err| wasm_error!(format!("{:?}",err)))?
 
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
     let new_doc_hash = update_document(UpdateDocumentInput { 

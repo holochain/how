@@ -32,7 +32,7 @@ impl Unit {
         let mut seg: Vec<String> = Vec::new();
         let mut i = 1;
         while i < v.len() {
-            seg.push(String::try_from(&v[i]).map_err(|e| wasm_error!(e.into()))?);
+            seg.push(String::try_from(&v[i]).map_err(|e| wasm_error!(format!("{:?}",e)))?);
             i = i + 1;
         }
         Ok(seg.join("."))

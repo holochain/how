@@ -24,7 +24,7 @@ fn get_entry_hashes(path: &Path) -> ExternResult<(Vec<UnitInfo>,Vec<EntryHash>)>
     let links = get_links(path.path_entry_hash()?, vec![LinkTypes::Unit, LinkTypes::Document], None)?;
     for l in links {
         let link_type = LinkTypes::try_from(ScopedLinkType {
-            zome_id: l.zome_id,
+            zome_index: l.zome_index,
             zome_type: l.link_type,
         })?;
         let target = l.target.into();
@@ -48,7 +48,7 @@ fn build_tree(tree: &mut Tree<Content>, node: usize, path: Path) -> ExternResult
         let v = path.as_ref();
         let (units, documents) = get_entry_hashes(&path)?;
         let val = Content {
-            name: String::try_from(&v[v.len()-1]).map_err(|e| wasm_error!(e.into()))?,
+            name: String::try_from(&v[v.len()-1]).map_err(|e| wasm_error!(format!("{:?}",e)))?,
             units,
             documents,
         };

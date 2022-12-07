@@ -74,7 +74,7 @@ fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
     let links = get_links(base, LinkTypes::Document, None)?;
     let get_input = links
         .into_iter()
-        .map(|link| GetInput::new(link.target.into(), GetOptions::default()))
+        .map(|link| GetInput::new(EntryHash::from(link.target).into(), GetOptions::default()))
         .collect();
 
     let document_elements = HDK.with(|hdk| hdk.borrow().get_details(get_input))?;
