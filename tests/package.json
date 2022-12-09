@@ -10,8 +10,8 @@
   "author": "",
   "license": "CAL-1.0",
   "dependencies": {
-    "@holochain/client": "^0.9.2",
-    "@holochain-open-dev/utils": "^0.5.6",
+    "@holochain/client": "^0.10.2",
+    "@holochain-open-dev/utils": "^0.6.2",
     "@msgpack/msgpack": "^2.7.0",
     "esm": "^3.2.25",
     "js-base64": "^3.6.1",
