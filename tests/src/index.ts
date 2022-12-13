@@ -8,7 +8,7 @@ import path from 'path'
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dnaPath = path.join(__dirname, "../../dna/workdir/dna/how.dna")
+const dnaPath = path.join(__dirname, "../../apps/launcher/dnas/how/how.dna")
 
 import * as _ from 'lodash'
 import { Base64 } from "js-base64";
@@ -19,7 +19,7 @@ function serializeHash(hash: Uint8Array): string {
 
 test("how basic tests", async (t) => {
   await runScenario(async (scenario: Scenario) => {
-
+try {
     const dnas: DnaSource[] = [{ path: dnaPath }];
     const [alice, bobbo] = await scenario.addPlayersWithHapps([dnas, dnas]);
     await scenario.shareAllAgents();
@@ -167,7 +167,10 @@ test("how basic tests", async (t) => {
     docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
     console.log("DOCS DELETED:", docs)
     t.equal(serializeHash(docs[2].deletedBy[0]),serializeHash(deleteActionHash))
-
+  } catch (e) {
+   console.log("ERROR:", e)
+  }
+  
   })
 })
 

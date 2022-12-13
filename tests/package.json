@@ -12,7 +12,7 @@
   "dependencies": {
     "@holochain/client": "^0.10.2",
     "@holochain-open-dev/utils": "^0.6.2",
-    "@msgpack/msgpack": "^2.7.0",
+    "@msgpack/msgpack": "^2.7.2",
     "esm": "^3.2.25",
     "js-base64": "^3.6.1",
     "lodash-es": "^4.17.21",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@detools/tap-diff": "^0.2.2",
-    "@holochain/tryorama": "^0.9.0",
+    "@holochain/tryorama": "^0.9.2",
     "@types/lodash": "^4.14.173",
     "@types/node": "^14.0.14"
   },

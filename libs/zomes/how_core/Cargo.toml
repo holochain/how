@@ -12,5 +12,5 @@ name = "how_core"
 serde = "1"
 derive_more = "0"
 hdk = {version = "0.0.163", features = ["encoding"]}
-hdi = {version = "0.1"}
+hdi = {version = "0.1.10"}
 
