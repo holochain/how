@@ -1,6 +1,5 @@
-import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
+import { EntryHashB64, AgentPubKeyB64, AppAgentClient, RoleName } from '@holochain/client';
 import { serializeHash, deserializeHash, AgentPubKeyMap, EntryRecord, fakeEntryHash } from '@holochain-open-dev/utils';
-import { CellClient } from '@holochain-open-dev/cell-client';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
 import { HowService } from './how.service';
@@ -72,18 +71,16 @@ export class HowStore {
   public refineProcesses: Readable<Array<Node>> = this.getProcessesStoreForType('refine');
   
   constructor(
-    protected cellClient: CellClient,
-  profilesStore: ProfilesStore,
-  zomeName = 'how'
+    protected client: AppAgentClient,
+    profilesStore: ProfilesStore,
+    roleName: RoleName,
+    zomeName = 'how'
   ) {
-    this.myAgentPubKey = serializeHash(cellClient.cell.cell_id[1]);
+    this.myAgentPubKey = serializeHash(client.myPubKey);
     this.profiles = profilesStore;
-    this.service = new HowService(cellClient, zomeName);
+    this.service = new HowService(client, roleName, zomeName);
 
-    cellClient.addSignalHandler( signal => {
-      if (! areEqual(cellClient.cell.cell_id[0],signal.data.cellId[0]) || !areEqual(cellClient.cell.cell_id[1], signal.data.cellId[1])) {
-        return
-      }
+    client.on( 'signal', signal => {
       console.log("SIGNAL",signal)
       const payload = signal.data.payload
       switch(payload.message.type) {

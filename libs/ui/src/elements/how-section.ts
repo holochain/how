@@ -12,7 +12,7 @@ import { Marked } from "@ts-stack/markdown";
 import { HowSectionDetails } from "./how-section-details";
 import { HowStore } from "../how.store";
 import { serializeHash } from "@holochain-open-dev/utils";
-import { AgentPubKeyB64, Dictionary } from "@holochain-open-dev/core-types";
+import { AgentPubKeyB64 } from "@holochain/client";
 import { HowEditAgentList } from "./how-edit-agent-list";
 import { HowAgentList } from "./how-agent-list";
 import { ApprovalControl, CommentControl, Control, VotingControl } from "../controls";

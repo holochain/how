@@ -6,7 +6,7 @@ import { contextProvided } from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Unit, howContext, Dictionary, Node, VersioningType} from "../types";
-import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
+import {EntryHashB64} from "@holochain/client";
 import {
   Button,
   Dialog,

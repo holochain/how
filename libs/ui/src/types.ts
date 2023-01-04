@@ -1,8 +1,7 @@
 // TODO: add globally available interfaces for your elements
 
-import { EntryHashB64, AgentPubKeyB64 } from "@holochain-open-dev/core-types";
 import { EntryRecord, serializeHash } from "@holochain-open-dev/utils";
-import { Action, ActionHash, ActionHashed, EntryHash, Record, Timestamp } from "@holochain/client";
+import { Action, ActionHash, ActionHashed, EntryHash, Record, Timestamp, EntryHashB64, AgentPubKeyB64  } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
 import { Control } from "./controls";
 import { HowStore } from "./how.store";

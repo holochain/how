@@ -12,8 +12,7 @@ import {
   profilesStoreContext,
   ProfilesService,
 } from "@holochain-open-dev/profiles";
-import { HolochainClient, CellClient } from "@holochain-open-dev/cell-client";
-import { AppWebsocket } from "@holochain/client";
+import { AppAgentWebsocket, AppWebsocket } from '@holochain/client';
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html } from "lit";
 
@@ -26,15 +25,10 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
       `ws://localhost:${process.env.HC_PORT}`
     );
 
-    const client = new HolochainClient(appWebsocket);
-    const appInfo = await appWebsocket.appInfo({
-      installed_app_id: "how",
-    });
+    const client = await AppAgentWebsocket.connect(appWebsocket, "how")
 
-    const cell = appInfo.cell_data[0];
-    const howClient = new CellClient(client, cell);
 
-    const store = new ProfilesStore(new ProfilesService(howClient), {
+    const store = new ProfilesStore(new ProfilesService(client, 'how'), {
       avatarMode: "avatar-required",
     })
 
@@ -45,7 +39,7 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
     new ContextProvider(
       this,
       howContext,
-      new HowStore(howClient, store)
+      new HowStore(client, store, "how")
     );
 
 

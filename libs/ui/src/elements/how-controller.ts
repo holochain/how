@@ -27,7 +27,7 @@ import {
   ProfilesStore,
   Profile,
 } from "@holochain-open-dev/profiles";
-import {EntryHashB64} from "@holochain-open-dev/core-types";
+import {EntryHashB64} from "@holochain/client";
 import { serializeHash } from "@holochain-open-dev/utils";
 
 /**

@@ -2,8 +2,6 @@ import {css, html, LitElement} from "lit";
 import {property, query} from "lit/decorators.js";
 import { contextProvided } from "@lit-labs/context";
 import {sharedStyles} from "../sharedStyles";
-import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
-import { deserializeHash } from "@holochain-open-dev/utils";
 import {Unit, DocType, howContext, Document, DocumentOutput, SysState, Progress} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";

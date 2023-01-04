@@ -14,7 +14,7 @@ import {
 } from "@scoped-elements/material-web";
 import { HowNode } from "./how-node";
 import { serializeHash } from "@holochain-open-dev/utils";
-import { EntryHashB64 } from "@holochain-open-dev/core-types";
+import { EntryHashB64 } from "@holochain/client";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
 
 /**

@@ -1,17 +1,17 @@
-import { CellClient } from '@holochain-open-dev/cell-client';
-import { EntryHashB64, AgentPubKeyB64 } from '@holochain-open-dev/core-types';
+import { AppAgentClient, EntryHashB64, AgentPubKeyB64, AppAgentCallZomeRequest, RoleName } from '@holochain/client';
 import { Unit, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput, AdvanceStateInput, UnitOutput, MarkDocumentInput} from './types';
 import { RecordBag, serializeHash } from '@holochain-open-dev/utils';
-import { ActionHash } from '@holochain/client';
+import { ActionHash  } from '@holochain/client';
 
 export class HowService {
   constructor(
-    public cellClient: CellClient,
+    public client: AppAgentClient,
+    protected roleName: RoleName,
     protected zomeName = 'how'
   ) {}
 
   get myAgentPubKey() : AgentPubKeyB64 {
-    return serializeHash(this.cellClient.cell.cell_id[1]);
+    return serializeHash(this.client.myPubKey);
   }
 
   async initialize(input: Initialization): Promise<EntryHashB64> {
@@ -58,7 +58,13 @@ export class HowService {
     return this.callZome('notify', {signal, folks});
   }
 
-  private callZome(fn_name: string, payload: any) {
-    return this.cellClient.callZome(this.zomeName, fn_name, payload);
+  private callZome(fnName: string, payload: any) {
+    const req: AppAgentCallZomeRequest = {
+      role_name: this.roleName,
+      zome_name: this.zomeName,
+      fn_name: fnName,
+      payload
+    }
+    return this.client.callZome(req);
   }
 }

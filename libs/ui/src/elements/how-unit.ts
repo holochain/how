@@ -6,7 +6,6 @@ import {StoreSubscriber} from "lit-svelte-stores";
 import { Unsubscriber, Readable, get } from "svelte/store";
 
 import {sharedStyles} from "../sharedStyles";
-import {EntryHashB64, AgentPubKeyB64} from "@holochain-open-dev/core-types";
 import { deserializeHash, serializeHash } from "@holochain-open-dev/utils";
 import {Unit, DocType, howContext, SysState, Document, UnitInfo} from "../types";
 import {HowStore} from "../how.store";
@@ -19,7 +18,7 @@ import {ProfilesStore, profilesStoreContext, Profile, AgentAvatar} from "@holoch
 import {
   Button,
 } from "@scoped-elements/material-web";
-import { Action } from "@holochain/client";
+import { Action, EntryHashB64 } from "@holochain/client";
 import { InfoItem } from "./info-item";
 import { HowConfirm } from "./how-confirm";
 

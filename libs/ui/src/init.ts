@@ -9,7 +9,7 @@ import {
   SourceManual,
   Unit
 } from "./types";
-import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
+import { AgentPubKeyB64 } from "@holochain/client";
 
 const std_procs: Array<[ProcessType, ProcessName]> = [
   ["soc_proto.process.define", "declaration"],

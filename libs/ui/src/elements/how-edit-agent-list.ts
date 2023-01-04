@@ -3,7 +3,7 @@ import {property, query, state} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
+import { AgentPubKeyB64 } from "@holochain/client";
 import { serializeHash } from "@holochain-open-dev/utils";
 import { HowAgentList } from "./how-agent-list";
 /**

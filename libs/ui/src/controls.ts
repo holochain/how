@@ -1,8 +1,8 @@
-import { AgentPubKeyB64, Dictionary } from "@holochain-open-dev/core-types"
+import { AgentPubKeyB64 } from "@holochain/client"
 import { Select, Switch, TextField } from "@scoped-elements/material-web"
 import { html, TemplateResult } from "lit"
 import { HowConfirm } from "./elements/how-confirm"
-import { Section, Document, parseAgentArray, MarkTypes, VoteAction, ApprovalAction, CommentStats } from "./types"
+import { Section, Document, parseAgentArray, MarkTypes, VoteAction, ApprovalAction, CommentStats, Dictionary } from "./types"
 
 const switchWidget = (id: string, on: boolean) : TemplateResult => {
     return on ? html`<mwc-switch id=${id} selected></mwc-switch>` : html`<mwc-switch id=${id} ></mwc-switch>`

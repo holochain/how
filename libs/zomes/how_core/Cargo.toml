@@ -11,6 +11,6 @@ name = "how_core"
 [dependencies]
 serde = "1"
 derive_more = "0"
-hdk = {version = "0.0.163", features = ["encoding"]}
-hdi = {version = "0.1.10"}
+hdi = { workspace = true }
+hdk = { workspace = true, features = ["encoding"] }
 

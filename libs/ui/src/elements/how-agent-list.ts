@@ -5,7 +5,7 @@ import { contextProvided } from "@lit-labs/context";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { AgentPubKeyB64 } from "@holochain-open-dev/core-types";
+import { AgentPubKeyB64 } from "@holochain/client";
 import { HowStore } from "../how.store";
 import { howContext } from "../types";
 
