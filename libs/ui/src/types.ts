@@ -464,12 +464,14 @@ export type CommentStats = {
 }
 
 export const applyApprovedComments = (text: string, comments: Array<Comment>) : string => {
-  for (let i= comments.length-1; i >=0 ; i-=1) {
-    const c: Comment = comments[i]
-    if (c.status == CommentStatus.Approved) {
-      const suggestion = c.suggestion()
-      if (suggestion != undefined) {
-        text = text.substring(0,c.startOffset())+suggestion+text.substring(c.endOffset())
+  if (comments) {
+    for (let i= comments.length-1; i >=0 ; i-=1) {
+      const c: Comment = comments[i]
+      if (c.status == CommentStatus.Approved) {
+        const suggestion = c.suggestion()
+        if (suggestion != undefined) {
+          text = text.substring(0,c.startOffset())+suggestion+text.substring(c.endOffset())
+        }
       }
     }
   }
