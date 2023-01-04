@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "scripts": {
     "build": "npm run build:happ && npm run build:ui",
-    "build:ui": "tsc",
-    "build:watch": "run-singleton \"tsc -w --incremental --preserveWatchOutput\"",
+    "build:ui": "rimraf dist && rollup -c rollup.config.js",
+    "build:watch": "rollup -c rollup.config.js -w",
     "start": "concurrently --names tsc,dev-server \"npm run build:watch\" \"web-dev-server --config ./web-dev-server.config.mjs\"",
     "package": "rimraf ui.zip && rimraf dist && rollup --config rollup.config.js && cd ./dist && bestzip ../ui.zip * ",
     "start:happ": "RUST_LOG=warn echo \"pass\" | hc s --piped -f=$ADMIN_PORT generate ../workdir/how.happ --run=$HC_PORT -a how network mdns",
@@ -18,9 +18,8 @@
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "^3.0.0",
-    "@rollup/plugin-typescript": "^8.2.5",
-    "@web/dev-server": "^0.1.21",
-    "@web/rollup-plugin-html": "^1.9.1",
+    "@rollup/plugin-typescript": "^10.0.1",
+    "@web/rollup-plugin-html": "^1.11.0",
     "@web/rollup-plugin-import-meta-assets": "^1.0.7",
     "babel-plugin-template-html-minifier": "^4.1.0",
     "bestzip": "^2.2.0",
@@ -34,7 +33,7 @@
     "rollup-plugin-workbox": "^6.2.0",
     "run-singleton-cli": "^0.0.5",
     "tslib": "^2.3.1",
-    "typescript": "4.3.5"
+    "typescript": "4.5.5"
   },
   "dependencies": {
     "@holochain-open-dev/profiles": "^0.9.3",
