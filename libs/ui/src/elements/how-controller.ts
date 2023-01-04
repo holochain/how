@@ -27,8 +27,7 @@ import {
   ProfilesStore,
   Profile,
 } from "@holochain-open-dev/profiles";
-import {EntryHashB64} from "@holochain/client";
-import { serializeHash } from "@holochain-open-dev/utils";
+import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
 
 /**
  * @element how-controller
@@ -212,7 +211,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       return []
     }
     return docs
-        .filter(d=>d.content.documentType==docType && serializeHash(d.content.unitHash) ==unitEh)
+        .filter(d=>d.content.documentType==docType && encodeHashToBase64(d.content.unitHash) ==unitEh)
   }
 
   handleNodeSelected(event: any) {

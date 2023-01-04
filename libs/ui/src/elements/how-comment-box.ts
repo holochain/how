@@ -4,7 +4,6 @@ import {property, query, state} from "lit/decorators.js";
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { CommentInfo, DocumentOutput, HilightRange, Section } from "../types";
-import { serializeHash } from "@holochain-open-dev/utils";
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { TextArea } from "@scoped-elements/material-web";
 import { SvgButton } from "./svg-button";

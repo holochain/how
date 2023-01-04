@@ -1,7 +1,6 @@
 // TODO: add globally available interfaces for your elements
 
-import { EntryRecord, serializeHash } from "@holochain-open-dev/utils";
-import { Action, ActionHash, ActionHashed, EntryHash, Record, Timestamp, EntryHashB64, AgentPubKeyB64  } from "@holochain/client";
+import { ActionHash, ActionHashed, EntryHash, Record, Timestamp, EntryHashB64, AgentPubKeyB64, encodeHashToBase64  } from "@holochain/client";
 import { createContext } from "@lit-labs/context";
 import { Control } from "./controls";
 import { HowStore } from "./how.store";
@@ -442,7 +441,7 @@ export class Comment {
     return this.documentOutput.hash
   }
   author() : AgentPubKeyB64 {
-    return serializeHash(this.documentOutput.actions[0].content.author)
+    return encodeHashToBase64(this.documentOutput.actions[0].content.author)
   }
   created() : Date {
     return new Date(this.documentOutput.actions[0].content.timestamp/1000)

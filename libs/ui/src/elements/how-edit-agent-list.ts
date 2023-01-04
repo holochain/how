@@ -3,8 +3,7 @@ import {property, query, state} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { AgentPubKeyB64 } from "@holochain/client";
-import { serializeHash } from "@holochain-open-dev/utils";
+import { AgentPubKeyB64, encodeHashToBase64 } from "@holochain/client";
 import { HowAgentList } from "./how-agent-list";
 /**
  * @element how-edit-agent-list
@@ -17,7 +16,7 @@ export class HowEditAgentList extends ScopedElementsMixin(LitElement) {
 
   private addAgent(e:any) {
     //const nickname = e.detail.agent.profile.nickname
-    const pubKey = serializeHash(e.detail.agentPubKey)
+    const pubKey = encodeHashToBase64(e.detail.agentPubKey)
     if (!this.agents.includes(pubKey)) {
       this.agents.push(pubKey)
       const list = this.shadowRoot!.getElementById(`agent-list`) as HowAgentList

@@ -6,7 +6,6 @@ import {StoreSubscriber} from "lit-svelte-stores";
 import { Unsubscriber, Readable, get } from "svelte/store";
 
 import {sharedStyles} from "../sharedStyles";
-import { deserializeHash, serializeHash } from "@holochain-open-dev/utils";
 import {Unit, DocType, howContext, SysState, Document, UnitInfo} from "../types";
 import {HowStore} from "../how.store";
 import { HowUnitDetails } from "./how-unit-details";
@@ -18,7 +17,7 @@ import {ProfilesStore, profilesStoreContext, Profile, AgentAvatar} from "@holoch
 import {
   Button,
 } from "@scoped-elements/material-web";
-import { Action, EntryHashB64 } from "@holochain/client";
+import { Action, EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 import { InfoItem } from "./info-item";
 import { HowConfirm } from "./how-confirm";
 
@@ -138,7 +137,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
 
     
     const created = new Date(action.timestamp)
-    const creatorHash = serializeHash(action.author)
+    const creatorHash = encodeHashToBase64(action.author)
     const creator = this._store.getProfileSync(creatorHash)
     let stateHTML
     let controlsHTML:any[] = []

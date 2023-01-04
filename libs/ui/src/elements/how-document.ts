@@ -5,7 +5,7 @@ import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {EntryHashB64} from "@holochain/client";
+import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
 import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, parseAgentArray, Dictionary} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -19,7 +19,6 @@ import { HowNewSectionDialog } from "./how-new-section-dialog";
 import { HowSection } from "./how-section";
 import { HowComment } from "./how-comment";
 import { InfoItem } from "./info-item";
-import { serializeHash } from "@holochain-open-dev/utils";
 import { HowCommentBox } from "./how-comment-box";
 import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
@@ -193,7 +192,7 @@ import { CommentControl, Control } from "../controls";
       let modified = 0
       let total = 0
 
-      this._store.getDocumentsFiltered(this.path, serializeHash(doc.unitHash), DocType.Comment, true).forEach( commentDoc => {
+      this._store.getDocumentsFiltered(this.path, encodeHashToBase64(doc.unitHash), DocType.Comment, true).forEach( commentDoc => {
         const comment = new Comment(commentDoc, doc)
         if (comment.getDocumentHash() == this.currentDocumentEh) {
           total += 1;

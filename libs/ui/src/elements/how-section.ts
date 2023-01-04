@@ -11,8 +11,7 @@ import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { Marked } from "@ts-stack/markdown";
 import { HowSectionDetails } from "./how-section-details";
 import { HowStore } from "../how.store";
-import { serializeHash } from "@holochain-open-dev/utils";
-import { AgentPubKeyB64 } from "@holochain/client";
+import { AgentPubKeyB64, encodeHashToBase64 } from "@holochain/client";
 import { HowEditAgentList } from "./how-edit-agent-list";
 import { HowAgentList } from "./how-agent-list";
 import { ApprovalControl, CommentControl, Control, VotingControl } from "../controls";
@@ -174,7 +173,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   private async getSectionDescription() {
     let description = ""
     if (this.section  && this.section.sourceUnit) {
-        const srcDocInfo = await this._store.getCurrentDocumentPull(this.section.sourcePath, serializeHash(this.section.sourceUnit))
+        const srcDocInfo = await this._store.getCurrentDocumentPull(this.section.sourcePath, encodeHashToBase64(this.section.sourceUnit))
         if (srcDocInfo) {
             const srcSection = srcDocInfo.content.getSection(this.section.name)
             if (srcSection) {

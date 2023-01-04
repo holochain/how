@@ -1,6 +1,5 @@
-import { AppAgentClient, EntryHashB64, AgentPubKeyB64, AppAgentCallZomeRequest, RoleName } from '@holochain/client';
+import { AppAgentClient, EntryHashB64, AgentPubKeyB64, AppAgentCallZomeRequest, RoleName, encodeHashToBase64 } from '@holochain/client';
 import { Unit, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput, AdvanceStateInput, UnitOutput, MarkDocumentInput} from './types';
-import { RecordBag, serializeHash } from '@holochain-open-dev/utils';
 import { ActionHash  } from '@holochain/client';
 
 export class HowService {
@@ -11,7 +10,7 @@ export class HowService {
   ) {}
 
   get myAgentPubKey() : AgentPubKeyB64 {
-    return serializeHash(this.client.myPubKey);
+    return encodeHashToBase64(this.client.myPubKey);
   }
 
   async initialize(input: Initialization): Promise<EntryHashB64> {

@@ -1,6 +1,6 @@
-import { ActionHash, DnaSource, EntryHash } from "@holochain/client";
+import { ActionHash, DnaSource, EntryHash, decodeHashFromBase64 } from "@holochain/client";
 import { pause, runScenario, Scenario  } from "@holochain/tryorama";
-import { RecordBag, EntryRecord, deserializeHash } from '@holochain-open-dev/utils';
+import { RecordBag } from '@holochain-open-dev/utils';
 
 import test from "tape-promise/tape.js";
 
@@ -13,7 +13,7 @@ const dnaPath = path.join(__dirname, "../../apps/launcher/dnas/how/how.dna")
 import * as _ from 'lodash'
 import { Base64 } from "js-base64";
 
-function serializeHash(hash: Uint8Array): string {
+function encodeHashToBase64(hash: Uint8Array): string {
   return `u${Base64.fromUint8Array(hash, true)}`;
 }
 
@@ -26,8 +26,8 @@ try {
 
     const [alice_how] = alice.cells;
     const [bobbo_how] = bobbo.cells;
-    const boboAgentKey = serializeHash(bobbo.agentPubKey);
-    const aliceAgentKey = serializeHash(alice.agentPubKey);
+    const boboAgentKey = encodeHashToBase64(bobbo.agentPubKey);
+    const aliceAgentKey = encodeHashToBase64(alice.agentPubKey);
 
     let rootUnit = {
       parents: [], // full paths to parent nodes (remember it's a DAG)
@@ -91,11 +91,11 @@ try {
 
     const unit1Output:any = await alice_how.callZome({zome_name:'how', fn_name:'create_unit', payload: unit1} );
     t.ok(unit1Output)
-    const unit1Hash = serializeHash(unit1Output.info.hash)
+    const unit1Hash = encodeHashToBase64(unit1Output.info.hash)
     console.log("unit1Hash", unit1Hash);
 
     let document1 = {  
-      unitHash: deserializeHash(unit1Hash),
+      unitHash: decodeHashFromBase64(unit1Hash),
       documentType: "_document",
       content: [
         {name: "title", content: "The Application API", sourcePath: "", sectionType:"c", contentType:"text/plain"},
@@ -116,7 +116,7 @@ try {
 
     const units :Array<any> = await alice_how.callZome({zome_name:'how', fn_name:'get_units'} );
     const bag = new RecordBag(units.map((u)=>u.record));
-    const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: serializeHash(hash),value}})
+    const entries = bag.entryMap.entries().map(([hash, value])=> {return {hash: encodeHashToBase64(hash),value}})
     t.deepEqual(entries, [{hash: entries[0].hash, value: rootUnit}, {hash: unit1Hash, value: unit1}]);
 
     let newDocHash
@@ -135,13 +135,13 @@ try {
     console.log("Rust tree 2", tree)
 
     const node = tree.tree[4].val
-    t.equal(newDocHash, serializeHash(node.documents[1]))
+    t.equal(newDocHash, encodeHashToBase64(node.documents[1]))
     } catch(e) {console.log("error in get_tree", e)}
 
     docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
     console.log("DOCS:", docs)
     t.equal(docs[0].updatedBy.length, 1)
-    t.equal(serializeHash(docs[0].updatedBy[0]), newDocHash)
+    t.equal(encodeHashToBase64(docs[0].updatedBy[0]), newDocHash)
     t.equal(docs[1].updatedBy.length, 0)
 
     t.equal(docs[1].marks.length, 0)
@@ -166,7 +166,7 @@ try {
     const deleteActionHash : ActionHash = await alice_how.callZome({zome_name:'how', fn_name:'delete_document', payload: docs[2].actions[0].hash} );
     docs = await alice_how.callZome({zome_name:'how',fn_name:'get_documents', payload:doc1Path} );
     console.log("DOCS DELETED:", docs)
-    t.equal(serializeHash(docs[2].deletedBy[0]),serializeHash(deleteActionHash))
+    t.equal(encodeHashToBase64(docs[2].deletedBy[0]),encodeHashToBase64(deleteActionHash))
   } catch (e) {
    console.log("ERROR:", e)
   }

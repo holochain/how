@@ -1,5 +1,5 @@
-import { EntryHashB64, AgentPubKeyB64, AppAgentClient, RoleName } from '@holochain/client';
-import { serializeHash, deserializeHash, AgentPubKeyMap, EntryRecord, fakeEntryHash } from '@holochain-open-dev/utils';
+import { EntryHashB64, AgentPubKeyB64, AppAgentClient, RoleName, encodeHashToBase64, decodeHashFromBase64 } from '@holochain/client';
+import { AgentPubKeyMap, EntryRecord } from '@holochain-open-dev/utils';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
 import { HowService } from './how.service';
@@ -76,7 +76,7 @@ export class HowStore {
     roleName: RoleName,
     zomeName = 'how'
   ) {
-    this.myAgentPubKey = serializeHash(client.myPubKey);
+    this.myAgentPubKey = encodeHashToBase64(client.myPubKey);
     this.profiles = profilesStore;
     this.service = new HowService(client, roleName, zomeName);
 
@@ -135,7 +135,7 @@ export class HowStore {
   private others(): Array<AgentPubKeyB64> {
     if (this.knownProfiles) {
       const map : AgentPubKeyMap<Profile> = get(this.knownProfiles)
-      const x: Array<AgentPubKeyB64>  = map.keys().map((key) => serializeHash(key))
+      const x: Array<AgentPubKeyB64>  = map.keys().map((key) => encodeHashToBase64(key))
       return x.filter((key) => key != this.myAgentPubKey)
     }
     else {
@@ -146,7 +146,7 @@ export class HowStore {
   private updateUnitFromEntry(unitOutput: UnitOutput) {
     const record: EntryRecord<Unit> = new EntryRecord<Unit>(unitOutput.record)
     const unit = new Unit(record.entry)
-    const hash = serializeHash(record.entryHash)
+    const hash = encodeHashToBase64(record.entryHash)
     this.unitsPathStore.update(units => {
       const path = unit.path()
       units[path] = hash
@@ -197,7 +197,7 @@ export class HowStore {
     if (docs) {
       let doc = docs.find(e=>e.hash == hash)
       if (doc) {
-        doc.updatedBy.push(deserializeHash(newHash)); 
+        doc.updatedBy.push(decodeHashFromBase64(newHash)); 
       }
     }
   }
@@ -282,7 +282,7 @@ export class HowStore {
   
         const newDocumentHash = await this.service.advanceState({
             newState: state,
-            unitHash: deserializeHash(unitHash),
+            unitHash: decodeHashFromBase64(unitHash),
             documentHash: documentOutput.hash,
             document: doc,
             }
@@ -340,13 +340,13 @@ export class HowStore {
 
 
   async getProfile(agent: AgentPubKeyB64) : Promise<Profile|undefined> {
-    return get(await this.profiles.fetchAgentProfile(deserializeHash(agent)))  
+    return get(await this.profiles.fetchAgentProfile(decodeHashFromBase64(agent)))  
   }
 
   getProfileSync(agent: AgentPubKeyB64) : Profile|undefined {
     if (this.knownProfiles) {
       const map : AgentPubKeyMap<Profile> = get(this.knownProfiles)
-      return map.get(deserializeHash(agent))
+      return map.get(decodeHashFromBase64(agent))
     } else {
       return undefined
     }
@@ -365,7 +365,7 @@ export class HowStore {
     const unit = this.unit(unitEh)
     const proc = unit.processes[0]
     const processPath = `${proc[0]}.${proc[1]}`
-    const doc = new Document({unitHash: deserializeHash(unitEh), documentType: DocType.Document})
+    const doc = new Document({unitHash: decodeHashFromBase64(unitEh), documentType: DocType.Document})
     // TODO 
     doc.editors = unit.stewards
 
@@ -382,10 +382,10 @@ export class HowStore {
   async addUnit(unit: Unit) : Promise<EntryHashB64> {
     const unitOutput: UnitOutput = await this.service.createUnit(unit)
     this.updateUnitFromEntry(unitOutput)
-    await this.initializeUnit(serializeHash(unitOutput.info.hash))
+    await this.initializeUnit(encodeHashToBase64(unitOutput.info.hash))
 
     //this.service.notify({unitHash:unitEh, message: {type:"NewUnit", content:unit}}, this.others());
-    return serializeHash(unitOutput.info.hash)
+    return encodeHashToBase64(unitOutput.info.hash)
   }
 
   async initilize(input: Initialization) : Promise<void> {
@@ -429,7 +429,7 @@ export class HowStore {
       if (latestOnly) {
         docs = docs.filter(doc => doc.updatedBy.length==0 && doc.deletedBy.length==0)
       }
-      docs = docs.filter(d=>d.content.documentType==docType && (unitEh == undefined || serializeHash(d.content.unitHash) == unitEh))
+      docs = docs.filter(d=>d.content.documentType==docType && (unitEh == undefined || encodeHashToBase64(d.content.unitHash) == unitEh))
       return docs
     }
     return []

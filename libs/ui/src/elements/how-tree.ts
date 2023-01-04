@@ -13,8 +13,7 @@ import {
   Button, 
 } from "@scoped-elements/material-web";
 import { HowNode } from "./how-node";
-import { serializeHash } from "@holochain-open-dev/utils";
-import { EntryHashB64 } from "@holochain/client";
+import { EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
 
 /**
@@ -49,9 +48,9 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
 
   buildTree(node: Node):any {
     const unitInfo = this.getUnitInfo(node)
-    const nodeId = unitInfo ? serializeHash(unitInfo.hash) : node.id
+    const nodeId = unitInfo ? encodeHashToBase64(unitInfo.hash) : node.id
     //const documentsMap = this._documents.value
-    //const docs = node.val.documents.map(hash => documentsMap[serializeHash(hash)])
+    //const docs = node.val.documents.map(hash => documentsMap[encodeHashToBase64(hash)])
     const state = node.val.units.length ? node.val.units[0].state : ""// docs[docs.length-1]? docs[docs.length-1].state : ""
     return html`
     <li class="${this.treeType}">
