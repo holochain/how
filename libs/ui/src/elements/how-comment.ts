@@ -7,8 +7,11 @@ import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { CommentStatus, HilightRange, howContext, Section, Comment, CommentAction } from "../types";
 import { AgentAvatar } from "@holochain-open-dev/profiles";
 import { HowStore } from "../how.store";
+import TimeAgo from "javascript-time-ago"
+import en from 'javascript-time-ago/locale/en'
 
-import ago from 's-ago'
+TimeAgo.addDefaultLocale(en)
+const timeAgo = new TimeAgo('en-US')
 
 /**
  * @element info-item
@@ -155,7 +158,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
         <div class="comment ${statusClass}" @click=${()=> this.select()}>
           <div class="comment-header row">
             <agent-avatar agent-pub-key=${this.comment.author()}> </agent-avatar>
-            <span title=${`${created}`}>${ago(created)}</span>
+            <span title=${`${created}`}>${timeAgo.format(created)}</span>
           </div>
           ${commentSectionsHTML}
           <div class="row comment-controls">

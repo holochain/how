@@ -21,9 +21,7 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
   loaded = false;
 
   async firstUpdated() {
-    const appWebsocket = await AppWebsocket.connect(
-      `ws://localhost:${process.env.HC_PORT}`
-    );
+    const appWebsocket = await AppWebsocket.connect('');
 
     const client = await AppAgentWebsocket.connect(appWebsocket, "how")
 

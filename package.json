@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "start": "npm run build:launcher && npm run launch:happ",
-    "launch:happ" : "RUST_LOG=warn echo \"pass\" | hc launch --piped -n 1 ./apps/launcher/workdir/how.happ -w --ui-path apps/launcher/dist network mdns",
+    "launch:happ" : "RUST_LOG=warn echo \"pass\" | hc launch --piped -n 1 ./apps/launcher/workdir/how.happ -w --ui-path apps/launcher/ui/dist network mdns",
     "start:old": "npm run build:launcher && npm run start:agent",
     "start:playground": "npm run build:launcher && concurrently \"npm run start:agent:playground\"",
     "network": "npm run build:launcher && concurrently-repeat \"npm run start:agent\"",

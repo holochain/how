@@ -3,6 +3,7 @@ import postcss from 'rollup-plugin-postcss';
 import postcssLit from 'rollup-plugin-postcss-lit';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 import postcssCQFill from 'cqfill/postcss';
 
 const pkg = require('./package.json');
@@ -17,6 +18,7 @@ export default {
     clearScreen: false,
   },
   plugins: [
+    json(),
     postcss({
       inject: false,
       plugins: [postcssCQFill],
