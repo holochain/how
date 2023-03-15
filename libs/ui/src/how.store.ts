@@ -1,4 +1,4 @@
-import { EntryHashB64, AgentPubKeyB64, AppAgentClient, RoleName, encodeHashToBase64, decodeHashFromBase64 } from '@holochain/client';
+import { EntryHashB64, AgentPubKeyB64, AppAgentClient, RoleName, encodeHashToBase64, decodeHashFromBase64, AgentPubKey } from '@holochain/client';
 import { AgentPubKeyMap, EntryRecord } from '@holochain-open-dev/utils';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
@@ -20,11 +20,8 @@ import {
   UnitInfo,
   Mark,
   MarkDocumentInput,
+  HowSignal,
 } from './types';
-import {
-  ProfilesStore,
-  Profile,
-} from "@holochain-open-dev/profiles";
 import { Action, ActionHash } from '@holochain/client';
 
 const areEqual = (first: Uint8Array, second: Uint8Array) =>
@@ -33,8 +30,6 @@ const areEqual = (first: Uint8Array, second: Uint8Array) =>
 export class HowStore {
   /** Private */
   private service : HowService
-  private profiles: ProfilesStore
-  private knownProfiles: Readable<AgentPubKeyMap<Profile>> | undefined
 
   /** UnitEh -> Unit */
   private unitsStore: Writable<Dictionary<Unit>> = writable({});   // maps unit hash to unit
@@ -72,17 +67,15 @@ export class HowStore {
   
   constructor(
     protected client: AppAgentClient,
-    profilesStore: ProfilesStore,
     roleName: RoleName,
     zomeName = 'how'
   ) {
     this.myAgentPubKey = encodeHashToBase64(client.myPubKey);
-    this.profiles = profilesStore;
     this.service = new HowService(client, roleName, zomeName);
 
     client.on( 'signal', signal => {
       console.log("SIGNAL",signal)
-      const payload = signal.data.payload
+      const payload  = signal.payload as HowSignal
       switch(payload.message.type) {
       case "NewUnit":
         if (!get(this.units)[payload.unitHash]) {
@@ -130,17 +123,6 @@ export class HowStore {
       this.processTypes,
       $processTypes => $processTypes.find(processType => processType.val.name === type)?.children || []
     )
-  }
-
-  private others(): Array<AgentPubKeyB64> {
-    if (this.knownProfiles) {
-      const map : AgentPubKeyMap<Profile> = get(this.knownProfiles)
-      const x: Array<AgentPubKeyB64>  = map.keys().map((key) => encodeHashToBase64(key))
-      return x.filter((key) => key != this.myAgentPubKey)
-    }
-    else {
-      return []
-    }
   }
 
   private updateUnitFromEntry(unitOutput: UnitOutput) {
@@ -334,23 +316,6 @@ export class HowStore {
     return this.find(get(this.treeStore), path.split("."))
   }
 
-  async pullProfiles() : Promise<void> {
-    this.knownProfiles = await this.profiles.fetchAllProfiles()
-  }
-
-
-  async getProfile(agent: AgentPubKeyB64) : Promise<Profile|undefined> {
-    return get(await this.profiles.fetchAgentProfile(decodeHashFromBase64(agent)))  
-  }
-
-  getProfileSync(agent: AgentPubKeyB64) : Profile|undefined {
-    if (this.knownProfiles) {
-      const map : AgentPubKeyMap<Profile> = get(this.knownProfiles)
-      return map.get(decodeHashFromBase64(agent))
-    } else {
-      return undefined
-    }
-  }
   async pullTree() : Promise<Node> {
     const rtree: Array<RustNode> = await this.service.getTree();
     const node: Node = this.buildTree(rtree, rtree[0])
@@ -390,7 +355,6 @@ export class HowStore {
 
   async initilize(input: Initialization) : Promise<void> {
     await this.service.initialize(input)
-    await this.pullProfiles()
   }
 
   unit(unitEh: EntryHashB64): Unit {

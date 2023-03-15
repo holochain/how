@@ -2,7 +2,6 @@ import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
-import { contextProvided } from "@lit-labs/context";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Unit, howContext, Dictionary, Node, VersioningType} from "../types";
@@ -15,8 +14,9 @@ import {
   Select,
   ListItem,
 } from "@scoped-elements/material-web";
-import {Profile, SearchAgent} from "@holochain-open-dev/profiles";
+import {SearchAgent} from "@holochain-open-dev/profiles";
 import { StoreSubscriber } from "lit-svelte-stores";
+import { consume } from '@lit-labs/context';
 
 const PROCESS_TYPES = ['define', 'refine', 'align'] as const;
 type ProcessType = typeof PROCESS_TYPES[number];
@@ -26,10 +26,8 @@ type ProcessType = typeof PROCESS_TYPES[number];
  */
 export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
 
-  @property() myProfile: Profile| undefined = undefined;
-
   /** Dependencies */
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext, subscribe: true })
   _store!: HowStore;
 
   @query('#name-field')
@@ -90,7 +88,6 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
     this._parent = this._store.unit(parentEh);
     const dialog = this.shadowRoot!.getElementById("unit-dialog") as Dialog
     dialog.open = true
-    this._store.pullProfiles() // TODO, this won't scale
   }
 
   private getProcessSelect(type: ProcessType) {

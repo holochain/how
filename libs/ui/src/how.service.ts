@@ -1,5 +1,5 @@
 import { AppAgentClient, EntryHashB64, AgentPubKeyB64, AppAgentCallZomeRequest, RoleName, encodeHashToBase64 } from '@holochain/client';
-import { Unit, Signal, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput, AdvanceStateInput, UnitOutput, MarkDocumentInput} from './types';
+import { Unit, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput, AdvanceStateInput, UnitOutput, MarkDocumentInput, HowSignal} from './types';
 import { ActionHash  } from '@holochain/client';
 
 export class HowService {
@@ -53,7 +53,7 @@ export class HowService {
     let tree:RustTree = await this.callZome('get_tree', null);
     return tree.tree
   }
-  async notify(signal: Signal, folks: Array<AgentPubKeyB64>): Promise<void> {
+  async notify(signal: HowSignal, folks: Array<AgentPubKeyB64>): Promise<void> {
     return this.callZome('notify', {signal, folks});
   }
 

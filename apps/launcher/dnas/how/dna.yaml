@@ -8,8 +8,8 @@ integrity:
   zomes:
     - name: how_core
       bundled: ../../../../target/wasm32-unknown-unknown/release/how_core.wasm
-    - name: profiles_core
-      bundled: ../../../../target/wasm32-unknown-unknown/release/profiles_core.wasm
+    - name: profiles_integrity
+      bundled: ../../../../target/wasm32-unknown-unknown/release/profiles_integrity.wasm
 coordinator:
   zomes:
     - name: how
@@ -19,4 +19,4 @@ coordinator:
     - name: profiles
       bundled: ../../../../target/wasm32-unknown-unknown/release/profiles.wasm
       dependencies:
-        - name: profiles_core
+        - name: profiles_integrity

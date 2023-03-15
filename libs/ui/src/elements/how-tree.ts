@@ -15,6 +15,7 @@ import {
 import { HowNode } from "./how-node";
 import { EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
+import { consume } from '@lit-labs/context';
 
 /**
  * @element how-tree
@@ -27,11 +28,12 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   @property() currentNode = "";
   @property() treeType = "tree";
 
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext, subscribe: true })
   _store!: HowStore;
 
-  @contextProvided({ context: profilesStoreContext })
+  @consume({ context: profilesStoreContext, subscribe: true })
   _profiles!: ProfilesStore;
+
 
   _tree = new StoreSubscriber(this, () => this._store.tree);
   _units = new StoreSubscriber(this, () => this._store.units);

@@ -5,8 +5,17 @@ members = [
   ]
 
 [workspace.dependencies]
-hdi = "0.2.0-beta-rc.1"
-hdk = "0.1.0-beta-rc.1"
+hdi = "=0.2.1"
+hdk = "=0.1.1"
+holochain = "0.1.3"
+serde = "1"
+
+[workspace.dependencies.profiles]
+path = "libs/zomes/profiles"
+
+[workspace.dependencies.profiles_integrity]
+path = "libs/zomes/profiles_integrity"
+
 
 [profile.dev]
 opt-level = "z"

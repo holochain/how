@@ -26,9 +26,10 @@
     "watch-cli": "^0.2.3"
   },
   "dependencies": {
-    "@holochain/client": "^0.11.9",
-    "@holochain-open-dev/utils": "0.7.2",
-    "@holochain-open-dev/profiles": "^0.9.3",
+    "@holochain/client": "^0.12.5",
+    "@holochain-open-dev/utils": "0.12.0",
+    "@holochain-open-dev/profiles": "^0.11.2",
+    "@holochain-open-dev/stores": "^0.4.2",
     "@open-wc/scoped-elements": "^2.1.3",
     "@scoped-elements/material-web": "0.0.19",
     "@scoped-elements/shoelace": "0.0.8",

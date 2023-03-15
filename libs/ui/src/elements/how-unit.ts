@@ -1,9 +1,7 @@
 import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
 
-import { contextProvided } from "@lit-labs/context";
 import {StoreSubscriber} from "lit-svelte-stores";
-import { Unsubscriber, Readable, get } from "svelte/store";
 
 import {sharedStyles} from "../sharedStyles";
 import {Unit, DocType, howContext, SysState, Document, UnitInfo} from "../types";
@@ -13,13 +11,14 @@ import { SvgButton } from "./svg-button";
 import { HowNode } from "./how-node";
 
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import {ProfilesStore, profilesStoreContext, Profile, AgentAvatar} from "@holochain-open-dev/profiles";
 import {
   Button,
 } from "@scoped-elements/material-web";
 import { Action, EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 import { InfoItem } from "./info-item";
 import { HowConfirm } from "./how-confirm";
+import { consume } from '@lit-labs/context';
+import { Profile, ProfilesStore, profilesStoreContext } from "@holochain-open-dev/profiles";
 
 const getCurrentStateName  = (unit:Unit, documentState:string ): string => {
   for (const [procType, procName] of unit.processes) {
@@ -43,13 +42,16 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   @property() currentUnitEh = "";
   @state() versionIndex: number | undefined = undefined;
 
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext, subscribe: true })
   _store!: HowStore;
 
-  @contextProvided({ context: profilesStoreContext })
+  @consume({ context: profilesStoreContext, subscribe: true })
   _profiles!: ProfilesStore;
 
-  _myProfile!: Readable<Profile | undefined> ;
+  _allProfiles  = new StoreSubscriber(this, () =>
+    this._profiles.allProfiles
+  );
+  
   _units = new StoreSubscriber(this, () => this._store.units);
   _unitsActions = new StoreSubscriber(this, () => this._store.unitsAction);
   _unitsInfos = new StoreSubscriber(this, () => this._store.unitsInfo);
@@ -61,12 +63,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
 
   @query('how-confirm')
   _confirmElem!: HowConfirm;
-
-
-  get myNickName(): string {
-    const p = get(this._myProfile)
-    return p ? p.nickname : "";
-  }
 
   handleNodelink(path: string) {
     this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
@@ -138,7 +134,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     
     const created = new Date(action.timestamp)
     const creatorHash = encodeHashToBase64(action.author)
-    const creator = this._store.getProfileSync(creatorHash)
+    let creator: Profile |undefined = undefined
+    if (this._allProfiles.value.status == "complete")
+      creator = this._allProfiles.value.value.get(action.author)
     let stateHTML
     let controlsHTML:any[] = []
 
@@ -245,7 +243,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       "mwc-button": Button,
       "how-unit-details": HowUnitDetails,
       "how-node": HowNode,
-      "agent-avatar": AgentAvatar,
       "svg-button": SvgButton,
       "info-item": InfoItem,
       "how-confirm": HowConfirm,

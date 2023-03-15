@@ -37,9 +37,9 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@holochain-open-dev/profiles": "^0.9.3",
-    "@holochain/client": "^0.11.9",
-    "@lit-labs/context": "^0.1.2",
+    "@holochain-open-dev/profiles": "^0.11.2",
+    "@holochain/client": "^0.12.5",
+    "@lit-labs/context": "^0.2.0",
     "@how/elements": "^0.0.1",
     "lit": "^2.1.4"
   }

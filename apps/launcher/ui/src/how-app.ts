@@ -1,5 +1,5 @@
 import { ContextProvider } from "@lit-labs/context";
-import { state } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import {
   HowController,
   HowUnit,
@@ -10,36 +10,43 @@ import {
   ProfilePrompt,
   ProfilesStore,
   profilesStoreContext,
-  ProfilesService,
+  ProfilesClient,
+  ProfilesConfig,
 } from "@holochain-open-dev/profiles";
 import { AppAgentWebsocket, AppWebsocket } from '@holochain/client';
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import { LitElement, html } from "lit";
+import { provide } from '@lit-labs/context';
 
 export class HowApp extends ScopedElementsMixin(LitElement) {
   @state()
   loaded = false;
 
+  @provide({ context: howContext })
+  @property()
+  _howStore!: HowStore;
+
+  @provide({ context: profilesStoreContext })
+  @property()
+  _profilesStore!: ProfilesStore;
+
   async firstUpdated() {
-    const appWebsocket = await AppWebsocket.connect('');
 
-    const client = await AppAgentWebsocket.connect(appWebsocket, "how")
+    const appAgentClient = await AppAgentWebsocket.connect("", "how")
+  
 
 
-    const store = new ProfilesStore(new ProfilesService(client, 'how'), {
-      avatarMode: "avatar-required",
-    })
+    this._howStore = new HowStore(appAgentClient, "how")
 
-    store.fetchAllProfiles()
-
-    new ContextProvider(this, profilesStoreContext, store);
-
-    new ContextProvider(
-      this,
-      howContext,
-      new HowStore(client, store, "how")
+    const config:ProfilesConfig = {
+      minNicknameLength: 3,
+      avatarMode: "avatar-optional",
+      additionalFields: [], // "Location","Hashtags", "Bio"// Custom app level profile fields
+    };
+    
+    this._profilesStore = new ProfilesStore(
+      new ProfilesClient(appAgentClient, 'how'), config
     );
-
 
     this.loaded = true;
   }

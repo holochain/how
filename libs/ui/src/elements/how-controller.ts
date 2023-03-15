@@ -1,9 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { state, property, query } from "lit/decorators.js";
 
-import { contextProvided } from "@lit-labs/context";
-import { StoreSubscriber } from "lit-svelte-stores";
-import { Unsubscriber, Readable, get } from "svelte/store";
+import { get } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
 import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType} from "../types";
@@ -15,6 +13,7 @@ import { HowUnitDialog } from "./how-unit-dialog";
 import { SlAvatar } from '@scoped-elements/shoelace';
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
+import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
 
 import {
   ListItem,
@@ -28,6 +27,7 @@ import {
   Profile,
 } from "@holochain-open-dev/profiles";
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
+import { consume } from '@lit-labs/context';
 
 /**
  * @element how-controller
@@ -43,13 +43,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   /** Dependencies */
 
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext, subscribe: true })
   _store!: HowStore;
 
-  @contextProvided({ context: profilesStoreContext })
+  @consume({ context: profilesStoreContext, subscribe: true })
   _profiles!: ProfilesStore;
 
-  _myProfile!: Readable<Profile | undefined> ;
+
+  _myProfile!: StoreSubscriber<AsyncStatus<Profile | undefined>>;
   _units = new StoreSubscriber(this, () => this._store.units);
   _unitsPath = new StoreSubscriber(this, () => this._store.unitsPath);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
@@ -80,7 +81,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
        if (avatar) {
          fields['avatar'] = avatar;
        }
-      await this._profiles.createProfile({
+      await this._profiles.client.createProfile({
         nickname,
         fields,
       });
@@ -93,12 +94,20 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
 
   get myNickName(): string {
-    const p = get(this._myProfile)
-    return p ? p.nickname : "";
+    if (this._myProfile.value.status == "complete") {
+      const profile = this._myProfile.value.value;
+      if (profile)
+        return profile.nickname
+    }
+    return ""
   }
   get myAvatar(): string {
-    const p = get(this._myProfile)
-    return p ? p.fields.avatar : "";
+    if (this._myProfile.value.status == "complete") {
+      const profile = this._myProfile.value.value;
+      if (profile)
+        return profile.fields.avatar
+    }
+    return ""
   }
 
   getCurrentPath() : string {
@@ -111,7 +120,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
   private async subscribeProfile() {
 
-    this._myProfile = await this._profiles.fetchMyProfile()
+    this._myProfile = new StoreSubscriber(
+      this,
+      () => this._profiles.myProfile
+    );
   }
 
   async firstUpdated() {
@@ -172,7 +184,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     console.log("refresh: Pulling data from DHT")
     await this._store.pullUnits();
     await this._store.pullTree();
-    await this._profiles.fetchAllProfiles()
   }
 
   get unitElem(): HowUnit {
@@ -297,7 +308,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       ${document}    
     </div>
     <how-unit-dialog id="unit-dialog"
-                        .myProfile=${get(this._myProfile)}
                         @unit-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
     </how-unit-dialog>
   </div>

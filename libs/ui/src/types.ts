@@ -263,7 +263,7 @@ export interface MarkDocumentInput {
   mark: String,
 }
 
-export type Signal =
+export type HowSignal =
   | {
     unitHash: EntryHashB64, message: {type: "NewUnit", content:  Unit}
   }

@@ -18,6 +18,6 @@ hdk = { workspace = true, features = ["encoding"] }
 
 
 [dev-dependencies]
-holochain = { version = "0.1.0-beta-rc.2", default-features = false, features = ["test_utils"] }
+holochain = { workspace = true, default-features = false, features = ["test_utils"] }
 tokio = {version = "1.3", features = ["full"]}
 futures = { version = "0.3.1", default-features = false }
