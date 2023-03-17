@@ -28,6 +28,7 @@ import {
 } from "@holochain-open-dev/profiles";
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
 import { consume } from '@lit-labs/context';
+import { HowMyProfileDialog } from "./how-my-profile-dialog";
 
 /**
  * @element how-controller
@@ -51,6 +52,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 
 
   _myProfile!: StoreSubscriber<AsyncStatus<Profile | undefined>>;
+  @query("how-my-profile")
+  _myProfileDialog!:HowMyProfileDialog
+
   _units = new StoreSubscriber(this, () => this._store.units);
   _unitsPath = new StoreSubscriber(this, () => this._store.unitsPath);
   _documentPaths = new StoreSubscriber(this, () => this._store.documentPaths);
@@ -291,12 +295,12 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     </how-document>` : ""
     return html`
 
-
+  <how-my-profile></how-my-profile>
   <div>
     <div id="top-bar" class="row">
       <div id="top-bar-title">How ${this._currentUnitEh ? ` - ${this._units.value[this._currentUnitEh].shortName}` : ''}</div>
       <mwc-icon-button icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
-      <mwc-icon-button icon="account_circle" @click=${() => {alert("TBD: edit account")}}></mwc-icon-button>
+      <mwc-icon-button icon="account_circle" @click=${() => {this._myProfileDialog.open()}}></mwc-icon-button>
       <mwc-icon-button icon="settings" @click=${() => {alert("TBD: settings")}}></mwc-icon-button>
     </div>
 
@@ -329,6 +333,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "how-unit": HowUnit,
       "how-tree": HowTree,
       "how-document": HowDocument,
+      'how-my-profile': HowMyProfileDialog,
     };
   }
 

@@ -34,8 +34,6 @@ export class HowApp extends ScopedElementsMixin(LitElement) {
 
     const appAgentClient = await AppAgentWebsocket.connect("", "how")
   
-
-
     this._howStore = new HowStore(appAgentClient, "how")
 
     const config:ProfilesConfig = {
