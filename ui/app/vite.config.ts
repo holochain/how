@@ -29,15 +29,12 @@ const exclude = components.map(
 );
 export default defineConfig({
   optimizeDeps: {
-    disabled: true,
+   // disabled: true,
     exclude: [
       ...exclude,
       '@holochain-open-dev/elements/elements/display-error.js',
-      '@holochain-open-dev/elements/elements/holo-identicon.js',
-      '@holochain-open-dev/profiles/elements/elements/agent-avatar.js',
-      '@holochain-open-dev/profiles/dist/elements/agent-avatar.js',
-      '@holochain-open-dev/elements/elements/agent-avatar.js',
-      '@holochain-open-dev/elements/dist/icon.js',
+      '@holochain-open-dev/elements/dist/elements/holo-identicon.js',
+      '@holochain-open-dev/profiles/elements/dist/agent-avatar.js',
     ],
   },
   plugins: [

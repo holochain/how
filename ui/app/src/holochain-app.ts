@@ -1,7 +1,7 @@
-import {
-  FileStorageClient,
-  fileStorageClientContext,
-} from '@holochain-open-dev/file-storage';
+// import {
+//   FileStorageClient,
+//   fileStorageClientContext,
+// } from '@holochain-open-dev/file-storage';
 import {
   ProfilesClient,
   ProfilesConfig,
@@ -39,9 +39,9 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
   @state()
   loaded = false;
 
-  @provide({ context: fileStorageClientContext })
-  @property()
-  _fileStorageClient!: FileStorageClient;
+  // @provide({ context: fileStorageClientContext })
+  // @property()
+  // _fileStorageClient!: FileStorageClient;
 
   @provide({ context: howContext })
   @property()
