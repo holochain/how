@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult} from "lit";
-import {property, query, state} from "lit/decorators.js";
+import {customElement, property, query, state} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";

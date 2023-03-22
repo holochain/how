@@ -22,7 +22,7 @@
     "@holochain/client": "^0.12.0",
     "@lit-labs/context": "^0.2.0",
     "@lit/localize": "^0.11.4",
-    "lit": "^2.6.0"
+    "lit": "^2.7.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.0",
