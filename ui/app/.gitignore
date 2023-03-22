@@ -1,28 +1,23 @@
 ## editors
 /.idea
 /.vscode
-*.swp
 
 ## system files
 .DS_Store
 
-target/
-node_modules/
-dist/
-.cargo/
-.hc*
-*.dna
-*.happ
-*.webhapp
-*.zip
-*.tsbuildinfo
-.running
+## npm
+/node_modules/
+/npm-debug.log
+
+## testing
+/coverage/
 
 ## temp folders
 /.tmp/
 
 # build
 /_site/
+/dist/
 /out-tsc/
 
 storybook-static

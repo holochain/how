@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        background: #fafafa;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+    </style>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="hi"></div>
+
+    <script type="module">
+      import { AppWebsocket, AdminWebsocket } from "@holochain/client";
+      import NotebooksWeGame from "./src/index.ts";
+
+      const element = document.getElementById("hi");
+
+      async function setup() {
+        const appWs = await AppWebsocket.connect(
+          `ws://localhost:${process.env.HC_PORT}`
+        );
+        const adminWs = await AdminWebsocket.connect(
+          `ws://localhost:${process.env.ADMIN_PORT}`
+        );
+
+        const appInfo = await appWs.appInfo({
+          installed_app_id: "notebooks",
+        });
+
+        NotebooksWeGame.gameRenderers(
+          appWs,
+          adminWs,
+          { profilesStore: null },
+          appInfo
+        ).full(element, customElements);
+      }
+      setup();
+    </script>
+  </body>
+</html>

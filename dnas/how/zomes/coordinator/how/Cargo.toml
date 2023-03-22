@@ -1,0 +1,17 @@
+[package]
+name = "how"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "how"
+
+[dependencies]
+thiserror = "1.0.20"
+
+hdk = { workspace = true }
+
+serde = { workspace = true }
+
+how_integrity = { workspace = true } 

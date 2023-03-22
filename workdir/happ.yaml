@@ -1,0 +1,17 @@
+---
+manifest_version: "1"
+name: how
+description: ~
+roles:
+  - name: how
+    provisioning:
+      strategy: create
+      deferred: false
+    dna:
+      bundled: "../dnas/how/workdir/how.dna"
+      modifiers:
+        network_seed: ~
+        properties: ~
+        origin_time: ~
+      version: ~
+      clone_limit: 0
