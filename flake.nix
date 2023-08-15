@@ -4,9 +4,10 @@
   inputs = {
     nixpkgs.follows = "holochain/nixpkgs";
 
+    versions.url = "github:holochain/holochain/?dir=versions/0_1";
     holochain = {
       url = "github:holochain/holochain";
-      inputs.versions.url = "github:holochain/holochain/?dir=versions/0_1";
+      inputs.versions.follows = "versions";
     };
   };
 
