@@ -13,6 +13,7 @@ import { HowUnitDialog } from "./how-unit-dialog";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
 import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
+import { aliveImage } from "../images";
 
 import {
   ListItem,
@@ -134,6 +135,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       await this.createDummyProfile()
     }
     this.subscribeProfile()
+    this.checkInit()
   }
  
   private _getFirst(units: Dictionary<Unit>): EntryHashB64 {
@@ -149,32 +151,23 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return "";
   }
 
-  async checkInit() {
-    if (this.initialized || this.initializing) {
-      this.initialized = true;
+  async addDefault() {
+    if (this.initializing || this.initialized) {
       return;
     }
     this.initializing = true  // because checkInit gets call whenever profiles changes...
+    await this.addHardcodedUnits();
+    this.initializing = false
+    this.checkInit()
+  }
+
+  async checkInit() {
     let units = await this._store.pullUnits();
     await this._store.pullTree();
 
-    /** load up a unit if there are none */
-    if (Object.keys(units).length == 0) {
-      console.log("no units found, initializing")
-      await this.addHardcodedUnits();
-      units = await this._store.pullUnits();
-      await this._store.pullTree();
+    if (Object.keys(units).length > 0) {
+      this.initialized = true
     }
-    if (Object.keys(units).length == 0) {
-      console.error("No units found")
-    }
-   // this._currentUnitEh = this._getFirst(units);
-
-    //console.log("   current unit: ",  units[this._currentUnitEh].shortName, this._currentUnitEh);
-
-    // - Done
-    this.initializing = false
-    this.initialized = true
   }
 
   async addHardcodedUnits() {
@@ -259,18 +252,48 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this._currentDocumentEh = hash
     this._documentReadOnly = readOnly
   }
+  clickCount = 0
+  @state() showInit = false
+  adminCheck = () => { 
+    this.clickCount += 1
+    if (this.clickCount == 5) {
+      this.clickCount = 0
+      this.showInit = true
+    }
+  }
   render() {
     if (!this.initialized) {
       return html`
-      <mwc-button
-          id="primary-action-button"
-          slot="primaryAction"
-          @click=${()=>this.checkInit()}
-          >Initialize</mwc-button
-        > 
+
+      <div class="initializing">
+        <div class="wrapper">
+          <div class="about-event"/>
+            <img class="how-welcome" src=${aliveImage}
+            @click=${()=>this.adminCheck()}>
+            <h3>Welcome to How!</h3>
+            <p>Either your node hasn't synchronized yet with the network, or you are the first one here! </p>
+            ${this.showInit ? html`
+            <mwc-button
+              id="primary-action-button"
+              slot="primaryAction"
+              @click=${()=>this.addDefault()}
+              >Initialize</mwc-button
+            > 
+            ` : html`
+            <mwc-button
+              id="primary-action-button"
+              slot="primaryAction"
+              @click=${()=>this.checkInit()}
+              >Reload</mwc-button
+            > 
+            `}
+            
+          </div>
+        </div>
+      </div>
       `
     }
-    const tree = html`
+    const tree = html`  
       <how-tree id="tree"
         .treeType=${this._treeType}
         @node-selected=${this.handleNodeSelected}
@@ -364,7 +387,42 @@ export class HowController extends ScopedElementsMixin(LitElement) {
           margin-bottom: 20px;
           display:flex;
         }
+        .initializing {
+          width: 100vw;
+          display: block;
+          height: 100vh;
+          background-image: url(/images/dweb-background.jpg);
+          background-size: cover;
+          overflow-y: scroll;
+        }
 
+        .initializing .wrapper {
+          display: block;
+          height: 100%;
+          max-width: 320px;
+          margin: 0 auto;
+        }
+
+
+        .about-event {
+          padding: 20px;
+          
+        }
+        .about-event h3 {
+          text-align: center;
+        }
+
+        .about-event p {
+          font-size: 14px;
+          text-align: center;
+          margin-top: 15px;
+          margin-bottom: 0;
+        }
+        .how-welcome {
+          width: 200px;
+          margin: 0 auto;
+          display: block;
+        }
         mwc-textfield.rounded {
           --mdc-shape-small: 20px;
           width: 7em;

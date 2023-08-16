@@ -8,9 +8,9 @@ opt-level = "z"
 members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 
 [workspace.dependencies]
-hdi = "0.2"
-hdk = "0.1"
-serde = "1"
+hdi = "=0.2.3"
+hdk = "=0.1.3"
+serde = "=1.0.145"
 
 [workspace.dependencies.file_storage]
 path = "dnas/how/zomes/coordinator/file_storage"
@@ -29,3 +29,4 @@ path = "dnas/how/zomes/coordinator/profiles"
 
 [workspace.dependencies.profiles_integrity]
 path = "dnas/how/zomes/integrity/profiles"
+
