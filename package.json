@@ -1,40 +1,32 @@
 {
   "name": "how-dev",
   "private": true,
-  "workspaces": [
-    "libs/ui",
-    "apps/*/ui",
-    "tests"
-  ],
+  "workspaces": ["ui/*", "tests"],
   "scripts": {
-    "start": "npm run build:launcher && npm run launch:happ",
-    "launch:happ" : "RUST_LOG=warn echo \"pass\" | hc launch --piped -n 1 ./apps/launcher/workdir/how.happ -w --ui-path apps/launcher/ui/dist network mdns",
-    "start:old": "npm run build:launcher && npm run start:agent",
-    "start:playground": "npm run build:launcher && concurrently \"npm run start:agent:playground\"",
-    "network": "npm run build:launcher && concurrently-repeat \"npm run start:agent\"",
-    "network:playground": "npm run build:launcher && concurrently-repeat \"npm run start:agent:playground\"",
-    "start:agent": "cross-env HC_PORT=$(port) concurrently \"npm run dev:libs\" \"npm run start:happ\" \"sleep 10 && npm run start -w how-app\"",
-    "dev:libs": "npm run build -w @how/elements",
-    "start-proxied": "npm run build:launcher && npm run build -w @how/elements && cross-env HC_PORT=$(port) concurrently -k \"npm run start:happ-proxied\" \"npm run start -w how-app\"",
-    "start-rerun": "cross-env HC_PORT=8888 concurrently -k \"npm run build:watch -w @how/elements\" \"echo \"pass\" | hc s --piped run 0 -p 8888\" \"npm run start -w how-app\"",
-    "prepare": "npm run build -w @how/elements && npm run build -w how-app",
-    "playground": "run-singleton \"holochain-playground\"",
-    "test": "npm run build:launcher && npm run build -w @how/elements && npm t -w tests",
-    "start:happ": "rimraf .hc* && RUST_LOG=warn echo \"pass\" | hc s --piped generate ./apps/launcher/workdir/how.happ --run=$HC_PORT -a how network mdns",
-    "start:happ-proxied": "rimraf .hc* && RUST_LOG=debug echo \"pass\" | hc s --piped generate ./launcher/workdir/how.happ --run=$HC_PORT -a how network --bootstrap https://bootstrap-staging.holo.host/ quic -p=kitsune-proxy://SYVd4CF3BdJ4DS7KwLLgeU3_DbHoZ34Y-qroZ79DOs8/kitsune-quic/h/165.22.32.11/p/5779/--",
-    "package:launcher": "npm run build:launcher && npm run package -w how-app && hc web-app pack ./apps/launcher/workdir",
-    "build:launcher": "npm run build -w \"@how/elements\" && npm run build -w how-app",
-    "clean": "npm run clean:node && npm run clean:rust",
-    "clean:node": "rimraf node_modules && rimraf ui/apps/how/node_modules/  && rimraf ui/lib/node_modules && rimraf test/node_modules",
-    "clean:rust": "rimraf target && rimraf .cargo"
+    "start": "AGENTS=2 npm run network:app",
+    "start:applet": "AGENTS=2 npm run network:applet",
+    "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) UI_PORT=8888 npm run x",
+    "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently -k \"npm run build:watch -w @holochain/how\" \"npm start -w app\" \"npm run start:happ\" ",
+    "prepare": "npm run build -w @holochain/how",
+    "network:app": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently -k \"npm run build:watch -w @holochain/how\" \"npm start -w app\" \"npm run launch\" \"holochain-playground\"",
+    "network:applet": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently -k \"npm run build:watch -w @holochain/how\" \"npm start -w applet\" \"npm run launch\" \"holochain-playground\"",
+    "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
+    "launch": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/how.happ --ui-port $UI_PORT network mdns",
+    "start:happ": "echo \"starting with admin $VITE_ADMIN_PORT\" && RUST_LOG=warn echo \"pass\" | hc s -f=$VITE_ADMIN_PORT --piped generate workdir/how.happ --run=$VITE_APP_PORT -a how network mdns",
+    "package:app": "npm run build:happ && npm run build -w @holochain/how && npm run package -w app",
+    "package:applet": "npm run build:happ && npm run build -w @holochain/how && npm run package -w applet",
+    "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
+    "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.0.12",
-    "concurrently": "^6.2.1",
-    "concurrently-repeat": "^0.0.1",
-    "cross-env": "^7.0.3",
-    "json-parse-better-errors": "^1.0.2",
+    "@holochain-playground/cli": "^0.1.1",
+    "eslint": "^7.1.0",
+    "@open-wc/eslint-config": "^2.0.0",
+    "eslint-config-prettier": "^6.11.0",
     "new-port-cli": "^1.0.0",
-    "rimraf": "^3.0.2"
+    "concurrently": "^6.2.1"
+  },
+  "engines": {
+    "npm": ">=7.0.0"
   }
 }

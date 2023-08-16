@@ -1,0 +1,14 @@
+[package]
+name = "how_integrity"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "how_integrity"
+
+[dependencies]
+hdi = { workspace = true }
+hdk = { workspace = true }
+
+serde = { workspace = true }

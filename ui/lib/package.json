@@ -1,0 +1,63 @@
+{
+  "name": "@holochain/how",
+  "description": "Webcomponent lit-element following open-wc recommendations",
+  "author": "eric.harris-braun@holo.host",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w --preserveWatchOutput false",
+    "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
+    "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./elements/*": "./dist/elements/*",
+    "./mocks": "./dist/mocks.js"
+  },
+  "dependencies": {
+    "@open-wc/scoped-elements": "^2.1.4",
+    "@scoped-elements/material-web": "0.0.19",
+    "@shoelace-style/shoelace": "^2.3.0",
+
+    "@holochain/client": "^0.12.5",
+    "@holochain-open-dev/elements": "^0.3.10",
+    "@holochain-open-dev/file-storage": "^0.2.0",
+    "@holochain-open-dev/profiles": "^0.12.0",
+    "@holochain-open-dev/stores": "^0.4.2",
+    "@holochain-open-dev/utils": "^0.12.0",
+    "@lit-labs/context": "^0.2.0",
+    "@lit-labs/task": "^2.0.0",
+    "@lit/localize": "^0.11.4",
+    "@mdi/js": "^7.2.96",
+    "@msgpack/msgpack": "^2.7.2",
+    "lit": "^2.7.0",
+    "lit-svelte-stores": "^0.2.5",
+    "lit-flatpickr": "^0.4.0",
+    "lodash-es": "^4.17.21",
+    "svelte": "^3.57.0",
+    "@ts-stack/markdown": "^1.4.0",
+    "@types/sanitize-html": "=2.6.2",
+    "wc-mermaid": "github:guillemcordoba/wc-mermaid#patch-1",
+    "javascript-time-ago": "2.3.7",
+    "@types/javascript-time-ago": "^2.0.3"
+
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.5.7",
+    "@lit/localize-tools": "^0.6.3",
+    "@open-wc/eslint-config": "^2.0.0",
+    "@types/lodash-es": "^4.17.5",
+    "@types/node": "14.11.1",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "deepmerge": "^3.2.0",
+    "eslint": "^7.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "prettier": "^2.0.4",
+    "tslib": "^2.0.0",
+    "typescript": "^4.9.0"
+  }
+}
