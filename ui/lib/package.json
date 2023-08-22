@@ -20,7 +20,8 @@
   "dependencies": {
     "@open-wc/scoped-elements": "^2.1.4",
     "@scoped-elements/material-web": "0.0.19",
-    "@shoelace-style/shoelace": "^2.3.0",
+    "@shoelace-style/shoelace": "^2.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.3.0",
 
     "@holochain/client": "^0.12.5",
     "@holochain-open-dev/elements": "^0.3.10",
@@ -42,7 +43,8 @@
     "@types/sanitize-html": "=2.6.2",
     "wc-mermaid": "github:guillemcordoba/wc-mermaid#patch-1",
     "javascript-time-ago": "2.3.7",
-    "@types/javascript-time-ago": "^2.0.3"
+    "@types/javascript-time-ago": "^2.0.3",
+    "sanitize-filename": "1.6.3"
 
   },
   "devDependencies": {

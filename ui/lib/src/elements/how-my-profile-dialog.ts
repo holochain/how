@@ -12,7 +12,7 @@ import {
 import '@holochain-open-dev/profiles/elements/my-profile.js';
 
 /**
- * @element how-new-section-dialog
+ * @element how-my-profile-dialog
  */
 export class HowMyProfileDialog extends ScopedElementsMixin(LitElement) {
   @query('#my-profile')

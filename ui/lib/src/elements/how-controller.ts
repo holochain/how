@@ -4,7 +4,7 @@ import { state, property, query } from "lit/decorators.js";
 import { get } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType} from "../types";
+import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType, Node, Section} from "../types";
 import { HowStore } from "../how.store";
 import { HowUnit } from "./how-unit";
 import { HowTree } from "./how-tree";
@@ -14,6 +14,10 @@ import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
 import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
 import { aliveImage } from "../images";
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import sanitize from "sanitize-filename";
 
 import {
   ListItem,
@@ -29,6 +33,8 @@ import {
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
 import { consume } from '@lit-labs/context';
 import { HowMyProfileDialog } from "./how-my-profile-dialog";
+import { HowSettings } from "./how-settings";
+import './how-settings.js';
 
 /**
  * @element how-controller
@@ -65,6 +71,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   private _tree!: HowTree;
   @query('#document')
   private _document!: HowDocument;
+  @query('#settings')
+  private _settings!: SlDialog;
 
   @state() _currentUnitEh = "";
   @state() _currentDocumentEh = "";
@@ -261,6 +269,113 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       this.showInit = true
     }
   }
+
+  download = (filename: string, text: string) => {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
+  serializeSection(section:Section) : any {
+    const s = {
+      name: section.name,
+      sectionType: section.sectionType,
+      contentType: section.contentType,
+      content: section.content,    
+      sourcePath: section.sourcePath,
+    }
+    if (section.sourceUnit) {
+      // @ts-ignore
+      s.sourceUnit = encodeHashToBase64(section.sourceUnit)
+    }
+    return s
+  }
+
+  serializeDocument(doc: Document) : any {
+    return {
+      hash: doc.documentHash,
+      type: doc.documentType,
+      editors: doc.editors,
+      sections: doc.content.map(s=>this.serializeSection(s)),
+      meta: doc.meta,
+      state: doc.state,
+      marks: doc.marks
+    }
+  }
+
+  serializeUnit(hash:string, unit:Unit) :any  {
+    return {
+        hash,
+        parents: unit.parents,
+        version: unit.version,
+        pathAbbreviation: unit.pathAbbreviation,
+        shortName: unit.shortName,
+        stewards: unit.stewards,
+        processes: unit.processes,
+        history: unit.history,
+        meta: unit.meta,
+      }
+  }
+
+  async pullAllDocs(parentPath: string, node:Node):Promise<void> {
+    const path = parentPath == "" ? node.val.name : `${parentPath}.${node.val.name}`
+    const _docs = await this._store.pullDocuments(path)
+    for (const c of node.children) {
+      await this.pullAllDocs(path, c)
+    }
+  }
+
+  serializeNode(path: string, node:Node, units:Dictionary<Unit> ) : any  {
+    const docs = get(this._store.documents)
+
+    return {
+      id: node.id,
+      val: {
+        name: node.val.name,
+        units: node.val.units.map(u=>{
+          const unitHash = encodeHashToBase64(u.hash)
+          return { 
+            unit: this.serializeUnit(unitHash, units[unitHash]),
+            version: u.version,
+            state: u.state,
+          }}),
+        documents: node.val.documents.map(h=>{
+          const d = docs[encodeHashToBase64(h)]
+          if (!d) {
+            console.log("FIxxxSH", path)
+            return {error:"not found",hash:encodeHashToBase64(h)}
+          }
+          return this.serializeDocument(d)
+         }),
+        children: node.children.map(c=> this.serializeNode(path == "" ? node.val.name : `${path}.${node.val.name}`, c, units))
+      }
+    }
+  }
+
+  async doExport() {
+    const rawTree = await this._store.pullTree()
+    await this.pullAllDocs("", rawTree)
+    const rawUnits = await this._store.pullUnits()
+    const tree = this.serializeNode("", rawTree, rawUnits)
+    const exportJSON= JSON.stringify(
+      {
+        tree,
+      //  documents,
+       // units,
+      }
+      )
+    const fileName = sanitize(`how.json`)
+    this.download(fileName, exportJSON)
+    alert(`exported as: ${fileName}`)
+  }
+
   render() {
     if (!this.initialized) {
       return html`
@@ -318,12 +433,17 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return html`
 
   <how-my-profile></how-my-profile>
+  <sl-dialog id="settings" label="Settings">
+      <sl-button
+      @click=${async ()=>{await this.doExport()}}>Export</sl-button>
+      </sl-dialog>
+
   <div>
     <div id="top-bar" class="row">
       <div id="top-bar-title">How ${this._currentUnitEh ? ` - ${this._units.value[this._currentUnitEh].shortName}` : ''}</div>
       <mwc-icon-button icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
       <mwc-icon-button icon="account_circle" @click=${() => {this._myProfileDialog.open()}}></mwc-icon-button>
-      <mwc-icon-button icon="settings" @click=${() => {alert("TBD: settings")}}></mwc-icon-button>
+      <mwc-icon-button icon="settings" @click=${() => {this._settings.show()}}></mwc-icon-button>
     </div>
 
     <div class="appBody column">
@@ -356,6 +476,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "how-tree": HowTree,
       "how-document": HowDocument,
       'how-my-profile': HowMyProfileDialog,
+      'how-settings': HowSettings,
     };
   }
 
