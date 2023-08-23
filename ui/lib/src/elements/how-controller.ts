@@ -4,7 +4,7 @@ import { state, property, query } from "lit/decorators.js";
 import { get } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType, Node, Section} from "../types";
+import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType, Node, Section, DocumentInitializer} from "../types";
 import { HowStore } from "../how.store";
 import { HowUnit } from "./how-unit";
 import { HowTree } from "./how-tree";
@@ -60,6 +60,10 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   _myProfile!: StoreSubscriber<AsyncStatus<Profile | undefined>>;
   @query("how-my-profile")
   _myProfileDialog!:HowMyProfileDialog
+
+
+  @query("#file-input")
+  _fileInput!: HTMLElement
 
   _units = new StoreSubscriber(this, () => this._store.units);
   _unitsPath = new StoreSubscriber(this, () => this._store.unitsPath);
@@ -157,31 +161,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
 //      }
     }
     return "";
-  }
-
-  async addDefault() {
-    if (this.initializing || this.initialized) {
-      return;
-    }
-    this.initializing = true  // because checkInit gets call whenever profiles changes...
-    await this.addHardcodedUnits();
-    this.initializing = false
-    this.checkInit()
-  }
-
-  async checkInit() {
-    let units = await this._store.pullUnits();
-    await this._store.pullTree();
-
-    if (Object.keys(units).length > 0) {
-      this.initialized = true
-    }
-  }
-
-  async addHardcodedUnits() {
-    const init:Initialization = initialTree(this._store.myAgentPubKey)
-    await this._store.initilize(init);
-    this._store.pullDocuments("soc_proto.process.define.declaration")
   }
 
   async refresh() {
@@ -375,25 +354,122 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this.download(fileName, exportJSON)
     alert(`exported as: ${fileName}`)
   }
+  async doInitializeDHT(init:Initialization) {
+    if (this.initializing || this.initialized) {
+      console.log("initialization allready started")
+      return;
+    }
+    console.log("starting initialization")
+    this.initializing = true  // because checkInit gets call whenever profiles changes...
+    await this._store.initilize(init);
+    this.initializing = false
+    console.log("initialization complete")
+    this.checkInit()
+  }
+
+  async addDefault() {
+    const init  = initialTree(this._store.myAgentPubKey)
+
+    await this.doInitializeDHT(init)
+    this._store.pullDocuments("soc_proto.process.define.declaration")
+  }
+
+  async checkInit() {
+    let units = await this._store.pullUnits();
+    await this._store.pullTree();
+
+    if (Object.keys(units).length > 0) {
+      this.initialized = true
+    }
+  }
+
+  dataFromImport(parentPath:string, node:any ): [Array<[string,Unit]>, Array<DocumentInitializer>] {
+    let units: Array<[string,Unit]> = []
+    let documents: Array<DocumentInitializer> = []
+
+    for (const unitInfo of node.val.units) {
+      const unit:any = unitInfo.unit
+      units.push([unitInfo.state, new Unit({
+        parents: unit.parents, // full paths to parent nodes (remember it's a DAG)
+        version: unitInfo.version,
+        pathAbbreviation: unit.pathAbbreviation, // max 10 char
+        shortName: unit.shortName, // max 25 char
+        stewards: [this._store.myAgentPubKey], // people who can change this document
+        processes: unit.processes,
+      })])
+    }
+    const path = parentPath == "" ? node.val.name : `${parentPath}.${node.val.name}`
+    console.log("importing:", path)
+    for (const doc of node.val.documents) {
+      documents.push(
+        {
+          path,
+          documentType: doc.type,
+          content:doc.sections,
+          editors:[this._store.myAgentPubKey],
+          meta: doc.meta
+        }
+      )
+    }
+    for (const n of node.val.children) {
+      const [u,d] = this.dataFromImport(path, n)
+      units = units.concat(u)
+      documents = documents.concat(d)
+    }
+    return [units,documents]
+  }
+
+  initializationFromImport(importData: any) : Initialization {
+    console.log("creating initialization structs..")
+    const [units, documents] = this.dataFromImport("", importData.tree)
+    const init: Initialization = {
+      units,
+      documents,
+    }
+    return init
+  }
+
+  onFileSelected = (e:any)=>{
+    let file = e.target.files[0];
+    let reader = new FileReader();
+
+    reader.addEventListener("load", async () => {
+        console.log("import file loaded, parsing...")
+        const b = JSON.parse(reader.result as string)
+        const init:Initialization  = this.initializationFromImport(b)
+        await this.doInitializeDHT(init)
+    }, false);
+    reader.readAsText(file);
+  }
 
   render() {
     if (!this.initialized) {
       return html`
 
       <div class="initializing">
+        <input id="file-input" style="display:none" type="file" accept=".json" @change=${(e:any)=>{console.log("FISH");this.onFileSelected(e)}} >
         <div class="wrapper">
           <div class="about-event"/>
             <img class="how-welcome" src=${aliveImage}
             @click=${()=>this.adminCheck()}>
             <h3>Welcome to How!</h3>
-            <p>Either your node hasn't synchronized yet with the network, or you are the first one here! </p>
+            <p>Either your node hasn't synchronized yet with the network, or you are the first one here! 
             ${this.showInit ? html`
+            <h3>Initialize with: </h3>
             <mwc-button
               id="primary-action-button"
               slot="primaryAction"
               @click=${()=>this.addDefault()}
-              >Initialize</mwc-button
+              >Holochain Community Standards</mwc-button
             > 
+            or<br />
+            <mwc-button
+              id="primary-action-button"
+              slot="primaryAction"
+              @click=${()=>this._fileInput.click()}
+              >Import JSON File</mwc-button
+            > 
+            
             ` : html`
             <mwc-button
               id="primary-action-button"
@@ -402,7 +478,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
               >Reload</mwc-button
             > 
             `}
-            
+            </p>
           </div>
         </div>
       </div>
