@@ -33,8 +33,8 @@ import {
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
 import { consume } from '@lit-labs/context';
 import { HowMyProfileDialog } from "./how-my-profile-dialog";
-import { HowSettings } from "./how-settings";
-import './how-settings.js';
+//import { HowSettings } from "./how-settings";
+//import './how-settings.js';
 
 /**
  * @element how-controller
@@ -552,7 +552,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "how-tree": HowTree,
       "how-document": HowDocument,
       'how-my-profile': HowMyProfileDialog,
-      'how-settings': HowSettings,
+//      'how-settings': HowSettings,
     };
   }
 
