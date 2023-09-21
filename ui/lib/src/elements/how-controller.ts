@@ -328,7 +328,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         documents: node.val.documents.map(h=>{
           const d = docs[encodeHashToBase64(h)]
           if (!d) {
-            console.log("FIxxxSH", path)
             return {error:"not found",hash:encodeHashToBase64(h)}
           }
           return this.serializeDocument(d)

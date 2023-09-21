@@ -92,7 +92,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       const unit: Unit = this._units.value[this.currentUnitEh]
       const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
       const process_path = unit.processPathForState(unitInfo.state)
-      console.log("cprod path", process_path)
       // TODO we should be using a unitHash, not a process path to prevent dups
       const docInfo = await this._store.getCurrentDocumentPull(process_path, undefined)
       const threshold = docInfo?.content.getSection("threshold")
