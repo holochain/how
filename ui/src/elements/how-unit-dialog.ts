@@ -14,7 +14,7 @@ import {
   Select,
   ListItem,
 } from "@scoped-elements/material-web";
-import '@holochain-open-dev/profiles/elements/search-agent.js';
+import '@holochain-open-dev/profiles/dist/elements/search-agent.js';
 import { StoreSubscriber } from "lit-svelte-stores";
 import { consume } from '@lit-labs/context';
 

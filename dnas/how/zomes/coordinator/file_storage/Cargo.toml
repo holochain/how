@@ -13,4 +13,4 @@ hdk = { workspace = true }
 serde = { workspace = true }
 
 file_storage_integrity = { workspace = true }
-hc_zome_file_storage_coordinator = "0.1"
+hc_zome_file_storage_coordinator = "0.2"

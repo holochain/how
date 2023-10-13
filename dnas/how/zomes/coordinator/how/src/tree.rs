@@ -2,7 +2,7 @@ pub use hdk::prelude::*;
 pub use hdk::hash_path::path::TypedPath;
 use how_integrity::{TREE_ROOT, LinkTypes};
 
-use crate::unit::convert_tag;
+use crate::{unit::convert_tag, HowError};
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct UnitInfo {
@@ -27,7 +27,8 @@ fn get_entry_hashes(path: &Path) -> ExternResult<(Vec<UnitInfo>,Vec<EntryHash>)>
             zome_index: l.zome_index,
             zome_type: l.link_type,
         })?;
-        let target = l.target.into();
+
+        let target = l.target.try_into().map_err(|e| HowError::HashConversionError)?;
         match link_type {
             LinkTypes::Document => documents.push(target),
             LinkTypes::Unit => {

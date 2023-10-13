@@ -9,21 +9,29 @@
     "build": "vite build",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
-    "package": "npm run build && cd dist && bestzip ../dist.zip * && cd .. && hc web-app pack workdir --recursive"
+    "package": "rm -f dist.zip && npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
+    "@scoped-elements/material-web": "0.0.19",
     "@open-wc/scoped-elements": "^2.1.4",
-    "@holochain/how": "^0.1.0",
-    "@holochain-open-dev/elements": "^0.3.10",
-    "@holochain-open-dev/file-storage": "^0.2.0",
-    "@holochain-open-dev/profiles": "^0.12.0",
-    "@holochain-open-dev/stores": "^0.4.2",
-    "@holochain-open-dev/utils": "^0.12.0",
-    "@holochain/client": "^0.12.0",
+    "@shoelace-style/shoelace": "^2.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.3.0",
+    "@holochain-open-dev/elements": "^0.7.0",
+    "@holochain-open-dev/profiles": "^0.16.0",
+    "@holochain-open-dev/file-storage": "^0.6.1",
+    "@holochain-open-dev/stores": "^0.6.0",
+    "@holochain-open-dev/utils": "^0.15.0",
+    "@holochain/client": "^0.16",
+    "@lightningrodlabs/we-applet": "0.9.0",
     "@lit-labs/context": "^0.2.0",
     "@lit/localize": "^0.11.4",
-    "@shoelace-style/shoelace": "^2.3.0",
-    "lit": "^2.7.0"
+    "lit": "^2.7.0",
+    "@ts-stack/markdown": "^1.4.0",
+    "@types/sanitize-html": "=2.6.2",
+    "wc-mermaid": "github:guillemcordoba/wc-mermaid#patch-1",
+    "javascript-time-ago": "2.3.7",
+    "@types/javascript-time-ago": "^2.0.3",
+    "sanitize-filename": "1.6.3"
   },
   "devDependencies": {
     "@lit/localize-tools": "^0.6.3",
@@ -39,9 +47,9 @@
     "eslint-config-prettier": "^6.11.0",
     "prettier": "^2.0.4",
     "rimraf": "^3.0.2",
-    "tslib": "^2.0.0",
+    "tslib": "^2.4.1",
     "typescript": "^4.9.0",
-    "vite": "^4.0.4",
+    "vite": "^4.3.4",
     "vite-plugin-checker": "^0.5.3",
     "vite-plugin-static-copy": "^0.13.1"
   }

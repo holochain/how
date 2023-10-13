@@ -10,12 +10,12 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "outDir": "dist",
     "sourceMap": true,
     "inlineSources": true,
     "rootDir": "./src",
     "incremental": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types":["vite/client"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts","src/vite.config.ts"]
 }

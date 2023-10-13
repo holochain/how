@@ -13,7 +13,7 @@ import {
   Button,
 } from "@scoped-elements/material-web";
 
-import '@holochain-open-dev/profiles/elements/agent-avatar.js';
+import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import { HowNewSectionDialog } from "./how-new-section-dialog";
 import { HowSection } from "./how-section";
 import { HowComment } from "./how-comment";
@@ -133,16 +133,28 @@ import { CommentControl, Control } from "../controls";
       }
     }
 
-    openCommentFromSelection(section: Section) {
+    openCommentFromSelection(detail:any) {
+      //@ts-ignore
+      const section: Section = detail.section
+      //@ts-ignore
+      const element: HTMLElement = detail.element
+      //@ts-ignore
+      const root: ShadowRoot = detail.root
       const doc = this._documents.value[this.currentDocumentEh]
       if (doc.state != "refine" || this.readOnly) {
         return
       }
 
-      // TODO handle double-click     
-      const sel = document.getSelection()
+      // TODO handle double-click
+
+      //@ts-ignore
+      const sel = root.getSelection()
+      if (!sel) {
+        const sel= document.getSelection()
+      }
       if (sel) {
         const range = sel.getRangeAt(0)
+        console.log("RANGE",range)
         let extra = 0
         if (this.highlitRange) {
           switch (range.startContainer.parentElement?.id) {

@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import { AgentPubKeyB64, encodeHashToBase64 } from "@holochain/client";
 import { HowAgentList } from "./how-agent-list";
 import "./how-agent-list";
-import '@holochain-open-dev/profiles/elements/search-agent.js';
+import '@holochain-open-dev/profiles/dist/elements/search-agent.js';
 
 /**
  * @element how-edit-agent-list

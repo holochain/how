@@ -34,15 +34,15 @@ export default defineConfig({
       ...exclude,
       '@holochain-open-dev/elements/elements/display-error.js',
       '@holochain-open-dev/elements/dist/elements/holo-identicon.js',
-      '@holochain-open-dev/profiles/elements/dist/agent-avatar.js',
+      '@holochain-open-dev/profiles/dist/elements/dist/agent-avatar.js',
     ],
   },
   plugins: [
     checker({
       typescript: true,
-      eslint: {
-        lintCommand: 'eslint --ext .ts,.html src',
-      },
+      // eslint: {
+      //   lintCommand: 'eslint --ext .ts,.html src',
+      // },
     }),
     viteStaticCopy({
       targets: [

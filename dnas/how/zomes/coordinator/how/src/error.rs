@@ -19,6 +19,8 @@ pub enum HowError {
     MissingPath,
     #[error("Document not found")]
     DocumentNotFound,
+    #[error("error converting hash")]
+    HashConversionError,
 }
 
 pub type HowResult<T> = Result<T, HowError>;

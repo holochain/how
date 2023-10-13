@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::collections::HashMap;
 
 pub use hdk::prelude::*;
@@ -127,16 +128,20 @@ fn get_units_inner(base: EntryHash) -> HowResult<Vec<UnitOutput>> {
     let mut unit_infos: HashMap<EntryHash,UnitInfo> = HashMap::new();
     for link in links.clone() {
         let (state, version) = convert_tag(link.tag.clone())?;
-        unit_infos.insert(link.target.clone().into(), UnitInfo {
-            hash: link.target.into(),
+
+        let hash = EntryHash::try_from(link.target).map_err(|e| HowError::HashConversionError)?;
+        unit_infos.insert(hash.clone(), UnitInfo {
+            hash,
             version,
             state});
     }
 
-    let get_input = links
-        .into_iter()
-        .map(|link| GetInput::new(EntryHash::from(link.target).into(), GetOptions::default()))
-        .collect();
+    let mut get_input=  vec!();
+    for link in links {
+        if let Ok(hash) = AnyDhtHash::try_from(link.target) {
+            get_input.push(GetInput::new(hash, GetOptions::default()))
+        }
+    }
 
     let unit_records = HDK.with(|hdk| hdk.borrow().get(get_input))?.into_iter()
     .filter_map(|me| me)

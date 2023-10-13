@@ -9,7 +9,7 @@ import {
   Button,
   Dialog,
 } from "@scoped-elements/material-web";
-import '@holochain-open-dev/profiles/elements/my-profile.js';
+import '@holochain-open-dev/profiles/dist/elements/my-profile.js';
 
 /**
  * @element how-my-profile-dialog

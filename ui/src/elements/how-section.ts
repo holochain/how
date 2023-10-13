@@ -45,6 +45,9 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   @query('how-section-details')
   private _detailsDialog!: HowSectionDetails;
 
+  @query('#how-selection-element')
+  private _elem!: HTMLElement;
+
   private sectionTypeMarker(section: Section) {
     switch (section.sectionType) {
       case SectionType.Content: return ""; break;
@@ -105,7 +108,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   }
 
   handleSelect(e:any) {
-    this.dispatchEvent(new CustomEvent('selection', { detail: this.section, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('selection', { detail: {section: this.section, element:this._elem, root:this.shadowRoot}, bubbles: true, composed: true }));
   }
 
   private highlitContent(range: HilightRange| undefined,content: string) : TemplateResult {
@@ -155,7 +158,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           } else {
             return html`<div class="section-content"
             @click=${(e:any)=>this.handleSelect(e)}
-            ><pre class="source">${this.highlitContent(this.highlitRange, section.content)}</pre></div>`
+            ><pre id="how-selection-element" class="source">${this.highlitContent(this.highlitRange, section.content)}</pre></div>`
           }
         default:  
         if (this.preview) {
@@ -164,8 +167,10 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           ><p>${content}</p></div>`
         }
         return html`<div class="section-content"        
-          @click=${(e:any)=>this.handleSelect(e)}
-        ><p>${this.highlitContent(this.highlitRange,section.content)}</p></div>`
+          
+        ><p id="how-selection-element"
+        @click=${(e:any)=>this.handleSelect(e)}>${this.highlitContent(this.highlitRange,section.content)}</p></div>
+        <p @click=${(e:any)=>this.handleSelect(e)}>comment</p>`
       }
     }
     return html`Section Missing`

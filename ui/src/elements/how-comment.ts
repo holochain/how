@@ -5,7 +5,7 @@ import { contextProvided } from "@lit-labs/context";
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { CommentStatus, HilightRange, howContext, Section, Comment, CommentAction } from "../types";
-import '@holochain-open-dev/profiles/elements/agent-avatar.js';
+import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import { HowStore } from "../how.store";
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'

@@ -72,10 +72,13 @@ pub fn get_documents(input: String) -> ExternResult<Vec<DocumentOutput>> {
 
 fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
     let links = get_links(base, LinkTypes::Document, None)?;
-    let get_input = links
-        .into_iter()
-        .map(|link| GetInput::new(EntryHash::from(link.target).into(), GetOptions::default()))
-        .collect();
+
+    let mut get_input=  vec!();
+    for link in links {
+        if let Ok(hash) = AnyDhtHash::try_from(link.target) {
+            get_input.push(GetInput::new(hash, GetOptions::default()))
+        }
+    }
 
     let document_elements = HDK.with(|hdk| hdk.borrow().get_details(get_input))?;
 
