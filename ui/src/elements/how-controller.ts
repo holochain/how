@@ -372,14 +372,12 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     const init  = initialTreeHolochain(this._store.myAgentPubKey)
 
     await this.doInitializeDHT(init)
-    this._store.pullDocuments("soc_proto.process.define.declaration")
   }
 
   async addInitialSimple() {
     const init  = initialTreeSimple(this._store.myAgentPubKey)
 
     await this.doInitializeDHT(init)
-    this._store.pullDocuments("soc_proto.process.define.declaration")
   }
 
   async checkInit() {

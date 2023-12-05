@@ -11,11 +11,14 @@ import {
 } from "./types";
 import { AgentPubKeyB64 } from "@holochain/client";
 
+const PROCESS_ROOT = "social.ops.process"
+
 const std_procs: Array<[ProcessType, ProcessName]> = [
-  ["soc_proto.process.define", "declaration"],
-  ["soc_proto.process.refine", "comment_period"],
-  ["soc_proto.process.align", "vote"],
+  [`${PROCESS_ROOT}.define`, "declaration"],
+  [`${PROCESS_ROOT}.refine`, "comment_period"],
+  [`${PROCESS_ROOT}.align`, "vote"],
 ];
+
 
 export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
   const init: Initialization = {
@@ -31,7 +34,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
-        pathAbbreviation: "soc_proto", // max 10 char
+        pathAbbreviation: "social", // max 10 char
         shortName: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
@@ -53,7 +56,23 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
+        parents: ["social"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "ops", // max 10 char
+        shortName: "Operations", // max 25 charAgent
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["social.ops"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "dev_support", // max 10 char
+        shortName: "Developer Support", // max 25 charAgent
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["social.ops"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "process", // max 10 char
         shortName: "How Processes", // max 25 charAgent
@@ -61,7 +80,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+        parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "define", // max 10 char
         shortName: "Proposal procesess", // max 25 char
@@ -69,7 +88,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
+        parents: [`${PROCESS_ROOT}.define`], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "declaration", // max 10 char
         shortName: "Declaration", // max 25 char
@@ -77,7 +96,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process.define"], // full paths to parent nodes (remember it's a DAG)
+        parents: [`${PROCESS_ROOT}.define`], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "petition", // max 10 char
         shortName: "Petition", // max 25 char
@@ -85,7 +104,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+        parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "refine", // max 10 char
         shortName: "Refinement Processes", // max 25 char
@@ -93,7 +112,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process.refine"], // full paths to parent nodes (remember it's a DAG)
+        parents: [`${PROCESS_ROOT}.refine`], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "comment_period", // max 10 char
         shortName: "Comment Period", // max 25 char
@@ -101,7 +120,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process"], // full paths to parent nodes (remember it's a DAG)
+        parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "align", // max 10 char
         shortName: "Unit Processes", // max 25 char
@@ -109,7 +128,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+        parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "vote", // max 10 char
         shortName: "Voting", // max 25 char
@@ -117,7 +136,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+        parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "consensus", // max 10 char
         shortName: "Consensus", // max 25 char
@@ -125,7 +144,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["soc_proto.process.align"], // full paths to parent nodes (remember it's a DAG)
+        parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "sortition", // max 10 char
         shortName: "Sortition", // max 25 char
@@ -167,7 +186,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
               sourcePath: SourceManual,
               sectionType: SectionType.Content,
               contentType: "text/plain",
-              content: '{"foo":"bar"}',
+              content: `{"processRoot":"${PROCESS_ROOT}"}`,
             },
           ],
           editors: [progenitor],
@@ -251,7 +270,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
             },
             {
               name: "context",
-              sourcePath:"soc_proto.process.define",
+              sourcePath:`${PROCESS_ROOT}.define`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: `
@@ -299,7 +318,7 @@ Furthermore we must:
             },
             {
               name: "specification",
-              sourcePath:"soc_proto.process.define",
+              sourcePath:`${PROCESS_ROOT}.define`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: `
@@ -395,7 +414,7 @@ function mintNFT(uint256 memory target_) external {
       },
      
       {
-        path: "soc_proto.process.define",
+        path: `${PROCESS_ROOT}.define`,
           documentType: DocType.Document,
           content: [
             {
@@ -421,21 +440,21 @@ function mintNFT(uint256 memory target_) external {
             },
             {
               name: "context",
-              sourcePath:"soc_proto.process.define",
+              sourcePath:`${PROCESS_ROOT}.define`,
               sectionType: SectionType.Process,
               contentType: "text/plain:long",
               content: '{"description": "Description of the context and use-case an why it requires a standard. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Holochain ecosystem? What use cases does this standard address?"}',
             },
             {
               name: "specification",
-              sourcePath:"soc_proto.process.define",
+              sourcePath:`${PROCESS_ROOT}.define`,
               sectionType: SectionType.Process,
               contentType: "text/markdown",
               content: '{"description": "Description of the syntax, semantics, state diagrams, and workflows of any new feature/protocol/process. The specification should be detailed enough to allow for multiple interoperable implementations."}',
             },
             {
               name: "rationale",
-              sourcePath:"soc_proto.process.define",
+              sourcePath:`${PROCESS_ROOT}.define`,
               sectionType: SectionType.Process,
               contentType: "text/plain:long",
               content: '{"description": "Description of what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages. The rationale may also provide evidence of consensus within the community, and should discuss important objections or concerns raised during discussion."}',
@@ -445,7 +464,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {},
       },
       {
-        path: "soc_proto.process.refine",
+        path: `${PROCESS_ROOT}.refine`,
           documentType: DocType.Document,
           content: [
             {
@@ -474,7 +493,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {}
       },
       {
-        path: "soc_proto.process.align",
+        path: `${PROCESS_ROOT}.align`,
           documentType: DocType.Document,
           content: [
             {
@@ -503,7 +522,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {}
       },
       {
-        path: "soc_proto.process.define.petition",
+        path: `${PROCESS_ROOT}.define.petition`,
           documentType: DocType.Document,
           content: [
             {
@@ -522,7 +541,7 @@ function mintNFT(uint256 memory target_) external {
             },
             {
               name: "threshold",
-              sourcePath:"soc_proto.process.define",
+              sourcePath:`${PROCESS_ROOT}.define`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "A petition can move to refine when the threshold number of people have signed on to the petition.",
@@ -539,7 +558,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {},
       },
       {
-        path: "soc_proto.process.define.declaration",
+        path: `${PROCESS_ROOT}.define.declaration`,
           documentType: DocType.Document,
           content: [
             {
@@ -558,7 +577,7 @@ function mintNFT(uint256 memory target_) external {
             },
             {
               name: "threshold",
-              sourcePath:"soc_proto.process.define",
+              sourcePath:`${PROCESS_ROOT}.define`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "A declaration can move to refinement whenever the stewards decide to.",
@@ -568,7 +587,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {},
       },
       {
-        path: "soc_proto.process.refine.comment_period",
+        path: `${PROCESS_ROOT}.refine.comment_period`,
           documentType: DocType.Document,
           content: [
             {
@@ -587,7 +606,7 @@ function mintNFT(uint256 memory target_) external {
             },
             {
               name: "threshold",
-              sourcePath:"soc_proto.process.refine",
+              sourcePath:`${PROCESS_ROOT}.refine`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "Refinement can complete after the specified number of weeks in the period.",
@@ -603,7 +622,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {},
       },
       {
-        path: "soc_proto.process.align.vote",
+        path: `${PROCESS_ROOT}.align.vote`,
           documentType: DocType.Document,
           content: [
             {
@@ -622,7 +641,7 @@ function mintNFT(uint256 memory target_) external {
             },
             {
               name: "threshold",
-              sourcePath:"soc_proto.process.align",
+              sourcePath:`${PROCESS_ROOT}.align`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "Voting can move to Alive when the voting criteria have been fulfilled.",
@@ -634,7 +653,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {},
       },
       {
-        path: "soc_proto.process.align.consensus",
+        path: `${PROCESS_ROOT}.align.consensus`,
           documentType: DocType.Document,
           content: [
             {
@@ -653,7 +672,7 @@ function mintNFT(uint256 memory target_) external {
             },
             {
               name: "threshold",
-              sourcePath:"soc_proto.process.align",
+              sourcePath:`${PROCESS_ROOT}.align`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "Consensus can move to Alive when the consensus outcome has been recorded in the outcome section.",
@@ -665,7 +684,7 @@ function mintNFT(uint256 memory target_) external {
           meta: {},
       },
       {
-        path: "soc_proto.process.align.sortition",
+        path: `${PROCESS_ROOT}.align.sortition`,
           documentType: DocType.Document,
           content: [
             {
@@ -684,7 +703,7 @@ function mintNFT(uint256 memory target_) external {
             },
             {
               name: "threshold",
-              sourcePath:"soc_proto.process.align",
+              sourcePath:`${PROCESS_ROOT}.align`,
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "Sortition can move to Alive when the sortition decision has been recorded in the outcome section by the stewards and the agents in the people section have all marked it as approved.",

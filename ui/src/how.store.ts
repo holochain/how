@@ -21,8 +21,13 @@ import {
   Mark,
   MarkDocumentInput,
   HowSignal,
+  Progress,
 } from './types';
 import { Action, ActionHash } from '@holochain/client';
+
+export type HowConfig = {
+  processRoot: string
+}
 
 const areEqual = (first: Uint8Array, second: Uint8Array) =>
       first.length === second.length && first.every((value, index) => value === second[index]);
@@ -43,7 +48,8 @@ export class HowStore {
   /** Static info */
   myAgentPubKey: AgentPubKeyB64;
   treeName: string = ""
-  config = {}
+  config: HowConfig = {processRoot: ""}
+  processRootPath: string[] = []
 
   /** Readable stores */
   public units: Readable<Dictionary<Unit>> = derived(this.unitsStore, i => i)
@@ -58,15 +64,11 @@ export class HowStore {
   private processTypes: Readable<Array<Node>> = derived(
     this.tree, 
     $tree => {
-      const { children = [] } = this.find($tree, ['soc_proto', 'process']) || {};
+      const { children = [] } = this.find($tree, this.processRootPath) || {};
       return children || []
     }
   )
 
-  public alignProcesses: Readable<Array<Node>> = this.getProcessesStoreForType('align');
-  public defineProcesses: Readable<Array<Node>> = this.getProcessesStoreForType('define');
-  public refineProcesses: Readable<Array<Node>> = this.getProcessesStoreForType('refine');
-  
   constructor(
     protected client: AppAgentClient,
     roleName: RoleName,
@@ -120,7 +122,7 @@ export class HowStore {
     return sections
   }
 
-  private getProcessesStoreForType(type: string): Readable<Array<Node>> {
+  public getProcessesStoreForType(type: string): Readable<Array<Node>> {
     return derived(
       this.processTypes,
       $processTypes => $processTypes.find(processType => processType.val.name === type)?.children || []
@@ -153,6 +155,7 @@ export class HowStore {
   }
 
   async pullUnits() : Promise<Dictionary<Unit>> {
+    await this.pullMeta()
     const units = await this.service.getUnits();
     for (const unitOutput of units) {
       this.updateUnitFromEntry(unitOutput)
@@ -208,13 +211,17 @@ export class HowStore {
     }
   }
 
-  async initialize() {
+  async pullMeta() {
     const docs = await this.pullDocuments("")
     const meta = docs.find(d=>d.content.documentType == DocType.TreeMeta)
     if (meta) {
       this.treeName = meta.content.content[0].name
-      this.config = JSON.parse(meta.content.content[0].content)
+      this.config = JSON.parse(meta.content.content[0].content) as HowConfig
+      this.processRootPath = this.config.processRoot.split(".")
+      Document.processRoot = this.config.processRoot
     }
+   // await this.pullDocuments("soc_proto.process.define.declaration")
+
   }
   
   async pullDocuments(path: string) : Promise<Array<DocumentOutput>> {
@@ -298,18 +305,18 @@ export class HowStore {
   }
 
   private getProcesses(tree: Node) : Array<Process> {
-    const node = this.find(tree,"soc_proto.process".split("."))
+    const node = this.find(tree,this.config!.processRoot.split("."))
     let processes : Array<Process> = []
     if (node) {
       for (const n of node.children) {
-        const docs = get(this.documentPathStore)[`soc_proto.process.${n.val.name}`]         
-        console.log("docs", get(this.documentPathStore), docs, `soc_proto.process.${n.val.name}`)
+        const docs = get(this.documentPathStore)[`${this.config.processRoot}.${n.val.name}`]         
+        console.log("docs", get(this.documentPathStore), docs, `${this.config.processRoot}.${n.val.name}`)
 
         if (docs) {
           const doc  = docs.find(doc=>doc.content.documentType == DocType.Document)
           console.log("doc", doc)
           if (doc) {
-            processes.push({path: `soc_proto.process.${n.val.name}`, name: n.val.name})
+            processes.push({path: `${this.config.processRoot}.${n.val.name}`, name: n.val.name})
           }
         }
       }
@@ -419,5 +426,27 @@ export class HowStore {
       }
     }
     return null;
+  }
+
+  public getDocumentProgress(doc: Document) : Progress {
+    let total = 1
+    let count = 0
+    for (const section of doc.content) {
+      if (doc.state == "define") {
+        total+=1
+        if (section.content != "") {
+          count += 1
+        }
+      } else if (section.sourcePath.indexOf(`.${this.config.processRoot}.${doc.state}`) >= 0) {
+        total+=1
+        if (section.content != "") {
+          count += 1
+        }
+      }  
+    }
+    return {
+      total,
+      count
+    }
   }
 }

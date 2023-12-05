@@ -56,12 +56,11 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   @state() _parent?: Unit;
 
   private static readonly NONE = 'none'; // we need a default value for the mwc-selects because if an empty string is provided, the UI gets broken
-  private static readonly PROCESS_PATH = 'soc_proto.process';
 
   private _processes: Dictionary<StoreSubscriber<Node[]>> = {
-    align: new StoreSubscriber(this, () => this._store.alignProcesses),
-    define: new StoreSubscriber(this, () => this._store.defineProcesses),
-    refine: new StoreSubscriber(this, () => this._store.refineProcesses)
+    align: new StoreSubscriber(this, () => this._store.getProcessesStoreForType('align')),
+    define: new StoreSubscriber(this, () => this._store.getProcessesStoreForType('define')),
+    refine: new StoreSubscriber(this, () => this._store.getProcessesStoreForType('refine'))
   };
 
   private takenNames: Array<string> = []
@@ -105,7 +104,7 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
       .map((processType: ProcessType) => {
         const { value } = this.getProcessSelect(processType)
 
-        return value !== HowUnitDialog.NONE ? [`${HowUnitDialog.PROCESS_PATH}.${processType}`, value] : null
+        return value !== HowUnitDialog.NONE ? [`${this._store.config.processRoot}.${processType}`, value] : null
       })
       .filter(process => !!process)
 

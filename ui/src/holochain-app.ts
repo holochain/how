@@ -93,7 +93,6 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
         const profilesClient = weClient.renderInfo.profilesClient;
         this._profilesStore = new ProfilesStore(profilesClient, config)
       }
-      this._howStore.initialize()
 
     this.loaded = true;
   }

@@ -116,6 +116,8 @@ export interface DocumentInitializer {
 }
 
 export class Document {
+  static processRoot:string = ""
+
   documentHash: EntryHashB64 | undefined
   unitHash: EntryHash = new Uint8Array
   documentType: DocType = DocType.Document
@@ -146,6 +148,10 @@ export class Document {
     return this.content[this.sectionsMap[sectionName]]
   }
 
+  private isState(stateFullPath: string, state: string) : boolean {
+    return stateFullPath.indexOf(`.${Document.processRoot}.${state}`) >= 0
+  }
+
   public getProgress() : Progress {
     let total = 1
     let count = 0
@@ -155,7 +161,7 @@ export class Document {
         if (section.content != "") {
           count += 1
         }
-      } else if (section.sourcePath.indexOf(".soc_proto.process."+this.state) >= 0) {
+      } else if (this.isState(section.sourcePath,this.state)) {
         total+=1
         if (section.content != "") {
           count += 1
@@ -177,8 +183,9 @@ export class Document {
     if (this.state == "define") {
       return true
     }
+    // section is editable if the source of that section is the current proceess
     const section = this.getSection(sectionName)
-    return section.sourcePath.indexOf(".soc_proto.process."+this.state) >= 0
+    return this.isState(section.sourcePath,this.state)
   }
 
   public setSection(sectionName: string, content: string ) {
