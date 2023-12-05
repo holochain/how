@@ -42,6 +42,8 @@ export class HowStore {
 
   /** Static info */
   myAgentPubKey: AgentPubKeyB64;
+  treeName: string = ""
+  config = {}
 
   /** Readable stores */
   public units: Readable<Dictionary<Unit>> = derived(this.unitsStore, i => i)
@@ -74,7 +76,7 @@ export class HowStore {
     this.service = new HowService(client, roleName, zomeName);
 
     client.on( 'signal', signal => {
-      console.log("SIGNAL",signal)
+      console.log("SIGNAL",signal.payload)
       const payload  = signal.payload as HowSignal
       switch(payload.message.type) {
       case "NewUnit":
@@ -139,7 +141,9 @@ export class HowStore {
       return units
     })
     this.unitsActionStore.update(units => {
-      units[hash] = record.action
+      const a = record.action
+      //@ts-ignore
+      units[hash] = a
       return units
     })
     this.unitsInfoStore.update(units => {
@@ -201,6 +205,15 @@ export class HowStore {
       if (doc) {
         doc.marks.push(mark); 
       }
+    }
+  }
+
+  async initialize() {
+    const docs = await this.pullDocuments("")
+    const meta = docs.find(d=>d.content.documentType == DocType.TreeMeta)
+    if (meta) {
+      this.treeName = meta.content.content[0].name
+      this.config = JSON.parse(meta.content.content[0].content)
     }
   }
   

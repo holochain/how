@@ -51,8 +51,8 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
   buildTree(node: Node):any {
     const unitInfo = this.getUnitInfo(node)
     const nodeId = unitInfo ? encodeHashToBase64(unitInfo.hash) : node.id
-    //const documentsMap = this._documents.value
-    //const docs = node.val.documents.map(hash => documentsMap[encodeHashToBase64(hash)])
+    const documentsMap = this._documents.value
+   // const docs = node.val.documents.map(hash => documentsMap[encodeHashToBase64(hash)])
     const state = node.val.units.length ? node.val.units[0].state : ""// docs[docs.length-1]? docs[docs.length-1].state : ""
     return html`
     <li class="${this.treeType}">
@@ -60,7 +60,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
         <div class="progress" title=${`document count: ${node.val.documents.length}`}>
           <how-node .unit=${this._units.value[nodeId]} state=${state}> </how-node>
         </div>
-        ${node.id=="0" ? "Holochain Community Standards" : node.val.name}
+        ${node.id=="0" ? this._store.treeName : node.val.name}
         <!-- <mwc-button icon="add_circle" @click=${
           () => this.dispatchEvent(new CustomEvent('add-child', { detail: nodeId, bubbles: true, composed: true }))}>
           </mwc-button> -->

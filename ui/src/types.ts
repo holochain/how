@@ -80,6 +80,7 @@ export enum VersioningType {
 }
 
 export enum DocType {
+  TreeMeta = "_",
   Document = "_document",
   Comment = "_comment"
 }

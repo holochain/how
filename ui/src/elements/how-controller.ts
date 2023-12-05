@@ -13,7 +13,7 @@ import { initialTreeSimple } from "../initSimple";
 import { HowUnitDialog } from "./how-unit-dialog";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
-import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
+import { AsyncReadable, AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
 import { aliveImage } from "../images";
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -34,6 +34,7 @@ import {
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
 import { consume } from '@lit-labs/context';
 import { HowMyProfileDialog } from "./how-my-profile-dialog";
+import { EntryRecord } from "@holochain-open-dev/utils";
 //import { HowSettings } from "./how-settings";
 //import './how-settings.js';
 
@@ -58,7 +59,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   _profiles!: ProfilesStore;
 
 
-  _myProfile!: StoreSubscriber<AsyncStatus<Profile | undefined>>;
+  _myProfile!: StoreSubscriber<AsyncStatus<EntryRecord<Profile> | undefined>>;
   @query("how-my-profile")
   _myProfileDialog!:HowMyProfileDialog
 
@@ -114,7 +115,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     if (this._myProfile.value.status == "complete") {
       const profile = this._myProfile.value.value;
       if (profile)
-        return profile.nickname
+        return profile.entry.nickname
     }
     return ""
   }
@@ -122,7 +123,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     if (this._myProfile.value.status == "complete") {
       const profile = this._myProfile.value.value;
       if (profile)
-        return profile.fields.avatar
+        return profile.entry.fields.avatar
     }
     return ""
   }

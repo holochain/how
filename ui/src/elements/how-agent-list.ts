@@ -36,8 +36,11 @@ export class HowAgentList extends LitElement {
     const agentsHTML: Array<TemplateResult>= []
     for (const agentHash of this.agents) {
       let profile: Profile |undefined = undefined
-      if (this._allProfiles.value.status == "complete")
-      profile = this._allProfiles.value.value.get(decodeHashFromBase64(agentHash))
+      if (this._allProfiles.value.status == "complete") {
+        const record = this._allProfiles.value.value.get(decodeHashFromBase64(agentHash))
+        if (record)
+          profile = record.entry
+      }
   
       if (profile) {
         agentsHTML.push(html`<div class="agent" title="${agentHash}"><agent-avatar agent-pub-key=${agentHash}> </agent-avatar> ${profile.nickname}</div>`)

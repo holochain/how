@@ -134,8 +134,12 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const created = new Date(action.timestamp)
     const creatorHash = encodeHashToBase64(action.author)
     let creator: Profile |undefined = undefined
-    if (this._allProfiles.value.status == "complete")
-      creator = this._allProfiles.value.value.get(action.author)
+    if (this._allProfiles.value.status == "complete") {
+      const record = this._allProfiles.value.value.get(action.author)
+      if (record) {
+        creator = record.entry
+      }
+    }
     let stateHTML
     let controlsHTML:any[] = []
 

@@ -72,8 +72,6 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
       const appAgentClient = await AppAgentWebsocket.connect(new URL(url), appId)
     
       this._howStore = new HowStore(appAgentClient, "how")
-
- 
       
       this._profilesStore = new ProfilesStore(
         new ProfilesClient(appAgentClient, 'how'), config
@@ -90,10 +88,12 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
         const client = weClient.renderInfo.appletClient;
         this._howStore = new HowStore(client, "how")
 
+
         //@ts-ignore
         const profilesClient = weClient.renderInfo.profilesClient;
         this._profilesStore = new ProfilesStore(profilesClient, config)
       }
+      this._howStore.initialize()
 
     this.loaded = true;
   }

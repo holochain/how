@@ -158,6 +158,21 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
     ],
     documents: [
+        {
+          path: "",
+          documentType: DocType.TreeMeta,
+          content: [
+            {
+              name: "Holochain Community Standards",
+              sourcePath: SourceManual,
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
+              content: '{"foo":"bar"}',
+            },
+          ],
+          editors: [progenitor],
+          meta: {}
+      },
       {
           path: "",
           documentType: DocType.Document,

@@ -126,6 +126,21 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
     ],
     documents: [
+        {
+          path: "",
+          documentType: DocType.TreeMeta,
+          content: [
+            {
+              name: "Alignments",
+              sourcePath: SourceManual,
+              sectionType: SectionType.Content,
+              contentType: "text/plain",
+              content: '{"foo":"bar"}',
+            },
+          ],
+          editors: [progenitor],
+          meta: {}
+      },
       {
           path: "",
           documentType: DocType.Document,
