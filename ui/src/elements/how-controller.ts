@@ -8,7 +8,8 @@ import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, 
 import { HowStore } from "../how.store";
 import { HowUnit } from "./how-unit";
 import { HowTree } from "./how-tree";
-import { initialTree } from "../init";
+import { initialTreeHolochain } from "../initHolochain";
+import { initialTreeSimple } from "../initSimple";
 import { HowUnitDialog } from "./how-unit-dialog";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
@@ -366,8 +367,15 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     this.checkInit()
   }
 
-  async addDefault() {
-    const init  = initialTree(this._store.myAgentPubKey)
+  async addInitialHolochain() {
+    const init  = initialTreeHolochain(this._store.myAgentPubKey)
+
+    await this.doInitializeDHT(init)
+    this._store.pullDocuments("soc_proto.process.define.declaration")
+  }
+
+  async addInitialSimple() {
+    const init  = initialTreeSimple(this._store.myAgentPubKey)
 
     await this.doInitializeDHT(init)
     this._store.pullDocuments("soc_proto.process.define.declaration")
@@ -458,7 +466,14 @@ export class HowController extends ScopedElementsMixin(LitElement) {
             <mwc-button
               id="primary-action-button"
               slot="primaryAction"
-              @click=${()=>this.addDefault()}
+              @click=${()=>this.addInitialSimple()}
+              >Default Tree</mwc-button
+            > 
+            or<br />
+            <mwc-button
+              id="primary-action-button"
+              slot="primaryAction"
+              @click=${()=>this.addInitialHolochain()}
               >Holochain Community Standards</mwc-button
             > 
             or<br />

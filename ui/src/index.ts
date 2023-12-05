@@ -11,4 +11,5 @@ export * from './elements/svg-button';
 export * from './how.service';
 export * from './how.store';
 export * from './types';
-export * from './init';
+export * from './initHolochain';
+export * from './initSimple';
