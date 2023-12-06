@@ -1,11 +1,11 @@
 import {css, html, LitElement} from "lit";
 import {property, query} from "lit/decorators.js";
-import { contextProvided } from "@lit-labs/context";
+import { consume } from '@lit/context';
 import {sharedStyles} from "../sharedStyles";
 import {Unit, DocType, howContext, Document, DocumentOutput, SysState, Progress} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { StoreSubscriber } from "lit-svelte-stores";
+import { StoreSubscriber } from "@holochain-open-dev/stores";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { aliveImage } from "../images";
 const angleInRadians = (angleInDegrees: number) => (angleInDegrees - 90) * (Math.PI / 180.0);
@@ -53,7 +53,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
   @property() state:string = "";
   @property() progress:Progress| undefined = undefined;
 
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext })
   _store!: HowStore;
 
   circle(segments: Array<Segment>, cross?: boolean) {

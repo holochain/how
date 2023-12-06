@@ -1,7 +1,7 @@
 import {css, html, LitElement} from "lit";
 import {property, query, state} from "lit/decorators.js";
 
-import {StoreSubscriber} from "lit-svelte-stores";
+import { StoreSubscriber } from '@holochain-open-dev/stores';
 
 import {sharedStyles} from "../sharedStyles";
 import {Unit, DocType, howContext, SysState, Document, UnitInfo} from "../types";

@@ -1,6 +1,6 @@
 import {css, html, LitElement, TemplateResult} from "lit";
 import {property} from "lit/decorators.js";
-import { contextProvided } from "@lit-labs/context";
+import { consume } from '@lit/context';
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -21,7 +21,7 @@ export class HowComment extends ScopedElementsMixin(LitElement) {
     super();
   }
 
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext })
   _store!: HowStore;
 
   @property() comment: Comment | undefined;

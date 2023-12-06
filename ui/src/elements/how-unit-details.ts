@@ -2,7 +2,7 @@ import {css, html, LitElement} from "lit";
 import {property} from "lit/decorators.js";
 
 import {sharedStyles} from "../sharedStyles";
-import { contextProvided } from "@lit-labs/context";
+import { consume } from '@lit/context';
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Unit, howContext, Dictionary, Node} from "../types";
@@ -23,7 +23,7 @@ export class HowUnitDetails extends ScopedElementsMixin(LitElement) {
     @property() state = "";
 
   /** Dependencies */
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext })
   _store!: HowStore;
   
   open() {

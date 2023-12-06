@@ -1,8 +1,8 @@
 import {css, html, LitElement, TemplateResult} from "lit";
 import {property, query, state} from "lit/decorators.js";
 
-import { contextProvided } from "@lit-labs/context";
-import {StoreSubscriber} from "lit-svelte-stores";
+import { consume } from '@lit/context';
+import { StoreSubscriber } from "@holochain-open-dev/stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
@@ -47,7 +47,7 @@ import { CommentControl, Control } from "../controls";
     private _newSectionDialog!: HowNewSectionDialog;
   
   
-    @contextProvided({ context: howContext })
+    @consume({ context: howContext })
     _store!: HowStore;
     _documents = new StoreSubscriber(this, () => this._store.documents);
 

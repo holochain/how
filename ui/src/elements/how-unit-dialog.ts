@@ -15,7 +15,7 @@ import {
   ListItem,
 } from "@scoped-elements/material-web";
 import '@holochain-open-dev/profiles/dist/elements/search-agent.js';
-import { StoreSubscriber } from "lit-svelte-stores";
+import { StoreSubscriber } from '@holochain-open-dev/stores';
 import { consume } from '@lit-labs/context';
 
 const PROCESS_TYPES = ['define', 'refine', 'align'] as const;

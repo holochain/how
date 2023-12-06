@@ -1,7 +1,7 @@
 import {css, html, LitElement, TemplateResult} from "lit";
 import {until} from 'lit-html/directives/until.js';
 import {property, query, state} from "lit/decorators.js";
-import { contextProvided } from "@lit-labs/context";
+import { consume } from '@lit/context';
 
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -28,7 +28,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
     super();
   }
 
-  @contextProvided({ context: howContext })
+  @consume({ context: howContext })
   _store!: HowStore;
 
   @property() section: Section | undefined;
