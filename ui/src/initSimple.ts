@@ -155,11 +155,11 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: '{"description": "title of the standard being defined"}',
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:SourceManual,
               sectionType: SectionType.Requirement,
               contentType: "text/markdown",
-              content: '{"description": "A multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does."}',
+              content: '{"description": "A multi-sentence (short paragraph) description of the purpose towards which alignment is being sought."}',
             },
           ],
           editors: [progenitor],
@@ -177,7 +177,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Projects",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -200,7 +200,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Definition Process Type",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -250,7 +250,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Refine Process Type",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -279,7 +279,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Align Process Type",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -308,7 +308,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Definition by petition",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -344,7 +344,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Definition by declaration",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -373,7 +373,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Comment Period",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -408,7 +408,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Votes",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -439,7 +439,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Consensus",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -470,7 +470,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
               content: "Sortition",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",

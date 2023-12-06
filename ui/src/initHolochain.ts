@@ -42,13 +42,21 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
+        pathAbbreviation: "tech", // max 10 char
+        shortName: "Technical", // max 25 char        stewards: [progenitor], // people who can change this document
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "hApps", // max 10 char
         shortName: "hApp Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         })],
       ["define", new Unit({
-        parents: ["hApps"], // full paths to parent nodes (remember it's a DAG)
+        parents: ["tech.hApps"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "ERC721_interop", // max 10 char
         shortName: "ERC721 Interoperability Standard", // max 25 char
@@ -64,7 +72,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["social.ops"], // full paths to parent nodes (remember it's a DAG)
+        parents: ["social"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "dev_support", // max 10 char
         shortName: "Developer Support", // max 25 charAgent
@@ -152,15 +160,15 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: [], // full paths to parent nodes (remember it's a DAG)
+        parents: ["tech"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
-        pathAbbreviation: "hc_system", // max 10 char
-        shortName: "Holochain System", // max 25 char
+        pathAbbreviation: "hc_framework", // max 10 char
+        shortName: "Holochain Framework", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["hc_system"], // full paths to parent nodes (remember it's a DAG)
+        parents: ["tech.hc_framework"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "conductor", // max 10 char
         shortName: "Holochain Conductor", // max 25 char
@@ -168,14 +176,22 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["hc_system.conductor"], // full paths to parent nodes (remember it's a DAG)
+        parents: ["tech.hc_framework.conductor"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "api", // max 10 char
         shortName: "Holochain Conductor API", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         })],
-    ],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.conductor"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "services", // max 10 char
+        shortName: "Holochain Conductor Services", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      ],
     documents: [
         {
           path: "",
@@ -204,18 +220,62 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
               content: '{"description": "title of the standard being defined"}',
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:SourceManual,
               sectionType: SectionType.Requirement,
               contentType: "text/markdown",
-              content: '{"description": "A multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does."}',
+              content: '{"description": "A multi-sentence (short paragraph) description of the purpose towards which alignment is being sought."}',
             },
           ],
           editors: [progenitor],
           meta: {}
       },
       {
-        path: "hApps",
+        path: "tech",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Technical Aligments',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: 'To align on the ontology, specifications, requirements, conventions, protocols, release patterns, testing frameworks, api, documentation etc for Holochain itself, as well as for standards for application types/classes/affordances built using Holochain',
+          },
+      ],
+        editors: [progenitor],
+        meta: {}
+    },
+    {
+      path: "tech.hc_framework",
+      documentType: DocType.Document,
+      content: [
+        {
+          name: "title",
+          sourcePath: "",
+          sectionType: SectionType.Content,
+          contentType: "text/plain",
+          content: 'Holochain Framework',
+        },
+        {
+          name: "purpose",
+          sourcePath:"",
+          sectionType: SectionType.Content,
+          contentType: "text/markdown",
+          content: "To align on the ontology, specifications, requirements, conventions, protocols, release patterns, testing frameworks, api, documentation etc for the Holochain framework",
+        },
+      ],
+      editors: [progenitor],
+      meta: {}
+    },
+    {
+        path: "tech.hApps",
           documentType: DocType.Document,
           content: [
             {
@@ -226,11 +286,18 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
               content: "hApp Standards",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
-              content: "Standards for classes of holochain hApps",
+              content: "To align on standards for classes of holochain hApps",
+            },
+            {
+              name: "summary",
+              sourcePath:SourceManual,
+              sectionType: SectionType.Requirement,
+              contentType: "text/markdown",
+              content: '{"description": "A multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does."}',
             },
             {
               name: "zome signatures",
@@ -251,7 +318,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
           meta: {}
       },
       {
-        path: "hApps.ERC721_interop",
+        path: "tech.hApps.ERC721_interop",
           documentType: DocType.Document,
           content: [
             {
@@ -260,6 +327,13 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
               sectionType: SectionType.Content,
               contentType: "text/plain",
               content: "ERC721 Interoperation Standard",
+            },
+            {
+              name: "purpose",
+              sourcePath:"",
+              sectionType: SectionType.Content,
+              contentType: "text/markdown",
+              content: "To align on how Holochain DHTs can be used to hold data for NFTs based on the ERC721 standard.",
             },
             {
               name: "summary",
@@ -412,7 +486,161 @@ function mintNFT(uint256 memory target_) external {
           editors: [progenitor],
           meta: {}
       },
-     
+      {
+        path: "tech.hc_framework.conductor",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Conductor',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.conductor.services",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Conductor Services',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.conductor.api",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Conductor API',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "social",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Social Aligments',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "To align on all of the human processes and patterns involved in building and governing Holochain and it's ecosystem",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "social.ops",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Operations',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: 'To align on the operational aspects of the Holochain open-source community, including change management process of this tool.',
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "social.dev_support",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Developer Support',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: 'To align on commitments the open-source community has to supporting developers in the community',
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: PROCESS_ROOT,
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Alignment Processes',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: 'To specify all the different processes that are used to add new nodes to the tree and come to alignment on them.',
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+
       {
         path: `${PROCESS_ROOT}.define`,
           documentType: DocType.Document,
@@ -425,7 +653,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Definition Process Type",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -475,7 +703,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Refine Process Type",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -504,7 +732,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Align Process Type",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -533,7 +761,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Definition by petition",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -569,7 +797,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Definition by declaration",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -598,7 +826,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Comment Period",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -633,7 +861,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Votes",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -664,7 +892,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Consensus",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
@@ -695,7 +923,7 @@ function mintNFT(uint256 memory target_) external {
               content: "Sortition",
             },
             {
-              name: "summary",
+              name: "purpose",
               sourcePath:"",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
