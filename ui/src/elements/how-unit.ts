@@ -17,7 +17,7 @@ import {
 import { Action, EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 import { InfoItem } from "./info-item";
 import { HowConfirm } from "./how-confirm";
-import { consume } from '@lit-labs/context';
+import { consume } from '@lit/context';
 import { Profile, ProfilesStore, profilesStoreContext } from "@holochain-open-dev/profiles";
 
 const getCurrentStateName  = (unit:Unit, documentState:string ): string => {
@@ -170,6 +170,11 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
             .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
             .info=${"add child"}
             .button=${"plus"}>
+          </svg-button> 
+          <svg-button
+            .click=${() => this.dispatchEvent(new CustomEvent('reparent', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
+            .info=${"reparent"}
+            .button=${"reparent"}>
           </svg-button> 
         </div>
       `)

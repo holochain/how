@@ -16,7 +16,7 @@ import {
 } from "@scoped-elements/material-web";
 import '@holochain-open-dev/profiles/dist/elements/search-agent.js';
 import { StoreSubscriber } from '@holochain-open-dev/stores';
-import { consume } from '@lit-labs/context';
+import { consume } from '@lit/context';
 
 const PROCESS_TYPES = ['define', 'refine', 'align'] as const;
 type ProcessType = typeof PROCESS_TYPES[number];

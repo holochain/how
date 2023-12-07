@@ -6,7 +6,7 @@ import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { AgentPubKeyB64 } from "@holochain/client";
 import { HowStore } from "../how.store";
 import { howContext } from "../types";
-import { consume } from '@lit-labs/context';
+import { consume } from '@lit/context';
 import { Profile, ProfilesStore, profilesStoreContext } from "@holochain-open-dev/profiles";
 import { StoreSubscriber } from "@holochain-open-dev/stores";
 import { decodeHashFromBase64 } from "@holochain/client";

@@ -449,4 +449,8 @@ export class HowStore {
       count
     }
   }
+
+  async reparent(path: string, newParent: string): Promise<void> {
+    this.service.reparent(path,newParent);
+  }
 }

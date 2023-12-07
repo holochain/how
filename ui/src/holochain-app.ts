@@ -17,7 +17,7 @@ import {
   AppAgentClient,
   AppAgentWebsocket,
 } from '@holochain/client';
-import { provide } from '@lit-labs/context';
+import { provide } from '@lit/context';
 import { LitElement, css, html } from 'lit';
 import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
 import { customElement, property, state } from 'lit/decorators.js';

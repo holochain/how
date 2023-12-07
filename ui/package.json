@@ -14,7 +14,7 @@
   "dependencies": {
     "@scoped-elements/material-web": "0.0.19",
     "@open-wc/scoped-elements": "^2.1.4",
-    "@shoelace-style/shoelace": "^2.5.2",
+    "@shoelace-style/shoelace": "^2.12",
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
     "@holochain-open-dev/elements": "^0.8.4",
     "@holochain-open-dev/profiles": "^0.17.3",

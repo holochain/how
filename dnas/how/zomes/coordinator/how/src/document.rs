@@ -131,10 +131,14 @@ pub struct UpdateDocumentInput {
 pub fn update_document(input: UpdateDocumentInput) -> ExternResult<EntryHashB64> {
     let record = get(EntryHash::from(input.hash), GetOptions::default())?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
-    let _action_hash = update_entry(record.action_address().clone().into(), &input.document)?;
-    let hash = hash_entry(&input.document)?;
+    _update_document(record.action_address().clone().into(),input.path, &input.document)
+}
+
+pub fn _update_document(hash: ActionHash, path: String, document: &Document) -> ExternResult<EntryHashB64> {
+    let _action_hash = update_entry(hash, document)?;
+    let hash = hash_entry(document)?;
     // TODO validate that old doc had the same path, or get the path some other way?
-    link_document(hash.clone(), input.path)?;
+    link_document(hash.clone(), path)?;
     return Ok(hash.into());
 }
 

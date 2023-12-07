@@ -6,10 +6,10 @@ use holo_hash::{EntryHashB64};
 use how_integrity::Document;
 use how_integrity::{Unit, EntryTypes, LinkTypes};
 
-use crate::document::{update_document, UpdateDocumentInput};
+use crate::document::{update_document, UpdateDocumentInput, _update_document};
 use crate::error::*;
 //use crate::signals::*;
-use crate::tree::UnitInfo;
+use crate::tree::{UnitInfo, _get_tree, tree_path, _get_path_tree, tree_path_to_str};
 
 pub fn get_units_path() -> Path {
     Path::from("units")
@@ -180,4 +180,95 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
     delete_unit_links(hash.clone(), unit.tree_paths())?;
     create_unit_links(hash,unit.tree_paths(), &input.new_state, &unit.version)?;
     return Ok(new_doc_hash);
+}
+
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ReparentInput {
+    pub path: String,
+    pub new_parent: String,
+}
+#[hdk_extern]
+pub fn reparent(input: ReparentInput) -> ExternResult<()> {
+    // let new_parent_path = Path::from(input.new_parent);
+    // let link = get
+    let sub_tree = _get_path_tree(tree_path(input.path.clone()))?;
+    let mut parent:Vec<_> = input.path.split(".").into_iter().collect();
+    parent.pop();
+    let parent = parent.join(".");
+    for node in sub_tree.tree {
+        let units = node.val.units.clone();
+        let current_path = node.val.path;//.clone();
+        for unit in units {
+            let documents: Vec<HoloHash<holo_hash::hash_type::Entry>> = node.val.documents.clone();
+
+            let (new_unit_hash, new_unit) = reparent_unit(&unit, parent.clone(), input.new_parent.clone())?;
+            for doc in documents {
+                reparent_document(unit.hash.clone(), new_unit_hash.clone(), &new_unit, doc, current_path.clone(), input.new_parent.clone())?;
+            }
+        }
+    }
+    Ok(())
+}
+
+pub fn update_unit(hash: ActionHash, unit: &Unit) -> ExternResult<EntryHash> {
+    let _action_hash = update_entry(hash, unit)?;
+    let hash = hash_entry(unit)?;
+    Ok(hash)
+}
+
+pub fn reparent_unit(unit_info: &UnitInfo, from: String, to: String)  -> ExternResult<(EntryHash, Unit)> {
+    let record = get(unit_info.hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Unit not found"))))?;
+    let mut unit: Unit = record
+        .entry()
+        .to_app_option().map_err(|err| wasm_error!(err))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
+    delete_unit_links(unit_info.hash.clone(), unit.tree_paths())?;
+
+    if let Some(idx) = unit.parents.clone().into_iter().position(|p| {
+        p.starts_with(&from)}
+    ) {
+        unit.parents[idx] = unit.parents[idx].replacen(&from, &to,1);
+    }
+
+    let new_unit_hash = update_unit(record.action_address().clone(), &unit)?;
+    create_unit_links(new_unit_hash.clone(), unit.tree_paths(), &unit_info.state, &unit_info.version)?;
+
+    Ok((new_unit_hash,unit))
+}
+
+pub fn reparent_document(old_unit_hash: EntryHash,  new_unit_hash: EntryHash, new_unit: &Unit, hash: EntryHash, old_path:String, new_parent: String)  -> ExternResult<()> {
+    let record = get(hash.clone(), GetOptions::default())?
+    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Document not found"))))?;
+    let mut document: Document = record
+        .entry()
+        .to_app_option().map_err(|err| wasm_error!(err))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed document"))))?;
+
+    if document.unit_hash == old_unit_hash {
+        document.unit_hash = new_unit_hash;
+        let new_path = format!("{}.{}", new_parent, new_unit.path_abbreviation);
+        let path = tree_path(old_path);
+        let links = get_links(path.path_entry_hash()?, LinkTypes::Document, None)?;
+
+        // delete all the old links at the old path
+        let mut delete_link_input: Vec<DeleteLinkInput> = Vec::new();
+        let any: AnyLinkableHash = hash.into();
+        for l in links {
+            if l.target == any {
+                delete_link_input.push(DeleteLinkInput{
+                    address: l.create_link_hash,
+                    chain_top_ordering: ChainTopOrdering::Relaxed,
+                });
+            }
+        }
+        for input in delete_link_input {
+            HDK.with(|hdk| hdk.borrow().delete_link(input))?;
+        }
+
+        _update_document( record.action_address().clone().into(), new_path, &document )?;
+    }
+    Ok(())
 }

@@ -14,7 +14,7 @@ import {
 import { HowNode } from "./how-node";
 import { EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
-import { consume } from '@lit-labs/context';
+import { consume } from '@lit/context';
 
 /**
  * @element how-tree

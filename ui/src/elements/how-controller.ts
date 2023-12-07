@@ -17,6 +17,11 @@ import { AsyncReadable, AsyncStatus, StoreSubscriber } from '@holochain-open-dev
 import { aliveImage } from "../images";
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+import "@shoelace-style/shoelace/dist/components/dropdown/dropdown.js";
+import "@shoelace-style/shoelace/dist/components/menu-item/menu-item.js";
+import "@shoelace-style/shoelace/dist/components/menu/menu.js";
+import SlDropdown from '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
+
 import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import sanitize from "sanitize-filename";
 
@@ -32,7 +37,7 @@ import {
   Profile,
 } from "@holochain-open-dev/profiles";
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
-import { consume } from '@lit-labs/context';
+import { consume } from '@lit/context';
 import { HowMyProfileDialog } from "./how-my-profile-dialog";
 import { EntryRecord } from "@holochain-open-dev/utils";
 //import { HowSettings } from "./how-settings";
@@ -79,6 +84,11 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   private _document!: HowDocument;
   @query('#settings')
   private _settings!: SlDialog;
+  @query('#reparent')
+  private _reparentDialog!: SlDialog;
+  @state() _reparentingToUnitHash: EntryHashB64 | undefined
+  @query('#units-menu')
+  private _unitsMenu!: SlDropdown;
 
   @state() _currentUnitEh = "";
   @state() _currentDocumentEh = "";
@@ -339,6 +349,23 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     }
   }
 
+  async doReparent() {
+    if (this._reparentingToUnitHash) {
+      const newParent = this._units.value[this._reparentingToUnitHash].path()
+      const path = this._units.value[this._currentUnitEh].path()
+      console.log("Move ", path, "->", newParent)
+      await this._store.reparent(path, newParent)
+    }
+    // cleanup
+    this._reparentDialog.hide()
+    this._reparentingToUnitHash = undefined
+  }
+
+  async handleReparent(event: any) {
+    await this._store.pullUnits()
+    this._reparentDialog.show()
+  }
+
   async doExport() {
     const rawTree = await this._store.pullTree()
     await this.pullAllDocs("", rawTree)
@@ -510,6 +537,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         @select-document=${(e:any)=>this.selectDocumentVersion(e.detail.hash, e.detail.readOnly)}
         @select-node=${(e: any)=>{const hash = this._unitsPath.value[e.detail]; this.handleUnitSelect(hash)}}
         @add-child=${this.handleAddChild}
+        @reparent=${this.handleReparent}
      />`
      const document = this._currentDocumentEh ? 
      html`<how-document id="document" 
@@ -527,7 +555,40 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       @click=${async ()=>{await this.doExport()}}>Export</sl-button>
       </sl-dialog>
 
+  <sl-dialog id="reparent" label="Reparent">
+    <sl-dropdown id="units-menu">
+          <sl-button slot="trigger"
+            @click=${(e:any)=>{
+              e.stopPropagation()
+              this._unitsMenu.show()
+            }}
+          >
+          ${this._reparentingToUnitHash ? this._units.value[this._reparentingToUnitHash].path() : "Select new parent"}
+          </sl-button>
+
+          <sl-menu  style="max-width: 100px;"
+            @mouseleave=${()=> this._unitsMenu.hide()}
+            @click=${(e:any)=>e.stopPropagation()}
+            @sl-select=${(e:any)=>{
+              console.log("SELECTED:", e.detail.item.value)
+              this._reparentingToUnitHash = e.detail.item.value
+              this._unitsMenu.hide()
+            }}>
+            ${
+              Object.entries(this._units.value).map(([key, unit]) => html`
+            <sl-menu-item value=${key}>
+              ${unit.path() == "" ? "<Root>" : unit.path()}
+            </sl-menu-item>
+              `)
+             }
+          </sl-menu>
+        </sl-dropdown>
+      <sl-button
+      @click=${async ()=>{await this.doReparent()}}>Do it!</sl-button>
+      </sl-dialog>
+
   <div>
+
     <div id="top-bar" class="row">
       <div id="top-bar-title">How ${this._currentUnitEh ? ` - ${this._units.value[this._currentUnitEh].shortName}` : ''}</div>
       <mwc-icon-button icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>

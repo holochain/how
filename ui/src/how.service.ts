@@ -53,6 +53,11 @@ export class HowService {
     let tree:RustTree = await this.callZome('get_tree', null);
     return tree.tree
   }
+
+  async reparent(path: string, newParent: string): Promise<void> {
+    this.callZome('reparent', {path,newParent});
+  }
+
   async notify(signal: HowSignal, folks: Array<AgentPubKeyB64>): Promise<void> {
     return this.callZome('notify', {signal, folks});
   }
