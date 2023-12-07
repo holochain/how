@@ -555,8 +555,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       @click=${async ()=>{await this.doExport()}}>Export</sl-button>
       </sl-dialog>
 
-  <sl-dialog id="reparent" label="Reparent">
-    <sl-dropdown id="units-menu">
+  ${this._currentUnitEh ? html`
+    <sl-dialog id="reparent" label="Reparent">
+      <sl-dropdown id="units-menu">
           <sl-button slot="trigger"
             @click=${(e:any)=>{
               e.stopPropagation()
@@ -570,12 +571,22 @@ export class HowController extends ScopedElementsMixin(LitElement) {
             @mouseleave=${()=> this._unitsMenu.hide()}
             @click=${(e:any)=>e.stopPropagation()}
             @sl-select=${(e:any)=>{
-              console.log("SELECTED:", e.detail.item.value)
               this._reparentingToUnitHash = e.detail.item.value
               this._unitsMenu.hide()
             }}>
             ${
-              Object.entries(this._units.value).map(([key, unit]) => html`
+              Object.entries(this._units.value).filter(([_,unit])=>{
+                const currentUnit = this._units.value[this._currentUnitEh]
+                const currentPath = currentUnit.path()
+                const unitPath = unit.path()
+                let current_path_parent = ""
+                if (currentUnit) {
+                  const p = currentPath.split(".")
+                  p.pop()
+                  current_path_parent = p.join(".")
+                }
+                return !unitPath.startsWith(currentPath) && (unitPath != current_path_parent)
+              }).map(([key, unit]) => html`
             <sl-menu-item value=${key}>
               ${unit.path() == "" ? "<Root>" : unit.path()}
             </sl-menu-item>
@@ -585,8 +596,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         </sl-dropdown>
       <sl-button
       @click=${async ()=>{await this.doReparent()}}>Do it!</sl-button>
-      </sl-dialog>
-
+    </sl-dialog>
+    ` : ""}
   <div>
 
     <div id="top-bar" class="row">

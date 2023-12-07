@@ -191,8 +191,9 @@ pub struct ReparentInput {
 }
 #[hdk_extern]
 pub fn reparent(input: ReparentInput) -> ExternResult<()> {
-    // let new_parent_path = Path::from(input.new_parent);
-    // let link = get
+    if input.new_parent.starts_with(&input.path) {
+        return Err(wasm_error!(WasmErrorInner::Guest(String::from("Can't reparent to child"))));
+    }
     let sub_tree = _get_path_tree(tree_path(input.path.clone()))?;
     let mut parent:Vec<_> = input.path.split(".").into_iter().collect();
     parent.pop();
