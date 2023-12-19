@@ -74,8 +74,24 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
       [SysState.Alive, new Unit({
         parents: ["social"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
+        pathAbbreviation: "biz", // max 10 char
+        shortName: "Business, Legal, Finance, Regulatory", // max 25 charAgent
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["social.biz"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "exec", // max 10 char
+        shortName: "Executive Function/ Council", // max 25 charAgent
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["social"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
         pathAbbreviation: "dev_support", // max 10 char
-        shortName: "Developer Support", // max 25 charAgent
+        shortName: "Developer Engagement & Support", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         })],
@@ -337,7 +353,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
             },
             {
               name: "summary",
-              sourcePath:"",
+              sourcePath: "tech.hApps",
               sectionType: SectionType.Content,
               contentType: "text/markdown",
               content: "An agent or agents in a Holochain DHT commit an entry who’s HRL will be used as the referenced in the minted NFT. The minted NFT’s id a hash of the minter plus Holochain entry hash. This id then is used on the Holochain side to create a baseless link to the NFT entry. The validation rules of that link ensure the trustability of any returned value for off-ethereum-chain reference by third parties. This creates a simple, fully-decentralized mechanism to provide a non-oracle based provenance of an NFT’s resource by preventing front-running.",
@@ -597,6 +613,50 @@ function mintNFT(uint256 memory target_) external {
         meta: {}
       },
       {
+        path: "social.biz",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Business, Legal, Finance, Regulatory',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: 'To align on how to interface with the world of regulations, banking, and laws. To create visibility and community feedback into significant decision-making happening in these domains.',
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "social.biz.exec",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Executive Function/ Council',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "To have surface area for interfacing with the Holochain Foundation's Executive Council, and make visible the people, and domains in which they are empowered and accountable to act.",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
         path: "social.dev_support",
         documentType: DocType.Document,
         content: [
@@ -605,14 +665,14 @@ function mintNFT(uint256 memory target_) external {
             sourcePath: "",
             sectionType: SectionType.Content,
             contentType: "text/plain",
-            content: 'Developer Support',
+            content: 'Developer Engagment & Support',
           },
           {
             name: "purpose",
             sourcePath:"",
             sectionType: SectionType.Content,
             contentType: "text/markdown",
-            content: 'To align on commitments the open-source community has to supporting developers in the community',
+            content: 'To align on commitments the open-source community has to supporting and engaging with developers in the community',
           },
         ],
         editors: [progenitor],
