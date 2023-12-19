@@ -56,13 +56,13 @@ pub fn delete_unit_links(hash: EntryHash, tree_paths: Vec<Path>)  -> ExternResul
     Ok(())
 }
 
-pub fn create_unit_links(hash: EntryHash, tree_paths: Vec<Path>, state: &str, version: &str)  -> ExternResult<()> {
+pub fn create_unit_links(hash: EntryHash, tree_paths: Vec<Path>, state: &str, version: &str, flags: &str)  -> ExternResult<()> {
     let path = get_units_path();
     let typed_path = path.clone().into_typed(ScopedLinkType::try_from(LinkTypes::Tree)?);
     typed_path.ensure()?;
 
     let anchor_hash = path.path_entry_hash()?;
-    let tag = LinkTag::new(String::from(format!("{}-{}", state, version)));
+    let tag = LinkTag::new(String::from(format!("{}-{}-{}", state, version, flags)));
 
     create_link(anchor_hash, hash.clone(), LinkTypes::Unit, tag.clone())?;
     for path in tree_paths {
@@ -82,12 +82,13 @@ pub fn create_unit_inner(input: Unit, state: &str) -> ExternResult<UnitOutput> {
         "Could not get the record created just now"
     ))))?;
     //emit_signal(&SignalPayload::new(hash.clone().into(), Message::NewUnit(record)))?;
-    create_unit_links(hash.clone(), tree_paths, state, &input.version)?;
+    create_unit_links(hash.clone(), tree_paths, state, &input.version, input.flags_str())?;
     Ok(UnitOutput {
         info: UnitInfo {
             hash,
             state: state.into(),
-            version: input.version
+            version: input.version.clone(),
+            flags: String::from(input.flags_str()),
         },
         record,
     })
@@ -110,16 +111,17 @@ fn get_units(_: ()) -> ExternResult<Vec<UnitOutput>> {
     Ok(units)
 }
 
-pub fn convert_tag(tag: LinkTag) -> ExternResult<(String,String)> {
+pub fn convert_tag(tag: LinkTag) -> ExternResult<(String,String,String)> {
     let tag_string = String::from_utf8(tag.into_inner())
     .map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert link tag to string"))))?;
     let x : Vec<&str>= tag_string.split("-").collect();
-    if x.len() != 2 {
+    if x.len() != 3 {
         return Err(wasm_error!(WasmErrorInner::Guest(format!("Badly formed link: {:?}", tag_string))));
     }
     let state = x[0].into();
-    let version = x[1].into();
-    Ok((state,version))
+    let version: String = x[1].into();
+    let flags: String = x[2].into();
+    Ok((state,version,flags))
 }
 
 fn get_units_inner(base: EntryHash) -> HowResult<Vec<UnitOutput>> {
@@ -127,13 +129,15 @@ fn get_units_inner(base: EntryHash) -> HowResult<Vec<UnitOutput>> {
 
     let mut unit_infos: HashMap<EntryHash,UnitInfo> = HashMap::new();
     for link in links.clone() {
-        let (state, version) = convert_tag(link.tag.clone())?;
+        let (state, version, flags) = convert_tag(link.tag.clone())?;
 
         let hash = EntryHash::try_from(link.target).map_err(|e| HowError::HashConversionError)?;
         unit_infos.insert(hash.clone(), UnitInfo {
             hash,
             version,
-            state});
+            state,
+            flags,
+        });
     }
 
     let mut get_input=  vec!();
@@ -178,7 +182,8 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
         hash: input.document_hash.clone(), path: unit.path_str()?, document: input.document })?;
     
     delete_unit_links(hash.clone(), unit.tree_paths())?;
-    create_unit_links(hash,unit.tree_paths(), &input.new_state, &unit.version)?;
+
+    create_unit_links(hash,unit.tree_paths(), &input.new_state, &unit.version, unit.flags_str())?;
     return Ok(new_doc_hash);
 }
 
@@ -235,7 +240,7 @@ pub fn reparent_unit(unit_info: &UnitInfo, from: String, to: String)  -> ExternR
     }
 
     let new_unit_hash = update_unit(record.action_address().clone(), &unit)?;
-    create_unit_links(new_unit_hash.clone(), unit.tree_paths(), &unit_info.state, &unit_info.version)?;
+    create_unit_links(new_unit_hash.clone(), unit.tree_paths(), &unit_info.state, &unit_info.version, unit.flags_str())?;
 
     Ok((new_unit_hash,unit))
 }

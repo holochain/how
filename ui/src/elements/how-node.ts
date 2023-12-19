@@ -2,7 +2,7 @@ import {css, html, LitElement} from "lit";
 import {property, query} from "lit/decorators.js";
 import { consume } from '@lit/context';
 import {sharedStyles} from "../sharedStyles";
-import {Unit, DocType, howContext, Document, DocumentOutput, SysState, Progress} from "../types";
+import {Unit, DocType, howContext, Document, DocumentOutput, SysState, Progress, UnitFlags} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { StoreSubscriber } from "@holochain-open-dev/stores";
@@ -51,6 +51,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
   }
   @property() unit:Unit|undefined;
   @property() state:string = "";
+  @property() flags:string = "";
   @property() progress:Progress| undefined = undefined;
 
   @consume({ context: howContext })
@@ -126,10 +127,11 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
         
         if (this.state == SysState.Alive) {
           return html`
-            <img src=${aliveImage}>`
+            <div class="${this.flags.includes(UnitFlags.Placeholder)?" placeholder":""}"><img src=${aliveImage}></div>
+            `
         } else {
           return html`
-            <div class="circle">${this.circle(segments)}</div>
+            <div class="${this.flags.includes(UnitFlags.Placeholder)?" placeholder":""}">${this.circle(segments)}</div>
           `
         }
     } else {    
@@ -147,6 +149,10 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
       css`
       img {
         width: 100%;
+      }
+      .placeholder {
+        background-color: lightyellow;
+        border-radius: 50%;
       }
       `,
     ];

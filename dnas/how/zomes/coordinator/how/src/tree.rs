@@ -9,6 +9,7 @@ pub struct UnitInfo {
     pub hash: EntryHash,
     pub version: String,
     pub state: String,
+    pub flags: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
@@ -40,11 +41,13 @@ fn get_entry_hashes(path: &Path) -> ExternResult<(Vec<UnitInfo>,Vec<EntryHash>)>
         match link_type {
             LinkTypes::Document => documents.push(target),
             LinkTypes::Unit => {
-                let (state, version) = convert_tag(l.tag)?;
+                let (state, version, flags) = convert_tag(l.tag)?;
                 units.push(UnitInfo{
                     hash: target,
                     version,
-                    state});                
+                    state,
+                    flags,
+                });                
             },
             _ => (),
         };

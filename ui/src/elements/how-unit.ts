@@ -4,7 +4,7 @@ import {property, query, state} from "lit/decorators.js";
 import { StoreSubscriber } from '@holochain-open-dev/stores';
 
 import {sharedStyles} from "../sharedStyles";
-import {Unit, DocType, howContext, SysState, Document, UnitInfo} from "../types";
+import {Unit, DocType, howContext, SysState, Document, UnitInfo, UnitFlags} from "../types";
 import {HowStore} from "../how.store";
 import { HowUnitDetails } from "./how-unit-details";
 import { SvgButton } from "./svg-button";
@@ -214,25 +214,27 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     return html`
       <div class="unit row">
         <div class="column">
-        <info-item size="26px" .item=${unit.shortName} name="short name"></info-item>
-        <info-item .item=${unit.version.slice(4)} .name=${`version (${unit.version.substring(1,4)})`}></info-item>
-        <info-item .item=${unit.pathAbbreviation} name="path"></info-item>
-        <info-item 
-          .title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}
-          .item=${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="created">
-        </info-item>
-        ${ updated ? html`<info-item title=${`Last modified ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="modified"></info-item>`:''}
-        <div class="info-item">${stewardsHTML}
-        <div class="info-item-name">stewards</div></div>
+          <info-item size="26px" .item=${unit.shortName} name="short name"></info-item>
+          <info-item .item=${unit.version.slice(4)} .name=${`version (${unit.version.substring(1,4)})`}></info-item>
+          <info-item .item=${unit.pathAbbreviation} name="path"></info-item>
+          <info-item 
+            .title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}
+            .item=${created.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="created">
+          </info-item>
+          ${ updated ? html`<info-item title=${`Last modified ${updated}`} .item=${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} name="modified"></info-item>`:''}
+          <div class="info-item">${stewardsHTML}
+            <div class="info-item-name">stewards</div>
+          </div>
         </div>
         <div class="column">
           <svg-button class="question-button"
               .click=${() => this._detailsElem!.open()} 
               .button=${"question"}>
-            </svg-button> 
+          </svg-button> 
           <div class="progress">
             <how-node .unit=${unit} .state=${stateName} .progress=${docInfo?.content.getProgress()}> </how-node>
           </div>
+          ${unit.meta.flags.includes(UnitFlags.Placeholder) ? html`<span style="margin:auto;background:yellow;border: 1px solid;">Under Construction</span>` : ""}
           ${stateHTML}
           <div class="column unit-controls">
             ${controlsHTML}

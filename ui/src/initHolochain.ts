@@ -7,7 +7,8 @@ import {
   Document,
   SectionType,
   SourceManual,
-  Unit
+  Unit,
+  UnitFlags
 } from "./types";
 import { AgentPubKeyB64 } from "@holochain/client";
 
@@ -186,24 +187,102 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
-        pathAbbreviation: "conductor", // max 10 char
-        shortName: "Holochain Conductor", // max 25 char
+        pathAbbreviation: "runtime", // max 10 char
+        shortName: "Runtime Environments", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         })],
       [SysState.Alive, new Unit({
-        parents: ["tech.hc_framework.conductor"], // full paths to parent nodes (remember it's a DAG)
+        parents: ["tech.hc_framework.runtime"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "conductor", // max 10 char
+        shortName: "Holochain Conductor", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        meta: {flags: `${UnitFlags.Placeholder}`},
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.runtime.conductor"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "api", // max 10 char
         shortName: "Holochain Conductor API", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
+        meta: {flags: `${UnitFlags.Placeholder}`},
         })],
       [SysState.Alive, new Unit({
-        parents: ["tech.hc_framework.conductor"], // full paths to parent nodes (remember it's a DAG)
+        parents: ["tech.hc_framework.runtime.conductor"], // full paths to parent nodes (remember it's a DAG)
         version: "vidx1",
         pathAbbreviation: "services", // max 10 char
         shortName: "Holochain Conductor Services", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        meta: {flags: `${UnitFlags.Placeholder}`},
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "organism", // max 10 char
+        shortName: "Network Organism", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.organism"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "organ", // max 10 char
+        shortName: "Network Organ", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.organism"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "ui", // max 10 char
+        shortName: "User Interface", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        meta: {flags: `${UnitFlags.Placeholder}`},
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "cell", // max 10 char
+        shortName: "Cell State", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "shared_viz", // max 10 char
+        shortName: "Shared Visibility", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        meta: {flags: `${UnitFlags.Placeholder}`},
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "dna", // max 10 char
+        shortName: "DNA", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        meta: {flags: `${UnitFlags.Placeholder}`},
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.organism.organ.cell"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "ephemeral", // max 10 char
+        shortName: "Ephemeral State", // max 25 char
+        stewards: [progenitor], // people who can change this document
+        processes: std_procs,
+        })],
+      [SysState.Alive, new Unit({
+        parents: ["tech.hc_framework.organism.organ.cell"], // full paths to parent nodes (remember it's a DAG)
+        version: "vidx1",
+        pathAbbreviation: "immutable", // max 10 char
+        shortName: "Immutable State", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
         })],
@@ -503,7 +582,29 @@ function mintNFT(uint256 memory target_) external {
           meta: {}
       },
       {
-        path: "tech.hc_framework.conductor",
+        path: "tech.hc_framework.runtime",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Runtime Environments',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "To provide aligment on standards for Holochain run-time environments",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.runtime.conductor",
         documentType: DocType.Document,
         content: [
           {
@@ -525,7 +626,7 @@ function mintNFT(uint256 memory target_) external {
         meta: {}
       },
       {
-        path: "tech.hc_framework.conductor.services",
+        path: "tech.hc_framework.runtime.conductor.services",
         documentType: DocType.Document,
         content: [
           {
@@ -547,7 +648,7 @@ function mintNFT(uint256 memory target_) external {
         meta: {}
       },
       {
-        path: "tech.hc_framework.conductor.api",
+        path: "tech.hc_framework.runtime.conductor.api",
         documentType: DocType.Document,
         content: [
           {
@@ -556,6 +657,189 @@ function mintNFT(uint256 memory target_) external {
             sectionType: SectionType.Content,
             contentType: "text/plain",
             content: 'Conductor API',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Network Organism',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "To provide aligment on standards for Holochain hApps",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism.ui",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'User Interface',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism.organ",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Network Organ',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "DNA level standards... fixme",
+          },
+          {
+            name: "host_fn spec",
+            sourcePath:"",
+            sectionType: SectionType.CollectionDef,
+            contentType: "text/markdown",
+            content: '{"description": "specification of host functions"}',
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism.organ.dna",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'DNA',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism.organ.cell",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Cell',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism.organ.shared_viz",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Shared Visibility',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism.organ.cell.ephemeral",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Ephemeral State',
+          },
+          {
+            name: "purpose",
+            sourcePath:"",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "fixme",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
+        path: "tech.hc_framework.organism.organ.cell.immutable",
+        documentType: DocType.Document,
+        content: [
+          {
+            name: "title",
+            sourcePath: "",
+            sectionType: SectionType.Content,
+            contentType: "text/plain",
+            content: 'Immutable State',
           },
           {
             name: "purpose",

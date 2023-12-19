@@ -82,12 +82,14 @@ export enum VersioningType {
 export enum DocType {
   TreeMeta = "_",
   Document = "_document",
-  Comment = "_comment"
+  Comment = "_comment",
+  Collection = "_collection"
 }
 
 export enum SectionType {
   Process = "p",
   Requirement = "r",
+  CollectionDef = "d",
   Content = "c",
 }
 
@@ -280,6 +282,11 @@ export type UnitInfo = {
     hash: EntryHash,
     version: string,
     state: string,
+    flags: string,
+}
+
+export enum UnitFlags {
+  Placeholder = "p"
 }
 
 export type UnitOutput = {

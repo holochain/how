@@ -23,6 +23,12 @@ pub struct Unit {
 }
 
 impl Unit {
+    pub fn flags_str(&self) -> &str {
+        match self.meta.get("flags") {
+            Some(flags) => flags,
+            None => "",
+        }
+    } 
     pub fn path_str(&self) -> ExternResult<String> {
         let x = self.tree_paths();
         let v = x[0].as_ref();
