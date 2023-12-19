@@ -170,7 +170,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
           
         ><p id="how-selection-element"
         @click=${(e:any)=>this.handleSelect(e)}>${this.highlitContent(this.highlitRange,section.content)}</p></div>
-        <p @click=${(e:any)=>this.handleSelect(e)}>comment</p>`
+      `
       }
     }
     return html`Section Missing`
