@@ -15,6 +15,7 @@ import { HowNode } from "./how-node";
 import { EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 //import {Button, Dialog, TextField, Fab, Slider} from "@scoped-elements/material-web";
 import { consume } from '@lit/context';
+import {ifDefined} from 'lit/directives/if-defined.js';
 
 /**
  * @element how-tree
@@ -57,7 +58,7 @@ export class HowTree extends ScopedElementsMixin(LitElement) {
     <li class="${this.treeType}">
       <span class="${nodeId == this.currentNode ? "current" : ""}" @click=${()=>this.select(nodeId)}>
         <div class="progress" title=${`document count: ${node.val.documents.length}`}>
-          <how-node .unit=${this._units.value[nodeId]} state=${state} flags=${unitInfo?.flags}> </how-node>
+          <how-node .unit=${this._units.value[nodeId]} state=${state} flags=${ifDefined(unitInfo?.flags)}> </how-node>
         </div>
         ${node.id=="0" ? this._store.treeName : node.val.name}
         <!-- <mwc-button icon="add_circle" @click=${
