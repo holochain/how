@@ -19,6 +19,7 @@ import { InfoItem } from "./info-item";
 import { HowConfirm } from "./how-confirm";
 import { consume } from '@lit/context';
 import { Profile, ProfilesStore, profilesStoreContext } from "@holochain-open-dev/profiles";
+import { underConstructionImage } from "../images";
 
 const getCurrentStateName  = (unit:Unit, documentState:string ): string => {
   for (const [procType, procName] of unit.processes) {
@@ -123,6 +124,8 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
     const action: Action = this._unitsActions.value[this.currentUnitEh]
 
+    const underConstruction = unit.meta.flags && unit.meta.flags.includes(UnitFlags.UnderConstruction)
+
     const path = this.getPath()
     const docInfo = this._store.getCurrentDocument(path, this.currentUnitEh)
     let allDocs = this._store.getDocumentsFiltered(path, this.currentUnitEh , DocType.Document, false)
@@ -149,7 +152,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       updated = new Date(docInfo.updated)
       const document = docInfo.content
       state = document.state
-      if (isSteward  && document.getStats().emptySections == 0) {
+      if (!underConstruction && isSteward  && document.getStats().emptySections == 0) {
         controlsHTML = controlsHTML.concat(unit
             .nextStatesFrom(document.state)
             .map(
@@ -164,13 +167,17 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     } else {
       state = unitInfo.state
     }
-    if (state == SysState.Alive && isSteward) {
+    if ( (underConstruction || state == SysState.Alive) && isSteward) {
       controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
             .info=${"add child"}
             .button=${"plus"}>
-          </svg-button> 
+          </svg-button>
+        </div>
+      `)
+      if (underConstruction && isSteward) {
+        controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('reparent', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
             .info=${"reparent"}
@@ -178,10 +185,13 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           </svg-button> 
         </div>
       `)
-      if (updated) {
-        stateHTML = html`<info-item title=${`Alive as of ${updated}`} item="Alive" .name=${`as of ${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}`}></info-item>`
-      } else {
-        stateHTML = html`<info-item item="Alive"></info-item>`
+      }
+      if (!underConstruction) {
+        if (updated) {
+          stateHTML = html`<info-item title=${`Alive as of ${updated}`} item="Alive" .name=${`as of ${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}`}></info-item>`
+        } else {
+          stateHTML = html`<info-item item="Alive"></info-item>`
+        }
       }
     } else if (state == SysState.Defunct) {
       stateHTML = html`<info-item item="Defunct"></info-item >`
@@ -232,9 +242,11 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
               .button=${"question"}>
           </svg-button> 
           <div class="progress">
-            <how-node .unit=${unit} .state=${stateName} .progress=${docInfo?.content.getProgress()}> </how-node>
+            ${ underConstruction ?
+             html`<img style="width: 100%;" src=${underConstructionImage}>` :
+             html`<how-node .unit=${unit} .state=${stateName} .progress=${docInfo?.content.getProgress()}> </how-node>`}
           </div>
-          ${unit.meta.flags.includes(UnitFlags.Placeholder) ? html`<span style="margin:auto;background:yellow;border: 1px solid;">Under Construction</span>` : ""}
+          ${underConstruction ? html`<span style="margin:auto;background:yellow;border: 1px solid;padding:5px">Under Construction</span>` : ""}
           ${stateHTML}
           <div class="column unit-controls">
             ${controlsHTML}

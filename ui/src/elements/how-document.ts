@@ -41,6 +41,8 @@ import { CommentControl, Control } from "../controls";
     @state() highlitRange : HilightRange | undefined;
     @state() overlapping : Comment[] | undefined
     @state() commentStats : CommentStats | undefined;
+    @state() availbleCollectionSections : Array<string>  = ["host_fn specs"]
+
     private selectedCommentText: string = ""
 
     @query('how-new-section-dialog')
@@ -461,6 +463,19 @@ import { CommentControl, Control } from "../controls";
             @add-section=${this.addSection}
             sectionType=${SectionType.Content}
           ></how-new-section-dialog>
+          ${this.availbleCollectionSections.length ? this.availbleCollectionSections.map(type => html`
+          <svg-button
+                button="plus"
+                info="add ${type} collection section"
+                infoPosition="right"
+                .click=${() => {
+                  console.log("FISH")
+                  this.dispatchEvent(new CustomEvent('add-section', { detail: {name: type, contentType: "text/markdown", sectionType:  SectionType.Content}, bubbles: true, composed: true }))
+                }}
+                ></svg-button>
+          </div>
+
+          `) : ""}
           `
         }
 

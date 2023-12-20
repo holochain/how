@@ -286,7 +286,7 @@ export type UnitInfo = {
 }
 
 export enum UnitFlags {
-  Placeholder = "p"
+  UnderConstruction = "p"
 }
 
 export type UnitOutput = {

@@ -7,7 +7,7 @@ import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import { StoreSubscriber } from "@holochain-open-dev/stores";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
-import { aliveImage } from "../images";
+import { aliveImage, underConstructionImage } from "../images";
 const angleInRadians = (angleInDegrees: number) => (angleInDegrees - 90) * (Math.PI / 180.0);
 
 const polarToCartesian = (centerX:number, centerY:number, radius:number, angleInDegrees:number) => {
@@ -125,14 +125,19 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
             i+=1
         }
         
-        if (this.state == SysState.Alive) {
+        if (this.flags.includes(UnitFlags.UnderConstruction)) {
           return html`
-            <div class="${this.flags.includes(UnitFlags.Placeholder)?" placeholder":""}"><img src=${aliveImage}></div>
-            `
+          <img src=${underConstructionImage}>`
+
         } else {
-          return html`
-            <div class="${this.flags.includes(UnitFlags.Placeholder)?" placeholder":""}">${this.circle(segments)}</div>
-          `
+          if (this.state == SysState.Alive) {
+            return html`
+              <img src=${aliveImage}>`
+          } else {
+            return html`
+              <div class="circle">${this.circle(segments)}</div>
+            `
+          }
         }
     } else {    
         return html`
@@ -149,10 +154,6 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
       css`
       img {
         width: 100%;
-      }
-      .placeholder {
-        background-color: lightyellow;
-        border-radius: 50%;
       }
       `,
     ];

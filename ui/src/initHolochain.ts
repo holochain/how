@@ -79,6 +79,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "Business, Legal, Finance, Regulatory", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["social.biz"], // full paths to parent nodes (remember it's a DAG)
@@ -87,6 +88,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "Executive Function/ Council", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["social"], // full paths to parent nodes (remember it's a DAG)
@@ -95,6 +97,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "Developer Engagement & Support", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["social.ops"], // full paths to parent nodes (remember it's a DAG)
@@ -199,7 +202,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "Holochain Conductor", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        meta: {flags: `${UnitFlags.Placeholder}`},
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.runtime.conductor"], // full paths to parent nodes (remember it's a DAG)
@@ -208,7 +211,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "Holochain Conductor API", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        meta: {flags: `${UnitFlags.Placeholder}`},
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.runtime.conductor"], // full paths to parent nodes (remember it's a DAG)
@@ -217,7 +220,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "Holochain Conductor Services", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        meta: {flags: `${UnitFlags.Placeholder}`},
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework"], // full paths to parent nodes (remember it's a DAG)
@@ -242,7 +245,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "User Interface", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        meta: {flags: `${UnitFlags.Placeholder}`},
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
@@ -259,7 +262,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "Shared Visibility", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        meta: {flags: `${UnitFlags.Placeholder}`},
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
@@ -268,7 +271,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         shortName: "DNA", // max 25 char
         stewards: [progenitor], // people who can change this document
         processes: std_procs,
-        meta: {flags: `${UnitFlags.Placeholder}`},
+        meta: {flags: `${UnitFlags.UnderConstruction}`},
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.organism.organ.cell"], // full paths to parent nodes (remember it's a DAG)
@@ -733,7 +736,7 @@ function mintNFT(uint256 memory target_) external {
           },
           {
             name: "host_fn spec",
-            sourcePath:"",
+            sourcePath: SourceManual,
             sectionType: SectionType.CollectionDef,
             contentType: "text/markdown",
             content: '{"description": "specification of host functions"}',

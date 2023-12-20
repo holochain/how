@@ -53,6 +53,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
       case SectionType.Content: return ""; break;
       case SectionType.Process: return html`<span class="template-marker">Process Template</span>`
       case SectionType.Requirement: return html`<span class="template-marker">Required Section</span>`
+      case SectionType.CollectionDef: return html`<span class="template-marker">Collection Definition</span>`
     }
   }
 
