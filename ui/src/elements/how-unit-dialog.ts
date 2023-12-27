@@ -4,7 +4,7 @@ import {property, query, state} from "lit/decorators.js";
 import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Unit, howContext, Dictionary, Node, VersioningType} from "../types";
+import {Unit, howContext, Dictionary, Node, VersioningType, SysState, UnitInfo} from "../types";
 import {EntryHashB64} from "@holochain/client";
 import {
   Button,
@@ -54,6 +54,7 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   @property() _stewards: Dictionary<string> = {};
 
   @state() _parent?: Unit;
+  @state() _parentInfo?: UnitInfo;
 
   private static readonly NONE = 'none'; // we need a default value for the mwc-selects because if an empty string is provided, the UI gets broken
 
@@ -85,6 +86,7 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   }
   open(parentEh: EntryHashB64) {
     this._parent = this._store.unit(parentEh);
+    this._parentInfo = this._store.unitInfo(parentEh);
     const dialog = this.shadowRoot!.getElementById("unit-dialog") as Dialog
     dialog.open = true
   }
@@ -128,7 +130,7 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
       this._versionField.reportValidity()
     }
 
-    const processes = this.getProcessesValue()
+    const processes = this._parentInfo?.state == SysState.UnderConstruction ? [] : this.getProcessesValue()
     const stewards = Object.keys(this._stewards).map((agent)=> agent)
     if (stewards.length == 0) {
       stewards.push(this._store.myAgentPubKey)
@@ -143,7 +145,7 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
       });
 
     // - Add unit to commons
-    const newUnit = await this._store.addUnit(unit);
+    const newUnit = await this._store.addUnit(unit, this._parentInfo?.state == SysState.UnderConstruction? SysState.UnderConstruction : "define");
     this.dispatchEvent(new CustomEvent('unit-added', { detail: newUnit, bubbles: true, composed: true }));
 
     // - Clear all fields
@@ -218,26 +220,26 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   <mwc-textfield type="text"
                  @input=${() => (this.shadowRoot!.getElementById("title-field") as TextField).reportValidity()}
                  id="title-field" minlength="3" maxlength="64" label="Title" autoValidate=true required></mwc-textfield>
-  
-  ${PROCESS_TYPES.map(processType => 
-    html`
-      <mwc-select
-        id="${processType}-process-select" 
-        label="Select ${processType} process" 
-        @closing=${(e: any) => e.stopPropagation()}
-      >
-        <mwc-list-item selected value=${HowUnitDialog.NONE}>
-          &ltnone&gt
-        </mwc-list-item>
+  ${this._parentInfo?.state != SysState.UnderConstruction ? 
+    PROCESS_TYPES.map(processType => 
+      html`
+        <mwc-select
+          id="${processType}-process-select" 
+          label="Select ${processType} process" 
+          @closing=${(e: any) => e.stopPropagation()}
+        >
+          <mwc-list-item selected value=${HowUnitDialog.NONE}>
+            &ltnone&gt
+          </mwc-list-item>
 
-        ${
-          this._processes[processType].value.map((process) =>
-            html`<mwc-list-item value=${process?.val.name}>${process?.val.name}</mwc-list-item>`
-          )
-        }
-      </mwc-select>
-    `
-  )}
+          ${
+            this._processes[processType].value.map((process) =>
+              html`<mwc-list-item value=${process?.val.name}>${process?.val.name}</mwc-list-item>`
+            )
+          }
+        </mwc-select>
+      `
+    ) : ""}
   
   Stewards: ${Object.keys(this._stewards).length} ${Object.entries(this._stewards).map(([agent, nickname])=>html`<span class="agent" title="${agent}">${nickname}</span>`)}
   <search-agent

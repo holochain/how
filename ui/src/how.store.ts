@@ -345,28 +345,31 @@ export class HowStore {
     return get(this.treeStore)
   }
 
-  async initializeUnit(unitEh: EntryHashB64) : Promise<void>  {
+  async initializeUnit(unitEh: EntryHashB64, state: string) : Promise<void>  {
     const unit = this.unit(unitEh)
-    const proc = unit.processes[0]
-    const processPath = `${proc[0]}.${proc[1]}`
     const doc = new Document({unitHash: decodeHashFromBase64(unitEh), documentType: DocType.Document})
     // TODO 
     doc.editors = unit.stewards
+    doc.state = state
 
     doc.appendSections(await this.getSectionsFromHierarcy(unit.parents[0], 0, SectionType.Requirement))
-    await this.pullDocuments(processPath)
-    doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
-
+    const proc = unit.processes[0]
+    if (proc) {
+      const processPath = `${proc[0]}.${proc[1]}`
+      await this.pullDocuments(processPath)
+      doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
+    }
+    
     doc.setSection("title", unit.shortName)
     console.log("ADDING DOC", doc)
     const path = `${unit.parents[0]}.${unit.pathAbbreviation}`
     await this.addDocument(path, doc)
   }
 
-  async addUnit(unit: Unit) : Promise<EntryHashB64> {
-    const unitOutput: UnitOutput = await this.service.createUnit(unit)
+  async addUnit(unit: Unit, state: string) : Promise<EntryHashB64> {
+    const unitOutput: UnitOutput = await this.service.createUnit({unit, state})
     this.updateUnitFromEntry(unitOutput)
-    await this.initializeUnit(encodeHashToBase64(unitOutput.info.hash))
+    await this.initializeUnit(encodeHashToBase64(unitOutput.info.hash), state)
 
     //this.service.notify({unitHash:unitEh, message: {type:"NewUnit", content:unit}}, this.others());
     return encodeHashToBase64(unitOutput.info.hash)
@@ -378,6 +381,10 @@ export class HowStore {
 
   unit(unitEh: EntryHashB64): Unit {
     return get(this.unitsStore)[unitEh];
+  }
+
+  unitInfo(unitEh: EntryHashB64): UnitInfo {
+    return get(this.unitsInfoStore)[unitEh];
   }
 
   async addDocument(path: string, document: Document) : Promise<EntryHashB64> {

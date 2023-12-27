@@ -17,6 +17,11 @@ export interface Initialization {
 export type ProcessName = string
 export type ProcessType = string
 
+export interface UnitInput {
+  state: string,
+  unit: Unit,
+}
+
 export class Unit {
   parents: Array<string> = []
   version: string = ""
@@ -127,7 +132,7 @@ export class Document {
   editors: Array<AgentPubKeyB64> = [] // people who can change this document, if empty anyone can
   content: Array<Section> = [] // semantically identified content components
   meta: Dictionary<string> = {} // semantically identified meta
-  state: string = "define"
+  state: string = SysState.UnderConstruction
   marks: Array<Mark> = []
   protected sectionsMap: Dictionary<number> = {}
 

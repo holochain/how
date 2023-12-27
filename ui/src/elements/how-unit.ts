@@ -132,6 +132,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const path = this.getPath()
     const docInfo = this._store.getCurrentDocument(path, this.currentUnitEh)
     let allDocs = this._store.getDocumentsFiltered(path, this.currentUnitEh , DocType.Document, false)
+    let collections = this._store.getDocumentsFiltered(path, this.currentUnitEh , DocType.Collection, false)
 
     const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
     let stewardsHTML = html`<how-agent-list .agents=${unit.stewards}></how-agent-list>`
@@ -238,6 +239,32 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         </mwc-select>
       </div>`
     } 
+
+    let collectionsHTML
+    if (collections.length > 0) {
+      const collectionItemsHTML = []
+      for (let i=collections.length-1; i>= 0;i-=1){
+        const date = new Date(allDocs[i].actions[0].content.timestamp/1000)
+        collectionItemsHTML.push(html`
+          <mwc-list-item value=${i} @click=${()=>this.handleDocumentClick(collections[i].hash, true)}>
+          ${date.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} ${date.toLocaleTimeString('en-US')}
+          </mwc-list-item>`) 
+      }
+      collectionsHTML = html`
+      <div class="history row">
+        <mwc-select
+          class="history-item" 
+          label="Show Collection" 
+          @closing=${(e: any) => e.stopPropagation()}
+          >
+        ${collectionItemsHTML}
+        </mwc-select>
+      </div>`
+    } 
+    else {
+      collectionsHTML = html`collections: ${collections.length}`
+    }
+
     return html`
       <div class="unit row">
         <div class="column">
@@ -271,6 +298,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         </div>
       </div>
       ${historyHTML}
+      ${collectionsHTML}
       <how-unit-details id="details-dialog" .state=${stateName}> </how-unit-details>
       <how-confirm @confirmed=${(e:any) => this.handleConfirm(e.detail)}></how-confirm>
     `;

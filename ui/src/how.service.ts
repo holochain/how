@@ -1,5 +1,5 @@
 import { AppAgentClient, EntryHashB64, AgentPubKeyB64, AppAgentCallZomeRequest, RoleName, encodeHashToBase64 } from '@holochain/client';
-import { Unit, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput, AdvanceStateInput, UnitOutput, MarkDocumentInput, HowSignal} from './types';
+import { UnitInput, RustNode, RustTree, Initialization, DocumentOutput, DocumentInput, UpdateDocumentInput, AdvanceStateInput, UnitOutput, MarkDocumentInput, HowSignal} from './types';
 import { ActionHash  } from '@holochain/client';
 
 export class HowService {
@@ -17,7 +17,7 @@ export class HowService {
     return this.callZome('initialize', input);
   }
 
-  async createUnit(unit: Unit): Promise<UnitOutput> {
+  async createUnit(unit: UnitInput): Promise<UnitOutput> {
     return this.callZome('create_unit', unit);
   }
 

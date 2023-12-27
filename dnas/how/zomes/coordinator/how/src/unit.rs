@@ -18,9 +18,16 @@ pub fn get_units_path() -> Path {
 pub const START_STATE: &str = "define";
 pub const ALIVE_STATE: &str = "_alive";
 
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UnitInput {
+    pub state: String,
+    pub unit: Unit,
+}
+
 #[hdk_extern]
-pub fn create_unit(input: Unit) -> ExternResult<UnitOutput> {
-    Ok(create_unit_inner(input, START_STATE)?)
+pub fn create_unit(input: UnitInput) -> ExternResult<UnitOutput> {
+    Ok(create_unit_inner(input.unit, &input.state)?)
 }
 
 pub fn delete_unit_links(hash: EntryHash, tree_paths: Vec<Path>)  -> ExternResult<()> {

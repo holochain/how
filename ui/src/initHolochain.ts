@@ -746,6 +746,28 @@ function mintNFT(uint256 memory target_) external {
         meta: {}
       },
       {
+        path: "tech.hc_framework.organism.organ",
+        documentType: DocType.Collection,
+        content: [
+          {
+            name: "cell.immutable",
+            sourcePath: "tech.hc_framework.organism.organ.cell.immutable",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: 'long spec about immutability',
+          },
+          {
+            name: "cell.ephemral",
+            sourcePath:"tech.hc_framework.organism.organ.cell.ephemral",
+            sectionType: SectionType.Content,
+            contentType: "text/markdown",
+            content: "",
+          },
+        ],
+        editors: [progenitor],
+        meta: {}
+      },
+      {
         path: "tech.hc_framework.organism.organ.dna",
         documentType: DocType.Document,
         content: [
