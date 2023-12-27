@@ -524,7 +524,6 @@ import { CommentControl, Control } from "../controls";
           tasksHTML = tasksHTML.concat(control.tasks(this._store.myAgentPubKey, doc))
         })
       return html`
-      state: ${this._documents.value[this.currentDocumentEh].state}
           <div id="header">
             ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
             ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}

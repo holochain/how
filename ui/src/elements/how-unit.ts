@@ -239,7 +239,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       </div>`
     } 
     return html`
-      state:${state}
       <div class="unit row">
         <div class="column">
           <info-item size="26px" .item=${unit.shortName} name="short name"></info-item>
