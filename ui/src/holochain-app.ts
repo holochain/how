@@ -28,7 +28,7 @@ import {howContext} from "./types"
 import { localized, msg } from '@lit/localize';
 
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { WeClient, isWeContext } from '@lightningrodlabs/we-applet';
+import { WeClient, isWeContext, initializeHotReload } from '@lightningrodlabs/we-applet';
 
 const appId = 'how'
 
@@ -57,6 +57,13 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
       avatarMode: "avatar-optional",
       additionalFields: [], // "Location","Hashtags", "Bio"// Custom app level profile fields
     };
+    if ((import.meta as any).env.DEV) {
+      try {
+        await initializeHotReload();
+      } catch (e) {
+        console.warn("Could not initialize applet hot-reloading. This is only expected to work in a We context in dev mode.")
+      }
+    }
 
     if (!isWeContext()) {
       const adminPort : string = import.meta.env.VITE_ADMIN_PORT

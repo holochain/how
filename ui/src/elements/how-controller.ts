@@ -40,6 +40,7 @@ import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
 import { consume } from '@lit/context';
 import { HowMyProfileDialog } from "./how-my-profile-dialog";
 import { EntryRecord } from "@holochain-open-dev/utils";
+import { isWeContext } from "@lightningrodlabs/we-applet";
 //import { HowSettings } from "./how-settings";
 //import './how-settings.js';
 
@@ -603,7 +604,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <div id="top-bar" class="row">
       <div id="top-bar-title">How ${this._currentUnitEh ? ` - ${this._units.value[this._currentUnitEh].shortName}` : ''}</div>
       <mwc-icon-button icon="view_module"  @click=${this.toggleTreeType}></mwc-icon-button>
-      <mwc-icon-button icon="account_circle" @click=${() => {this._myProfileDialog.open()}}></mwc-icon-button>
+      ${!isWeContext() ? html`<mwc-icon-button icon="account_circle" @click=${() => {this._myProfileDialog.open()}}></mwc-icon-button>`:''}
       <mwc-icon-button icon="settings" @click=${() => {this._settings.show()}}></mwc-icon-button>
     </div>
 
@@ -615,7 +616,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       ${document}    
     </div>
     <how-unit-dialog id="unit-dialog"
-                        @unit-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
+      @unit-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
     </how-unit-dialog>
   </div>
 
