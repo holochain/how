@@ -106,7 +106,8 @@ export interface Section {
 
 export enum SysState {
   Alive = "_alive",
-  Defunct = "_defunct"
+  Defunct = "_defunct",
+  UnderConstruction = "_build"
 }
 
 export interface DocumentInitializer {
@@ -178,11 +179,11 @@ export class Document {
 
   public canAddSection() : boolean {
     // TODO add stuff about Editors and Stewards
-    return this.state === "define" || this.state === "refine"
+    return this.underConstruction() || this.state === "define" || this.state === "refine"
   }
 
   public isEditable(sectionName:string) : Boolean {
-    if (this.state == "define") {
+    if (this.underConstruction() || this.state == "define") {
       return true
     }
     // section is editable if the source of that section is the current proceess
@@ -199,6 +200,10 @@ export class Document {
 
   public isAlive() : boolean {
     return this.state == SysState.Alive
+  }
+
+  public underConstruction() : boolean {
+    return this.state == SysState.UnderConstruction
   }
 
   public getSectionsByType(sectionType: SectionType) : Array<Section> {
@@ -286,7 +291,7 @@ export type UnitInfo = {
 }
 
 export enum UnitFlags {
-  UnderConstruction = "p"
+  TBD = "p"
 }
 
 export type UnitOutput = {

@@ -33,7 +33,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
 
   @property() section: Section | undefined;
   @property() index = 0
-  @property() editable = false;
+  @property() readOnly = false;
   @property() click = ()=>{};
   @property() highlitRange: HilightRange | undefined = undefined;
   @property() comments:Array<Comment> = []
@@ -47,6 +47,11 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
 
   @query('#how-selection-element')
   private _elem!: HTMLElement;
+
+  isEdiable() {
+    return this.document && this.section ?  (this.document.isEditable(this.section.name) && !this.readOnly) : false
+  }
+
 
   private sectionTypeMarker(section: Section) {
     switch (section.sectionType) {
@@ -268,7 +273,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 infoPosition="right"
                 .click=${() => this.editing=false}
                 ></svg-button>`)
-        } else if (this.editable) {
+        } else if (this.isEdiable()) {
             controls.push(html`<svg-button
                 button="edit"
                 info="edit"

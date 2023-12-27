@@ -89,7 +89,12 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     let message = ""
     if (newState == SysState.Defunct) {
       message = "Are you sure you want to move this item to Defunct?  This can not be undone."
-    } else {
+    } else if (newState == SysState.Alive && this._unitsInfos.value[this.currentUnitEh].state == SysState.UnderConstruction) {
+      message = "Are you sure you want to move this under construction unit to Alive?"
+    } else if (newState == SysState.UnderConstruction) {
+      message = "Are you sure you want to move this unit to under construction?"
+    }
+    else {
       const unit: Unit = this._units.value[this.currentUnitEh]
       const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
       const process_path = unit.processPathForState(unitInfo.state)
@@ -124,8 +129,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const unitInfo: UnitInfo = this._unitsInfos.value[this.currentUnitEh]
     const action: Action = this._unitsActions.value[this.currentUnitEh]
 
-    const underConstruction = unit.meta.flags && unit.meta.flags.includes(UnitFlags.UnderConstruction)
-
     const path = this.getPath()
     const docInfo = this._store.getCurrentDocument(path, this.currentUnitEh)
     let allDocs = this._store.getDocumentsFiltered(path, this.currentUnitEh , DocType.Document, false)
@@ -147,12 +150,12 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     let controlsHTML:any[] = []
 
     let updated: Date |undefined
-    let state 
+    let state
     if (docInfo) {
       updated = new Date(docInfo.updated)
       const document = docInfo.content
       state = document.state
-      if (!underConstruction && isSteward  && document.getStats().emptySections == 0) {
+      if (state != SysState.UnderConstruction && isSteward  && document.getStats().emptySections == 0) {
         controlsHTML = controlsHTML.concat(unit
             .nextStatesFrom(document.state)
             .map(
@@ -163,11 +166,20 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
                   .button=${nextState == SysState.Defunct ? "defunct" : "move"}>
                   </svg-button>`
             ))
-      }
+        controlsHTML.push(html`
+            <svg-button
+              .click=${() => this.confirmAdvance(this.currentUnitEh, SysState.UnderConstruction)}
+              .info=${"move to construction"}
+              .button=${"move"}>
+            </svg-button> 
+          </div>
+        `)
+  
+        }
     } else {
       state = unitInfo.state
     }
-    if ( (underConstruction || state == SysState.Alive) && isSteward) {
+    if ( (state == SysState.UnderConstruction || state == SysState.Alive) && isSteward) {
       controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
@@ -176,17 +188,22 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
           </svg-button>
         </div>
       `)
-      if (underConstruction && isSteward) {
+      if (state == SysState.UnderConstruction  && isSteward) {
         controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('reparent', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
             .info=${"reparent"}
             .button=${"reparent"}>
+          </svg-button>
+          <svg-button
+            .click=${() => this.confirmAdvance(this.currentUnitEh, SysState.Alive)}
+            .info=${"make alive"}
+            .button=${"move"}>
           </svg-button> 
         </div>
       `)
       }
-      if (!underConstruction) {
+      if (state != SysState.UnderConstruction ) {
         if (updated) {
           stateHTML = html`<info-item title=${`Alive as of ${updated}`} item="Alive" .name=${`as of ${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}`}></info-item>`
         } else {
@@ -222,6 +239,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       </div>`
     } 
     return html`
+      state:${state}
       <div class="unit row">
         <div class="column">
           <info-item size="26px" .item=${unit.shortName} name="short name"></info-item>
@@ -242,11 +260,11 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
               .button=${"question"}>
           </svg-button> 
           <div class="progress">
-            ${ underConstruction ?
+            ${ state == SysState.UnderConstruction  ?
              html`<img style="width: 100%;" src=${underConstructionImage}>` :
              html`<how-node .unit=${unit} .state=${stateName} .progress=${docInfo?.content.getProgress()}> </how-node>`}
           </div>
-          ${underConstruction ? html`<span style="margin:auto;background:yellow;border: 1px solid;padding:5px">Under Construction</span>` : ""}
+          ${state == SysState.UnderConstruction ? html`<span style="margin:auto;background:yellow;border: 1px solid;padding:5px">Under Construction</span>` : ""}
           ${stateHTML}
           <div class="column unit-controls">
             ${controlsHTML}

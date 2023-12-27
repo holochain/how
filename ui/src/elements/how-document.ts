@@ -36,7 +36,7 @@ import { CommentControl, Control } from "../controls";
   
     @property() currentDocumentEh = "";
     @property() path = "";
-    @property() readOnly = false;
+    @property() readOnly: boolean = false;
     @state() commentingOn : Section|undefined = undefined;
     @state() highlitRange : HilightRange | undefined;
     @state() overlapping : Comment[] | undefined
@@ -433,7 +433,7 @@ import { CommentControl, Control } from "../controls";
           .section=${section} 
           .index=${index}
           .highlitRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
-          .editable=${doc.isEditable(section.name) && !this.readOnly}
+          .readOnly=${this.readOnly}
           .comments=${comments}
           >
         </how-section>
@@ -524,6 +524,7 @@ import { CommentControl, Control } from "../controls";
           tasksHTML = tasksHTML.concat(control.tasks(this._store.myAgentPubKey, doc))
         })
       return html`
+      state: ${this._documents.value[this.currentDocumentEh].state}
           <div id="header">
             ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
             ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}

@@ -125,7 +125,7 @@ export class HowNode extends ScopedElementsMixin(LitElement) {
             i+=1
         }
         
-        if (this.flags.includes(UnitFlags.UnderConstruction)) {
+        if (this.state == SysState.UnderConstruction) {
           return html`
           <img src=${underConstructionImage}>`
 

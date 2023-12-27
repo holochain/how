@@ -178,8 +178,13 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
         .to_app_option().map_err(|err| wasm_error!(err))?
 
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
-    let new_doc_hash = update_document(UpdateDocumentInput { 
-        hash: input.document_hash.clone(), path: unit.path_str()?, document: input.document })?;
+    let mut document = input.document;
+    // let now = Timestamp::now().as_micros();
+    // document.meta.insert("timestamp".to_string(),now.to_string());
+    let new_document = UpdateDocumentInput { 
+        hash: input.document_hash.clone(), path: unit.path_str()?, document };
+    debug!("Updating Doc {:?}", new_document);
+    let new_doc_hash = update_document(new_document)?;
     
     delete_unit_links(hash.clone(), unit.tree_paths())?;
 

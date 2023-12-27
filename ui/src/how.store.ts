@@ -93,7 +93,6 @@ export class HowStore {
   // get all of the sections needed for a specific process by getting the template contents
   // for that proccess hierarchy
   async getSectionsFromHierarcy(path: string, start: number, sectionType: SectionType): Promise<Array<Section>> {
-    console.log(`looking for ${sectionType} in ${path}`)
     path = `.${path}`
     let sections: Array<Section> = []
     let segments = path.split(".")
@@ -278,10 +277,10 @@ export class HowStore {
       if (documentOutput) {
         let doc = cloneDeep(documentOutput.content)
         doc.state = state
-
         const processPath = unit.processPathForState(state)
         doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
   
+        doc.meta.date = `${new Date()}`  // we need to do this to make sure that content is distinct in case of moving state back and forth for history.
         const newDocumentHash = await this.service.advanceState({
             newState: state,
             unitHash: decodeHashFromBase64(unitHash),

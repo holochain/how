@@ -4,7 +4,7 @@ import { state, property, query } from "lit/decorators.js";
 import { get } from "svelte/store";
 
 import { sharedStyles } from "../sharedStyles";
-import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType, Node, Section, DocumentInitializer} from "../types";
+import {howContext, Unit, Dictionary, Initialization, DocumentOutput, Document, DocType, Node, Section, DocumentInitializer, UnitFlags} from "../types";
 import { HowStore } from "../how.store";
 import { HowUnit } from "./how-unit";
 import { HowTree } from "./how-tree";
