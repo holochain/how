@@ -481,7 +481,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       return html`
 
       <div class="initializing">
-        <input id="file-input" style="display:none" type="file" accept=".json" @change=${(e:any)=>{console.log("FISH");this.onFileSelected(e)}} >
+        <input id="file-input" style="display:none" type="file" accept=".json" @change=${(e:any)=>{this.onFileSelected(e)}} >
         <div class="wrapper">
           <div class="about-event"/>
             <img class="how-welcome" src=${aliveImage}
@@ -541,7 +541,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         @reparent=${this.handleReparent}
      />`
      const document = this._currentDocumentEh ? 
-     html`<how-document id="document" 
+     html`<how-document id="document"
           .currentDocumentEh=${this._currentDocumentEh}
           .readOnly=${this._documentReadOnly}
           @document-updated=${this.handleDocumentUpdated}
