@@ -5,7 +5,6 @@ import {sharedStyles} from "../sharedStyles";
 import {Unit, DocType, howContext, Document, DocumentOutput, SysState, Progress, UnitFlags} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
-import { StoreSubscriber } from "@holochain-open-dev/stores";
 import {unsafeHTML} from "lit/directives/unsafe-html.js";
 import { aliveImage, underConstructionImage } from "../images";
 const angleInRadians = (angleInDegrees: number) => (angleInDegrees - 90) * (Math.PI / 180.0);

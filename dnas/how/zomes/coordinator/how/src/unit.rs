@@ -186,11 +186,10 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
 
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
     let mut document = input.document;
-    // let now = Timestamp::now().as_micros();
-    // document.meta.insert("timestamp".to_string(),now.to_string());
+    let now = sys_time()?.as_micros(); // we need to do this to make sure that content is distinct in case of moving state back and forth for history.
+    document.meta.insert("timestamp".to_string(),now.to_string());
     let new_document = UpdateDocumentInput { 
         hash: input.document_hash.clone(), path: unit.path_str()?, document };
-    debug!("Updating Doc {:?}", new_document);
     let new_doc_hash = update_document(new_document)?;
     
     delete_unit_links(hash.clone(), unit.tree_paths())?;

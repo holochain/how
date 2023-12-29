@@ -96,21 +96,23 @@ export class HowStore {
     path = `.${path}`
     let sections: Array<Section> = []
     let segments = path.split(".")
+
     let i = start+1
     while (i <= segments.length) {
       const walk = segments.slice(0,i).join(".")
       i += 1
       // find the sections of the given type at this level and add them into the sections
       await this.pullDocuments(walk)
-      const docs = get(this.documentPaths)[walk]
+      let docs = get(this.documentPaths)[walk]
       if (docs) {
+        docs = docs.filter(doc => doc.updatedBy.length==0 && doc.deletedBy.length==0)
         for (const doc of docs) {
           if (doc.content.documentType == DocType.Document) {
             let newSections = doc.content.getSectionsByType(sectionType).map(s => cloneDeep(s))
             for (const section of newSections) {
               section.content = ""
               section.sectionType = SectionType.Content
-              section.sourcePath = walk
+              section.sourcePath = walk.slice(1)  // drop leading .
               section.sourceUnit = doc.content.unitHash
             }
             sections = sections.concat(newSections)
@@ -120,6 +122,33 @@ export class HowStore {
     }
     return sections
   }
+
+  async getCollectionSections(path: string): Promise<Array<Section>> {
+    let sections: Array<Section> = []
+
+    const branchPaths = this.getBranchPaths(path)
+    for (const p of branchPaths) {
+      await this.pullDocuments(p)
+      let docs = get(this.documentPaths)[p]
+      docs = docs.filter(doc => doc.updatedBy.length==0 && doc.deletedBy.length==0)
+      for (const doc of docs) {
+        if (doc.content.documentType == DocType.Document) {
+          let title = doc.content.getSection("title")
+          let secs = doc.content.getSectionsBySource(path).map(s => cloneDeep(s))
+          // rewrite the section to say where it came from
+          for (const s of secs) {
+            s.sourcePath = p
+            s.name = title.content
+            sections.push(s)
+          }
+        }
+      }
+    }
+    console.log("COLLECTION SECTIONS", sections)
+    return sections
+  }
+
+
 
   public getProcessesStoreForType(type: string): Readable<Array<Node>> {
     return derived(
@@ -280,7 +309,6 @@ export class HowStore {
         const processPath = unit.processPathForState(state)
         doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
   
-        doc.meta.date = `${new Date()}`  // we need to do this to make sure that content is distinct in case of moving state back and forth for history.
         const newDocumentHash = await this.service.advanceState({
             newState: state,
             unitHash: decodeHashFromBase64(unitHash),
@@ -335,6 +363,22 @@ export class HowStore {
     return this.find(get(this.treeStore), path.split("."))
   }
 
+  getBranchPaths(path: string): Array<string> {
+    const paths: Array<string> = []
+    const node = this.findInTree(path)
+    if (node) {
+      for (const child of node.children) {
+        const childPath = `${path}.${child.val.name}`
+        paths.push(childPath)
+        const subPaths = this.getBranchPaths(childPath)
+        for (const p of subPaths) {
+          paths.push(p)
+        }
+      }
+    }
+    return paths
+  }
+
   async pullTree() : Promise<Node> {
     const rtree: Array<RustNode> = await this.service.getTree();
     const node: Node = this.buildTree(rtree, rtree[0])
@@ -359,7 +403,7 @@ export class HowStore {
       await this.pullDocuments(processPath)
       doc.appendSections(await this.getSectionsFromHierarcy(processPath, 2, SectionType.Process))
     }
-    
+
     doc.setSection("title", unit.shortName)
     console.log("ADDING DOC", doc)
     const path = `${unit.parents[0]}.${unit.pathAbbreviation}`
@@ -458,5 +502,18 @@ export class HowStore {
 
   async reparent(path: string, newParent: string): Promise<void> {
     this.service.reparent(path,newParent);
+  }
+
+  async collectionDefs(documentEh: EntryHashB64) : Promise<Array<Section>>{
+    const defs: Array<Section> = []
+    const path = this.getDocumentPath(documentEh)
+    if (path) {
+      const sections = await this.getSectionsFromHierarcy(path, 0, SectionType.CollectionDef)
+      for (const section of sections) {
+        defs.push(section)
+      }
+    }
+    console.log("sections found", defs)
+    return defs
   }
 }

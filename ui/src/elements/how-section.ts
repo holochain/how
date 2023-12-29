@@ -38,6 +38,7 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
   @property() highlitRange: HilightRange | undefined = undefined;
   @property() comments:Array<Comment> = []
   @property() document: Document | undefined
+  @property() isSteward = false
 
   @state() editing = false;
   @state() preview = false;
@@ -252,6 +253,9 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
       ((this.section.contentType == "text/markdown") || 
        (this.comments && this.comments.length>0 && this.comments.find(c=>c.status==CommentStatus.Approved  && (c.suggestion() != undefined))))
   }
+  private deletable() {
+    return this.section && this.isSteward && this.section.sourcePath != "" && !this.readOnly
+  }
   render() {
     if (this.section) {
         const controls = [html`
@@ -297,6 +301,15 @@ export class HowSection extends ScopedElementsMixin(LitElement) {
                 .click=${() => this.preview=true}
                 ></svg-button>`
             )
+        }
+        if (this.deletable()) {
+          controls.push(html`<svg-button
+          button="trash"
+          info="delete"
+          infoPosition="right"
+          .click=${() => this.dispatchEvent(new CustomEvent('delete-section', { detail: this.section, bubbles: true, composed: true }))}
+          ></svg-button>`)
+
         }
         const sectionNameBar = html`
         <div class="section-name-bar row">

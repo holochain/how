@@ -6,7 +6,7 @@ import { StoreSubscriber } from "@holochain-open-dev/stores";
 
 import {sharedStyles} from "../sharedStyles";
 import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
-import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, parseAgentArray, Dictionary} from "../types";
+import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, Dictionary, Unit} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
@@ -22,6 +22,7 @@ import { HowCommentBox } from "./how-comment-box";
 import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
 import { CommentControl, Control } from "../controls";
+import {until} from 'lit-html/directives/until.js';
 
 /**
  * @element how-document
@@ -42,8 +43,20 @@ import { CommentControl, Control } from "../controls";
     @state() overlapping : Comment[] | undefined
     @state() commentStats : CommentStats | undefined;
     @state() availbleCollectionSections : Array<string>  = ["host_fn specs"]
+    @state() collectionDefs : Array<Section> = []
+
+    _units = new StoreSubscriber(this, () => this._store.units);
 
     private selectedCommentText: string = ""
+  
+    async updated(changedProperties:any) {
+      for (const [prop,_] of changedProperties) {
+        if (prop === 'currentDocumentEh' && prop.currentDocumentEh != this.currentDocumentEh) {
+          this.collectionDefs = await this._store.collectionDefs(this.currentDocumentEh)
+          break;
+        }
+      }
+    }
 
     @query('how-new-section-dialog')
     private _newSectionDialog!: HowNewSectionDialog;
@@ -59,14 +72,14 @@ import { CommentControl, Control } from "../controls";
       this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
     }
 
-    async addSection(e: any) {
-      const section: Section = {
-        name: e.detail.name, 
-        contentType: e.detail.contentType, 
-        sectionType:e.detail.sectionType,
-        sourcePath: SourceManual,
-        content: ""
-      }
+    async deleteSection(section:Section, index:number) {
+      const document = this._documents.value[this.currentDocumentEh]
+      document.content.splice(index,1)
+      const newDocumentHash = await this._store.updateDocument(this.currentDocumentEh, document);
+      this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+    }
+
+    async addSection(section: Section) {
       const document = this._documents.value[this.currentDocumentEh]
       document.content.push(section)
       const newDocumentHash = await this._store.updateDocument(this.currentDocumentEh, document);
@@ -384,7 +397,7 @@ import { CommentControl, Control } from "../controls";
       return false
     }
 
-    private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>) : TemplateResult {
+    private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>, isSteward: boolean) : TemplateResult {
       let commentsHTML
       if (this.canSeeComments(doc, section)) {
         const canMakeComments = this.canMakeComments(doc, section)
@@ -430,11 +443,13 @@ import { CommentControl, Control } from "../controls";
           .document=${doc}
           @selection=${(e:any)=>this.openCommentFromSelection(e.detail)}
           @section-changed=${(e:any) => this.updateSection(e.detail, index)}
+          @delete-section=${(e:any) => this.deleteSection(e.detail, index)}
           .section=${section} 
           .index=${index}
           .highlitRange=${this.highlitRange && this.highlitRange.sectionName == section.name ? this.highlitRange: undefined}
           .readOnly=${this.readOnly}
           .comments=${comments}
+          .isSteward=${isSteward}
           >
         </how-section>
         ${commentsHTML}
@@ -447,35 +462,51 @@ import { CommentControl, Control } from "../controls";
           return;
         }
         const doc : Document = this._documents.value[this.currentDocumentEh]
+        const unit: Unit = this._units.value[encodeHashToBase64(doc.unitHash)]
+        const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
+
         let addSectionHTML
         if (doc.canAddSection() && !this.readOnly) {
+          const document = this._documents.value[this.currentDocumentEh]
           addSectionHTML = html`
-          <svg-button
-                button="plus"
-                info="add section"
-                infoPosition="right"
-                .click=${() => this._newSectionDialog.open()}
-                ></svg-button>
-          </div>
+            ${ this.collectionDefs ? 
+                this.collectionDefs.map((def) => html`
+                  <svg-button
+                        button="plus"
+                        info="add ${def.name} collection section"
+                        infoPosition="right"
+                        .click=${() => {
+                          this.addSection(def)
+                        }}
+                        ></svg-button>
+                  </div>`) :
 
-          <how-new-section-dialog
-            .takenNames=${doc.content.map((s)=>s.name)}
-            @add-section=${this.addSection}
-            sectionType=${SectionType.Content}
-          ></how-new-section-dialog>
-          ${this.availbleCollectionSections.length ? this.availbleCollectionSections.map(type => html`
-          <svg-button
-                button="plus"
-                info="add ${type} collection section"
-                infoPosition="right"
-                .click=${() => {
-                  console.log("FISH")
-                  this.dispatchEvent(new CustomEvent('add-section', { detail: {name: type, contentType: "text/markdown", sectionType:  SectionType.Content}, bubbles: true, composed: true }))
-                }}
-                ></svg-button>
-          </div>
+                html`Loading...`
+            }
+            <svg-button
+                  button="plus"
+                  info="add section"
+                  infoPosition="right"
+                  .click=${() => this._newSectionDialog.open()}
+                  ></svg-button>
+            </div>
 
-          `) : ""}
+            <how-new-section-dialog
+              .takenNames=${doc.content.map((s)=>s.name)}
+              @add-section=${(e:any) => {
+                      const section: Section = {
+                        name:e.detail.name, 
+                        contentType:e.detail.contentType, 
+                        sectionType:e.detail.sectionType,
+                        sourcePath: SourceManual,
+                        content: ""
+                      }
+                
+                this.addSection(section)
+              }}
+              sectionType=${SectionType.Content}
+            ></how-new-section-dialog>
+            
           `
         }
 
@@ -486,10 +517,10 @@ import { CommentControl, Control } from "../controls";
         this.controls = doc.controls()
 
         const sectionsHTML = sections.map((section, index) => 
-          this.sectionRow(doc, section, index, comments[section.name]))
+          this.sectionRow(doc, section, index, comments[section.name], isSteward))
         const requirements =  doc.content.filter(section => section.sectionType == SectionType.Requirement)
         let requirementsHTML = requirements.map((section, index) => 
-          this.sectionRow(doc, section, index, comments[section.name]))
+          this.sectionRow(doc, section, index, comments[section.name], isSteward))
         if (requirementsHTML.length > 0) {
           requirementsHTML.unshift(html`
             <info-item item="Requirements" name="sections that this standard requires of sub-nodes"></info-item>
@@ -525,11 +556,15 @@ import { CommentControl, Control } from "../controls";
         })
       return html`
           <div id="header">
-            ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
-            ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}
-            <div id="editors" class="row">
-              Editors: <how-agent-list layout="row" .agents=${doc.editors}></how-agent-list>
-            </div>
+            ${doc.documentType == DocType.Collection ? html`<h3>Collection</h3>` : 
+              html`
+                ${tasksHTML.length>0 ? html`<div class="tasks">${tasksHTML}</div>`:''}
+                ${affordancesHTML.length>0 ? html`<div class="affordances">${affordancesHTML}</div>`:''}
+                <div id="editors" class="row">
+                  Editors: <how-agent-list layout="row" .agents=${doc.editors}></how-agent-list>
+                </div>
+              `
+            }
           </div>
           <div id="sections" >
             ${sectionsHTML}

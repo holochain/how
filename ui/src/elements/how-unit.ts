@@ -4,7 +4,7 @@ import {property, query, state} from "lit/decorators.js";
 import { StoreSubscriber } from '@holochain-open-dev/stores';
 
 import {sharedStyles} from "../sharedStyles";
-import {Unit, DocType, howContext, SysState, Document, UnitInfo, UnitFlags} from "../types";
+import {Unit, DocType, howContext, SysState, Document, UnitInfo, UnitFlags, SectionType, Section} from "../types";
 import {HowStore} from "../how.store";
 import { HowUnitDetails } from "./how-unit-details";
 import { SvgButton } from "./svg-button";
@@ -14,9 +14,10 @@ import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {
   Button,
 } from "@scoped-elements/material-web";
-import { Action, EntryHashB64, encodeHashToBase64 } from "@holochain/client";
+import { Action, EntryHashB64, decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client";
 import { InfoItem } from "./info-item";
 import { HowConfirm } from "./how-confirm";
+import { HowCollect } from "./how-collect";
 import { consume } from '@lit/context';
 import { Profile, ProfilesStore, profilesStoreContext } from "@holochain-open-dev/profiles";
 import { underConstructionImage } from "../images";
@@ -65,6 +66,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
   @query('how-confirm')
   _confirmElem!: HowConfirm;
 
+  @query('how-collect')
+  _collectElem!: HowCollect;
+
   handleNodelink(path: string) {
     this.dispatchEvent(new CustomEvent('select-node', { detail: path, bubbles: true, composed: true }));
   }
@@ -108,7 +112,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     this._confirmElem!.open(message, {unitHash, newState})
   }
 
-  private async handleConfirm(confirmation:any) {
+  private async handleConfirmAdvance(confirmation:any) {
     const unitHash: EntryHashB64 = confirmation.unitHash
     const nextState: string = confirmation.newState
     this.advanceState(unitHash, nextState)
@@ -118,6 +122,31 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     const newDocumentHash = await this._store.advanceState(unitHash, newState)
     this.dispatchEvent(new CustomEvent('document-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
     this.dispatchEvent(new CustomEvent('unit-updated', { detail: newDocumentHash, bubbles: true, composed: true }));
+  }
+
+  private async confirmCollect(def: Section) {
+    this._collectElem!.open(def)
+  }
+
+  private async handleConfirmCollect(version:string, def:Section) {
+    const path = this.getPath()
+    const sections = await this._store.getCollectionSections(path)
+    sections.unshift({
+      name: "title",
+      sourcePath: path,
+      sectionType: SectionType.Content,
+      contentType: "text/plain",
+      content: def.name,
+    })
+    if (sections.length > 0) {
+      const collection = new Document({
+        unitHash: decodeHashFromBase64(this.currentUnitEh), 
+        documentType: DocType.Collection,
+        content: sections,
+        meta: {version}
+      })
+      this._store.addDocument(path, collection)
+    }
   }
 
   render() {
@@ -204,6 +233,19 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         </div>
       `)
       }
+      if (isSteward && docInfo && docInfo.content) {
+        const collectionDefs = docInfo.content.getSectionsByType(SectionType.CollectionDef)
+        collectionDefs.forEach(def => {
+          controlsHTML.push(html`
+              <svg-button
+                .click=${() => this.confirmCollect(def)} 
+                .info=${"collect "+def.name}
+                .button=${"collect"}>
+              </svg-button>
+            </div>
+          `)
+        }); 
+      }
       if (state != SysState.UnderConstruction ) {
         if (updated) {
           stateHTML = html`<info-item title=${`Alive as of ${updated}`} item="Alive" .name=${`as of ${updated.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})}`}></info-item>`
@@ -244,17 +286,21 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     if (collections.length > 0) {
       const collectionItemsHTML = []
       for (let i=collections.length-1; i>= 0;i-=1){
-        const date = new Date(allDocs[i].actions[0].content.timestamp/1000)
+        const date = new Date(collections[i].actions[0].content.timestamp/1000)
+        const docOutput = collections[i]
+        const doc = docOutput.content
+        let title = doc.getSection("title")
+
         collectionItemsHTML.push(html`
-          <mwc-list-item value=${i} @click=${()=>this.handleDocumentClick(collections[i].hash, true)}>
-          ${date.toLocaleDateString('en-us', { year:"numeric", month:"short", day:"numeric"})} ${date.toLocaleTimeString('en-US')}
+          <mwc-list-item value=${i} @click=${()=>this.handleDocumentClick(docOutput.hash, true)}>
+          ${title ? title.content : ""} version: ${doc.meta.version}
           </mwc-list-item>`) 
       }
       collectionsHTML = html`
       <div class="history row">
         <mwc-select
           class="history-item" 
-          label="Show Collection" 
+          label="Collections" 
           @closing=${(e: any) => e.stopPropagation()}
           >
         ${collectionItemsHTML}
@@ -300,7 +346,8 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       ${historyHTML}
       ${collectionsHTML}
       <how-unit-details id="details-dialog" .state=${stateName}> </how-unit-details>
-      <how-confirm @confirmed=${(e:any) => this.handleConfirm(e.detail)}></how-confirm>
+      <how-confirm @confirmed=${(e:any) => this.handleConfirmAdvance(e.detail)}></how-confirm>
+      <how-collect @collect=${(e:any) => this.handleConfirmCollect(e.detail.version, e.detail.def)}></how-collect>
     `;
   }
 
@@ -313,6 +360,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       "svg-button": SvgButton,
       "info-item": InfoItem,
       "how-confirm": HowConfirm,
+      "how-collect": HowCollect,
     };
   }
   static get styles() {

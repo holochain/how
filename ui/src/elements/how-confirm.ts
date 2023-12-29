@@ -9,7 +9,7 @@ import {
 
 const DEFAULT_CONFIRM_MESSAGE = "Please confirm!"
 /**
- * @element how-new-section-dialog
+ * @element how-confirm-dialog
  */
 export class HowConfirm extends ScopedElementsMixin(LitElement) {
 

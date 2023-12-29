@@ -157,7 +157,7 @@ export class Document {
   }
 
   private isState(stateFullPath: string, state: string) : boolean {
-    return stateFullPath.indexOf(`.${Document.processRoot}.${state}`) >= 0
+    return stateFullPath.indexOf(`${Document.processRoot}.${state}`) >= 0
   }
 
   public getProgress() : Progress {
@@ -214,7 +214,11 @@ export class Document {
   public getSectionsByType(sectionType: SectionType) : Array<Section> {
     return this.content.filter((section) => section.sectionType == sectionType)
   }
-  
+
+  public getSectionsBySource(path: string) : Array<Section> {
+    return this.content.filter((section) => section.sourcePath == path)
+  }
+
   // return the various controls in the document
   public controls() : Array<Control> {
     const controls: Array<Control> = []
