@@ -32,7 +32,7 @@ try {
     let rootUnit = {
       parents: [], // full paths to parent nodes (remember it's a DAG)
       shortName: "Holochain Community Standards",
-      version: "vidx0",
+      version: "vidx:0",
       pathAbbreviation: "", // max 10 char
       stewards: [],  // people who can change this document
       processes: [["soc_proto.procs.define","petition"]], // state-machine definition
@@ -79,7 +79,7 @@ try {
     let unit1 = {
       parents: ["hc_system.conductor.api"], // full paths to parent nodes (remember it's a DAG)
       shortName: "app API",
-      version: "vidx1",
+      version: "vidx:1",
       pathAbbreviation: "app", // max 10 char
       stewards: [],  // people who can change this document
       processes: [["soc_proto.procs.define","petition"]], // state-machine definition

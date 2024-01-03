@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
 import {Unit, howContext, Dictionary, Node, VersioningType, SysState, UnitInfo} from "../types";
-import {EntryHashB64} from "@holochain/client";
+import {encodeHashToBase64, EntryHashB64} from "@holochain/client";
 import {
   Button,
   Dialog,
@@ -84,9 +84,11 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
       };
     };
   }
+  
   open(parentEh: EntryHashB64) {
     this._parent = this._store.unit(parentEh);
     this._parentInfo = this._store.unitInfo(parentEh);
+
     const dialog = this.shadowRoot!.getElementById("unit-dialog") as Dialog
     dialog.open = true
   }
@@ -137,7 +139,7 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
     }
     const unit = new Unit({
       parents: [this.parentPath()], // full paths to parent nodes (remember it's a DAG)
-      version: `${this._versioningTypeSelect.value}${this._versionField.value}`, // max 100 chars
+      version: `${this._versioningTypeSelect.value}:${this._versionField.value}`, // max 100 chars
       pathAbbreviation: this._nameField.value, // max 10 char
       shortName: this._titleField.value,
       stewards,  // people who can change this document
@@ -159,9 +161,11 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
     this._parent = undefined
     this._nameField.value = ''
     this._titleField.value = ''
-    this._alignProcessSelect.value = HowUnitDialog.NONE
-    this._defineProcessSelect.value = HowUnitDialog.NONE
-    this._refineProcessSelect.value = HowUnitDialog.NONE
+    if (this._parentInfo?.state != SysState.UnderConstruction) {
+      this._alignProcessSelect.value = HowUnitDialog.NONE
+      this._defineProcessSelect.value = HowUnitDialog.NONE
+      this._refineProcessSelect.value = HowUnitDialog.NONE
+    }
     this._stewards = {}
   }
 
@@ -189,8 +193,8 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
   }
 
   private addSteward(e:any) {
-    const nickname = e.detail.agent.profile.nickname
-    const pubKey = e.detail.agent.agent_pub_key
+    const nickname = e.detail.profile.nickname
+    const pubKey = encodeHashToBase64(e.detail.agentPubKey)
     this._stewards[pubKey] = nickname
     this._stewards = this._stewards
     this.requestUpdate()
@@ -201,8 +205,9 @@ export class HowUnitDialog extends ScopedElementsMixin(LitElement) {
 <mwc-dialog id="unit-dialog" heading="New unit" @closing=${this.handleDialogClosing} @opened=${this.handleDialogOpened}>
   Parent: ${this.parentPath()}
   <mwc-textfield dialogInitialFocus type="text"
-                 @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
-                 id="name-field" minlength="3" maxlength="64" label="Path Abbreviation" autoValidate=true required></mwc-textfield>
+    @input=${() => (this.shadowRoot!.getElementById("name-field") as TextField).reportValidity()}
+    id="name-field" minlength="3" maxlength="10" label="Path Abbreviation" autoValidate=true required></mwc-textfield>
+  
   <mwc-select
         id="versioning-type-select" 
         label="Select version type" 

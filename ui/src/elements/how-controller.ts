@@ -11,6 +11,7 @@ import { HowTree } from "./how-tree";
 import { initialTreeHolochain } from "../initHolochain";
 import { initialTreeSimple } from "../initSimple";
 import { HowUnitDialog } from "./how-unit-dialog";
+import { HowUnitDialogEdit } from "./how-unit-dialog-edit";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
 import { AsyncReadable, AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
@@ -90,6 +91,11 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   @state() _reparentingToUnitHash: EntryHashB64 | undefined
   @query('#units-menu')
   private _unitsMenu!: SlDropdown;
+
+  @query('#unit-dialog')
+  private _unitDialogElem!: HowUnitDialog;
+  @query('#unit-dialog-edit')
+  private _editUnitDialogElem!: HowUnitDialogEdit;
 
   @state() _currentUnitEh = "";
   @state() _currentDocumentEh = "";
@@ -186,14 +192,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     return this.shadowRoot!.getElementById("how-unit") as HowUnit;
   }
 
-  async openUnitDialog(parent?: any) {
-    this.unitDialogElem.open(parent);
-  }
-
-  get unitDialogElem() : HowUnitDialog {
-    return this.shadowRoot!.getElementById("unit-dialog") as HowUnitDialog;
-  }
-
   private async handleUnitSelect(unitEh: EntryHashB64): Promise<void> {
     if (this._units.value[unitEh]) {
       this._currentUnitEh = unitEh;
@@ -226,8 +224,13 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
 
   handleAddChild(event: any) {
+    const parentEh = event.detail
+    this._unitDialogElem.open(parentEh)
+  }
+
+  handleEditUnit(event: any) {
     const unitEh = event.detail
-    this.openUnitDialog(unitEh)
+    this._editUnitDialogElem.open(unitEh)
   }
 
   private isTreeType() : boolean {
@@ -247,6 +250,8 @@ export class HowController extends ScopedElementsMixin(LitElement) {
   }
   async handleUnitUpdated(e:any) {
     await this._store.pullTree()
+    await this._store.pullUnits()
+
   }
   selectDocumentVersion(hash: EntryHashB64, readOnly: boolean) {
     this._currentDocumentEh = hash
@@ -348,23 +353,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         children: node.children.map(c=> this.serializeNode(path == "" ? node.val.name : `${path}.${node.val.name}`, c, units))
       }
     }
-  }
-
-  async doReparent() {
-    if (this._reparentingToUnitHash) {
-      const newParent = this._units.value[this._reparentingToUnitHash].path()
-      const path = this._units.value[this._currentUnitEh].path()
-      console.log("Move ", path, "->", newParent)
-      await this._store.reparent(path, newParent)
-    }
-    // cleanup
-    this._reparentDialog.hide()
-    this._reparentingToUnitHash = undefined
-  }
-
-  async handleReparent(event: any) {
-    await this._store.pullUnits()
-    this._reparentDialog.show()
   }
 
   async doExport() {
@@ -538,7 +526,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
         @select-document=${(e:any)=>this.selectDocumentVersion(e.detail.hash, e.detail.readOnly)}
         @select-node=${(e: any)=>{const hash = this._unitsPath.value[e.detail]; this.handleUnitSelect(hash)}}
         @add-child=${this.handleAddChild}
-        @reparent=${this.handleReparent}
+        @edit=${this.handleEditUnit}
      />`
      const document = this._currentDocumentEh ? 
      html`<how-document id="document"
@@ -555,50 +543,6 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       <sl-button
       @click=${async ()=>{await this.doExport()}}>Export</sl-button>
       </sl-dialog>
-
-  ${this._currentUnitEh ? html`
-    <sl-dialog id="reparent" label="Reparent">
-      <sl-dropdown id="units-menu">
-          <sl-button slot="trigger"
-            @click=${(e:any)=>{
-              e.stopPropagation()
-              this._unitsMenu.show()
-            }}
-          >
-          ${this._reparentingToUnitHash ? this._units.value[this._reparentingToUnitHash].path() : "Select new parent"}
-          </sl-button>
-
-          <sl-menu  style="max-width: 100px;"
-            @mouseleave=${()=> this._unitsMenu.hide()}
-            @click=${(e:any)=>e.stopPropagation()}
-            @sl-select=${(e:any)=>{
-              this._reparentingToUnitHash = e.detail.item.value
-              this._unitsMenu.hide()
-            }}>
-            ${
-              Object.entries(this._units.value).filter(([_,unit])=>{
-                const currentUnit = this._units.value[this._currentUnitEh]
-                const currentPath = currentUnit.path()
-                const unitPath = unit.path()
-                let current_path_parent = ""
-                if (currentUnit) {
-                  const p = currentPath.split(".")
-                  p.pop()
-                  current_path_parent = p.join(".")
-                }
-                return !unitPath.startsWith(currentPath) && (unitPath != current_path_parent)
-              }).map(([key, unit]) => html`
-            <sl-menu-item value=${key}>
-              ${unit.path() == "" ? "<Root>" : unit.path()}
-            </sl-menu-item>
-              `)
-             }
-          </sl-menu>
-        </sl-dropdown>
-      <sl-button
-      @click=${async ()=>{await this.doReparent()}}>Do it!</sl-button>
-    </sl-dialog>
-    ` : ""}
   <div>
 
     <div id="top-bar" class="row">
@@ -618,6 +562,9 @@ export class HowController extends ScopedElementsMixin(LitElement) {
     <how-unit-dialog id="unit-dialog"
       @unit-added=${(e:any)=>{this.handleNodeSelected(e); this.refresh();}}>
     </how-unit-dialog>
+    <how-unit-dialog-edit id="unit-dialog-edit"
+      >
+    </how-unit-dialog-edit>
   </div>
 
 `;
@@ -634,6 +581,7 @@ export class HowController extends ScopedElementsMixin(LitElement) {
       "mwc-icon-button": IconButton,
       "mwc-button": Button,
       "how-unit-dialog" : HowUnitDialog,
+      "how-unit-dialog-edit" : HowUnitDialogEdit,
       "how-unit": HowUnit,
       "how-tree": HowTree,
       "how-document": HowDocument,

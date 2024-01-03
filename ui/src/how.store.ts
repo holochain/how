@@ -419,6 +419,12 @@ export class HowStore {
     return encodeHashToBase64(unitOutput.info.hash)
   }
 
+  async updateUnit(unitEh: EntryHashB64, unit: Unit, state: string): Promise<EntryHashB64> {
+    const unitOutput: UnitOutput = await this.service.updateUnit(unitEh, unit, state);
+    this.updateUnitFromEntry(unitOutput)
+    return encodeHashToBase64(unitOutput.info.hash)
+  }
+
   async initilize(input: Initialization) : Promise<void> {
     await this.service.initialize(input)
   }
@@ -498,10 +504,6 @@ export class HowStore {
       total,
       count
     }
-  }
-
-  async reparent(path: string, newParent: string): Promise<void> {
-    this.service.reparent(path,newParent);
   }
 
   async collectionDefs(documentEh: EntryHashB64) : Promise<Array<Section>>{

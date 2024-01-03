@@ -5,7 +5,7 @@ import {sharedStyles} from "../sharedStyles";
 import { consume } from '@lit/context';
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
 import {HowStore} from "../how.store";
-import {Unit, howContext, Dictionary, Node} from "../types";
+import {howContext} from "../types";
 import {
   Button,
   Dialog,

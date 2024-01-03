@@ -26,7 +26,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
     units: [
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "", // max 10 char
         shortName: "Holochain Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -34,7 +34,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
       })],
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "social", // max 10 char
         shortName: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
@@ -42,7 +42,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "tech", // max 10 char
         shortName: "Technical", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
@@ -50,7 +50,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "hApps", // max 10 char
         shortName: "hApp Standards", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -58,7 +58,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       ["define", new Unit({
         parents: ["tech.hApps"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "ERC721_interop", // max 10 char
         shortName: "ERC721 Interoperability Standard", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -66,7 +66,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["social"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "ops", // max 10 char
         shortName: "Operations", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
@@ -74,7 +74,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["social"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "biz", // max 10 char
         shortName: "Business, Legal, Finance, Regulatory", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
@@ -83,7 +83,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["social.biz"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "exec", // max 10 char
         shortName: "Executive Function/ Council", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
@@ -92,7 +92,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["social"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "dev_support", // max 10 char
         shortName: "Developer Engagement & Support", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
@@ -101,7 +101,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["social.ops"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "process", // max 10 char
         shortName: "How Processes", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
@@ -109,7 +109,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "define", // max 10 char
         shortName: "Proposal procesess", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -117,7 +117,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.define`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "declaration", // max 10 char
         shortName: "Declaration", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -125,7 +125,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.define`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "petition", // max 10 char
         shortName: "Petition", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -133,7 +133,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "refine", // max 10 char
         shortName: "Refinement Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -141,7 +141,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.refine`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "comment_period", // max 10 char
         shortName: "Comment Period", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -149,7 +149,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "align", // max 10 char
         shortName: "Unit Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -157,7 +157,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "vote", // max 10 char
         shortName: "Voting", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -165,7 +165,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "consensus", // max 10 char
         shortName: "Consensus", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -173,7 +173,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "sortition", // max 10 char
         shortName: "Sortition", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -181,7 +181,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "hc_framework", // max 10 char
         shortName: "Holochain Framework", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -189,7 +189,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "runtime", // max 10 char
         shortName: "Runtime Environments", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -197,7 +197,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["tech.hc_framework.runtime"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "conductor", // max 10 char
         shortName: "Holochain Conductor", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -206,7 +206,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["tech.hc_framework.runtime.conductor"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "api", // max 10 char
         shortName: "Holochain Conductor API", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -215,7 +215,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["tech.hc_framework.runtime.conductor"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "services", // max 10 char
         shortName: "Holochain Conductor Services", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -224,7 +224,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "organism", // max 10 char
         shortName: "Network Organism", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -232,7 +232,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.organism"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "organ", // max 10 char
         shortName: "Network Organ", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -240,7 +240,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["tech.hc_framework.organism"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "ui", // max 10 char
         shortName: "User Interface", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -249,7 +249,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "cell", // max 10 char
         shortName: "Cell State", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -257,7 +257,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "shared_viz", // max 10 char
         shortName: "Shared Visibility", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -266,7 +266,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.UnderConstruction, new Unit({
         parents: ["tech.hc_framework.organism.organ"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "dna", // max 10 char
         shortName: "DNA", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -275,7 +275,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.organism.organ.cell"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "ephemeral", // max 10 char
         shortName: "Ephemeral State", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -283,7 +283,7 @@ export function initialTreeHolochain(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["tech.hc_framework.organism.organ.cell"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "immutable", // max 10 char
         shortName: "Immutable State", // max 25 char
         stewards: [progenitor], // people who can change this document

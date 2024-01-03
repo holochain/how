@@ -9,7 +9,7 @@ use how_integrity::{Unit, EntryTypes, LinkTypes};
 use crate::document::{update_document, UpdateDocumentInput, _update_document};
 use crate::error::*;
 //use crate::signals::*;
-use crate::tree::{UnitInfo, _get_tree, tree_path, _get_path_tree, tree_path_to_str};
+use crate::tree::{UnitInfo, _get_tree, tree_path, _get_path_tree, tree_path_to_str, PathContent, Node};
 
 pub fn get_units_path() -> Path {
     Path::from("units")
@@ -198,62 +198,96 @@ pub fn advance_state(input: AdvanceStateInput) -> ExternResult<EntryHashB64> {
     return Ok(new_doc_hash);
 }
 
+pub fn reparent_node(node: Node<PathContent>, from: String, to: String)-> ExternResult<()> {
+    let units = node.val.units.clone();
+    let current_path = node.val.path;//.clone();
+    for unit in units {
+        let documents: Vec<HoloHash<holo_hash::hash_type::Entry>> = node.val.documents.clone();
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct ReparentInput {
-    pub path: String,
-    pub new_parent: String,
-}
-#[hdk_extern]
-pub fn reparent(input: ReparentInput) -> ExternResult<()> {
-    if input.new_parent.starts_with(&input.path) {
-        return Err(wasm_error!(WasmErrorInner::Guest(String::from("Can't reparent to child"))));
-    }
-    let sub_tree = _get_path_tree(tree_path(input.path.clone()))?;
-    let mut parent:Vec<_> = input.path.split(".").into_iter().collect();
-    parent.pop();
-    let parent = parent.join(".");
-    for node in sub_tree.tree {
-        let units = node.val.units.clone();
-        let current_path = node.val.path;//.clone();
-        for unit in units {
-            let documents: Vec<HoloHash<holo_hash::hash_type::Entry>> = node.val.documents.clone();
-
-            let (new_unit_hash, new_unit) = reparent_unit(&unit, parent.clone(), input.new_parent.clone())?;
-            for doc in documents {
-                reparent_document(unit.hash.clone(), new_unit_hash.clone(), &new_unit, doc, current_path.clone(), input.new_parent.clone())?;
-            }
+        let (new_unit_output, new_unit) = reparent_unit(&unit, from.clone(), to.clone())?;
+        for doc in documents {
+            reparent_document(unit.hash.clone(), new_unit_output.info.hash.clone(), &new_unit, doc, current_path.clone(), to.clone())?;
         }
     }
     Ok(())
 }
 
-pub fn update_unit(hash: ActionHash, unit: &Unit) -> ExternResult<EntryHash> {
-    let _action_hash = update_entry(hash, unit)?;
-    let hash = hash_entry(unit)?;
-    Ok(hash)
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateUnitInput {
+    pub hash: EntryHash,
+    pub state: String,
+    pub unit: Unit,
+}
+#[hdk_extern]
+pub fn update_unit(input: UpdateUnitInput) -> ExternResult<UnitOutput> {
+    let record = get(input.hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Unit not found"))))?;
+    let old_action_hash = record.action_address().clone();
+    let old_unit: Unit = record
+        .entry()
+        .to_app_option().map_err(|err| wasm_error!(err))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
+
+    let old_tree_paths = old_unit.tree_paths();
+    let new_unit_output = _update_unit(input.hash.clone(), old_action_hash, old_tree_paths.clone(), &input.unit, &input.state)?;
+
+    let old_path = old_unit.path_str()?;
+    let new_path = input.unit.path_str()?;
+    let new_parent = input.unit.parents[0].clone();
+    let sub_tree = _get_path_tree(old_tree_paths[0].clone())?;
+    let root = sub_tree.tree[0].clone();
+    for doc in root.val.documents {
+        reparent_document(input.hash.clone(), new_unit_output.info.hash.clone(), &input.unit, doc, old_path.clone(), new_parent.clone())?;
+    }
+    let reparenting = new_path != old_path || old_unit.path_abbreviation != input.unit.path_abbreviation;
+
+    if reparenting && sub_tree.tree.len() > 1 {
+        for node in sub_tree.tree.into_iter().skip(1) {
+            reparent_node(node, old_path.clone(), new_path.clone())?;
+        }
+    };
+    Ok(new_unit_output) 
 }
 
-pub fn reparent_unit(unit_info: &UnitInfo, from: String, to: String)  -> ExternResult<(EntryHash, Unit)> {
+pub fn _update_unit(hash: EntryHash, action_hash: ActionHash, paths: Vec<Path>, new_unit: &Unit, state: &str) -> ExternResult<UnitOutput> {
+    delete_unit_links(hash.clone(), paths)?;
+    let new_action_hash = update_entry(action_hash, new_unit)?;
+    let new_unit_hash = hash_entry(new_unit)?;
+    create_unit_links(new_unit_hash.clone(), new_unit.tree_paths(), state, &new_unit.version, new_unit.flags_str())?;
+    let maybe_record = get(new_action_hash, GetOptions::default())?;
+    let record = maybe_record.ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+        "Could not get the record created just now"
+    ))))?;
+
+    Ok(UnitOutput {
+        info: UnitInfo {
+            hash: new_unit_hash,
+            state: state.into(),
+            version: new_unit.version.clone(),
+            flags: String::from(new_unit.flags_str()),
+        },
+        record,
+    })
+}
+
+pub fn reparent_unit(unit_info: &UnitInfo, from: String, to: String)  -> ExternResult<(UnitOutput, Unit)> {
     let record = get(unit_info.hash.clone(), GetOptions::default())?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Unit not found"))))?;
     let mut unit: Unit = record
         .entry()
         .to_app_option().map_err(|err| wasm_error!(err))?
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from("Malformed unit"))))?;
-    delete_unit_links(unit_info.hash.clone(), unit.tree_paths())?;
-
+    let old_paths = unit.tree_paths();
     if let Some(idx) = unit.parents.clone().into_iter().position(|p| {
         p.starts_with(&from)}
     ) {
         unit.parents[idx] = unit.parents[idx].replacen(&from, &to,1);
     }
 
-    let new_unit_hash = update_unit(record.action_address().clone(), &unit)?;
-    create_unit_links(new_unit_hash.clone(), unit.tree_paths(), &unit_info.state, &unit_info.version, unit.flags_str())?;
+    let unit_output = _update_unit(unit_info.hash.clone(),record.action_address().clone(), old_paths, &unit, &unit_info.state)?;
 
-    Ok((new_unit_hash,unit))
+    Ok((unit_output,unit))
 }
 
 pub fn reparent_document(old_unit_hash: EntryHash,  new_unit_hash: EntryHash, new_unit: &Unit, hash: EntryHash, old_path:String, new_parent: String)  -> ExternResult<()> {

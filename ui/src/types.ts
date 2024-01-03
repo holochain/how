@@ -308,6 +308,12 @@ export type UnitOutput = {
   record: Record,
 }
 
+export type UpdateUnitInput = {
+  hash: EntryHash,
+  state: String,
+  unit: Unit,
+}
+
 export type Content = {
   name: string,
   units: Array<UnitInfo>,

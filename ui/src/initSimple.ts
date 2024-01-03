@@ -24,7 +24,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
     units: [
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "", // max 10 char
         shortName: "Alignments", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -32,7 +32,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
       })],
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "soc_proto", // max 10 char
         shortName: "Social Protocols", // max 25 char        stewards: [progenitor], // people who can change this document
         stewards: [progenitor], // people who can change this document
@@ -40,7 +40,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "projects", // max 10 char
         shortName: "Projects", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -48,7 +48,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: ["soc_proto"], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "process", // max 10 char
         shortName: "How Processes", // max 25 charAgent
         stewards: [progenitor], // people who can change this document
@@ -56,7 +56,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "define", // max 10 char
         shortName: "Proposal procesess", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -64,7 +64,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.define`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "declaration", // max 10 char
         shortName: "Declaration", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -72,7 +72,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.define`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "petition", // max 10 char
         shortName: "Petition", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -80,7 +80,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "refine", // max 10 char
         shortName: "Refinement Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -88,7 +88,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.refine`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "comment_period", // max 10 char
         shortName: "Comment Period", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -96,7 +96,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [PROCESS_ROOT], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "align", // max 10 char
         shortName: "Unit Processes", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -104,7 +104,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "vote", // max 10 char
         shortName: "Voting", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -112,7 +112,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "consensus", // max 10 char
         shortName: "Consensus", // max 25 char
         stewards: [progenitor], // people who can change this document
@@ -120,7 +120,7 @@ export function initialTreeSimple(progenitor: AgentPubKeyB64) {
         })],
       [SysState.Alive, new Unit({
         parents: [`${PROCESS_ROOT}.align`], // full paths to parent nodes (remember it's a DAG)
-        version: "vidx1",
+        version: "vidx:1",
         pathAbbreviation: "sortition", // max 10 char
         shortName: "Sortition", // max 25 char
         stewards: [progenitor], // people who can change this document

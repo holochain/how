@@ -221,9 +221,9 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       if (state == SysState.UnderConstruction  && isSteward) {
         controlsHTML.push(html`
           <svg-button
-            .click=${() => this.dispatchEvent(new CustomEvent('reparent', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
-            .info=${"reparent"}
-            .button=${"reparent"}>
+            .click=${() => this.dispatchEvent(new CustomEvent('edit', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 
+            .info=${"edit"}
+            .button=${"edit"}>
           </svg-button>
           <svg-button
             .click=${() => this.confirmAdvance(this.currentUnitEh, SysState.Alive)}
@@ -315,7 +315,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
       <div class="unit row">
         <div class="column">
           <info-item size="26px" .item=${unit.shortName} name="short name"></info-item>
-          <info-item .item=${unit.version.slice(4)} .name=${`version (${unit.version.substring(1,4)})`}></info-item>
+          <info-item .item=${unit.version.split(":")[1]} .name=${`version (${unit.version.split(":")[0]})`}></info-item>
           <info-item .item=${unit.pathAbbreviation} name="path"></info-item>
           <info-item 
             .title=${`Created on ${created} by ${creator ? creator.nickname : creatorHash}`}
