@@ -1,5 +1,4 @@
 use hdi::prelude::*;
-use hdk::hash_path::path::{Component, Path};
 use std::collections::BTreeMap;
 use holo_hash::{EntryHashB64, AgentPubKeyB64};
 

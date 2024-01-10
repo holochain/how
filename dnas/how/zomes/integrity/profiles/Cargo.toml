@@ -8,11 +8,7 @@ crate-type = ["cdylib", "rlib"]
 name = "profiles_integrity"
 
 [dependencies]
-hc_zome_profiles_integrity = "0.2"
+hc_zome_profiles_integrity = { git = "https://github.com/holochain-open-dev/profiles", branch = "for-hdk-v0.3.0-beta-dev" }
 hdi = { workspace = true }
 
 serde = { workspace = true }
-indexmap = "=1.9.1"
-wast = "=39.0.0"
-enumset = "=1.0.8"
-wasm-bindgen = "=0.2.82"

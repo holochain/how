@@ -48,6 +48,6 @@ fn notify(input: NotifyInput) -> ExternResult<()> {
         folks.push(a.into())
     }
     debug!("Sending signal {:?} to {:?}", input.signal, input.folks);
-    remote_signal(ExternIO::encode(input.signal).map_err(|e| wasm_error!(e))?,folks)?;
+    send_remote_signal(ExternIO::encode(input.signal).map_err(|e| wasm_error!(e))?,folks)?;
     Ok(())
 }

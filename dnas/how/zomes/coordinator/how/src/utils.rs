@@ -1,4 +1,4 @@
-use hdk::prelude::*;
+use hdk::{prelude::*, hdi::link};
 use how_integrity::*;
 
 pub fn create_relaxed(entry_type: EntryTypes, entry: Entry)  -> ExternResult<ActionHash> {
@@ -42,4 +42,9 @@ ScopedLinkType: TryFrom<T, Error = E>,
             ChainTopOrdering::Relaxed,
         ))
     })
+}
+
+pub fn do_get_links(base: impl Into<AnyLinkableHash>, link_type: impl LinkTypeFilterExt) -> ExternResult<Vec<Link>> {
+    let input = GetLinksInputBuilder::try_new(base, link_type)?.build();
+    get_links(input)
 }

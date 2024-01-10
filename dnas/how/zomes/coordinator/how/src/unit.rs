@@ -10,6 +10,7 @@ use crate::document::{update_document, UpdateDocumentInput, _update_document};
 use crate::error::*;
 //use crate::signals::*;
 use crate::tree::{UnitInfo, _get_tree, tree_path, _get_path_tree, tree_path_to_str, PathContent, Node};
+use crate::utils::do_get_links;
 
 pub fn get_units_path() -> Path {
     Path::from("units")
@@ -33,7 +34,7 @@ pub fn create_unit(input: UnitInput) -> ExternResult<UnitOutput> {
 pub fn delete_unit_links(hash: EntryHash, tree_paths: Vec<Path>)  -> ExternResult<()> {
     let path = get_units_path();
     let anchor_hash = path.path_entry_hash()?;
-    let links = get_links(anchor_hash, LinkTypes::Unit, None)?;
+    let links = do_get_links(anchor_hash, LinkTypes::Unit)?;
     let mut delete_link_input: Vec<DeleteLinkInput> = Vec::new();
     let any: AnyLinkableHash = hash.into();
     for l in links {
@@ -45,7 +46,7 @@ pub fn delete_unit_links(hash: EntryHash, tree_paths: Vec<Path>)  -> ExternResul
         }
     }
     for path in tree_paths {
-        let links = get_links(path.path_entry_hash()?, LinkTypes::Unit, None)?;
+        let links = do_get_links(path.path_entry_hash()?, LinkTypes::Unit)?;
         for l in links {
             if l.target == any {
                 delete_link_input.push(DeleteLinkInput{
@@ -132,7 +133,7 @@ pub fn convert_tag(tag: LinkTag) -> ExternResult<(String,String,String)> {
 }
 
 fn get_units_inner(base: EntryHash) -> HowResult<Vec<UnitOutput>> {
-    let links = get_links(base, LinkTypes::Unit, None)?;
+    let links = do_get_links(base, LinkTypes::Unit)?;
 
     let mut unit_infos: HashMap<EntryHash,UnitInfo> = HashMap::new();
     for link in links.clone() {
@@ -302,7 +303,7 @@ pub fn reparent_document(old_unit_hash: EntryHash,  new_unit_hash: EntryHash, ne
         document.unit_hash = new_unit_hash;
         let new_path = format!("{}.{}", new_parent, new_unit.path_abbreviation);
         let path = tree_path(old_path);
-        let links = get_links(path.path_entry_hash()?, LinkTypes::Document, None)?;
+        let links = do_get_links(path.path_entry_hash()?, LinkTypes::Document)?;
 
         // delete all the old links at the old path
         let mut delete_link_input: Vec<DeleteLinkInput> = Vec::new();

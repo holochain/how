@@ -71,7 +71,7 @@ pub fn get_documents(input: String) -> ExternResult<Vec<DocumentOutput>> {
 }
 
 fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
-    let links = get_links(base, LinkTypes::Document, None)?;
+    let links = do_get_links(base, LinkTypes::Document)?;
 
     let mut get_input=  vec!();
     for link in links {

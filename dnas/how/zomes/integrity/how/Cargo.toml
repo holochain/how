@@ -12,7 +12,3 @@ hdi = { workspace = true }
 hdk = { workspace = true }
 
 serde = { workspace = true }
-indexmap = "=1.9.1"
-wast = "=39.0.0"
-enumset = "=1.0.8"
-wasm-bindgen = "=0.2.82"

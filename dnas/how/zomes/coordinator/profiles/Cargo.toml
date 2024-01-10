@@ -13,9 +13,4 @@ hdk = { workspace = true }
 serde = { workspace = true }
 
 profiles_integrity = { workspace = true }
-hc_zome_profiles_coordinator = "0.2"
-
-indexmap = "=1.9.1"
-wast = "=39.0.0"
-enumset = "=1.0.8"
-wasm-bindgen = "=0.2.82"
+hc_zome_profiles_coordinator = { git = "https://github.com/holochain-open-dev/profiles", branch = "for-hdk-v0.3.0-beta-dev" }

@@ -1,8 +1,8 @@
 pub use hdk::prelude::*;
-pub use hdk::hash_path::path::TypedPath;
+pub use hdi::hash_path::path::TypedPath;
 use how_integrity::{TREE_ROOT, LinkTypes};
 
-use crate::{unit::convert_tag, HowError};
+use crate::{unit::convert_tag, HowError, utils::do_get_links};
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct UnitInfo {
@@ -30,7 +30,7 @@ pub struct PathContent {
 fn get_entry_hashes(path: &Path) -> ExternResult<(Vec<UnitInfo>,Vec<EntryHash>)> {
     let mut units = vec![];
     let mut documents = vec![];
-    let links = get_links(path.path_entry_hash()?, vec![LinkTypes::Unit, LinkTypes::Document], None)?;
+    let links = do_get_links(path.path_entry_hash()?, vec![LinkTypes::Unit, LinkTypes::Document])?;
     for l in links {
         let link_type = LinkTypes::try_from(ScopedLinkType {
             zome_index: l.zome_index,

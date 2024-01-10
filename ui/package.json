@@ -20,7 +20,7 @@
     "@holochain-open-dev/profiles": "^0.17.3",
     "@holochain-open-dev/stores": "^0.8.3",
     "@holochain-open-dev/utils": "^0.16.0",
-    "@holochain/client": "0.16",
+    "@holochain/client": "^0.17.0-dev.3",
     "@lightningrodlabs/we-applet": "^0.12.2",
     "@lit/context": "^1.0.0",
     "@lit/localize": "^0.12.0",
