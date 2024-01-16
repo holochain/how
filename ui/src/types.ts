@@ -386,6 +386,7 @@ export enum MarkTypes {
   CommentStatus = 1,
   Vote = 2,
   Approval = 3,
+  Attachment = 4,
 }
 
 export type Offsets = {

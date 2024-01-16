@@ -5,7 +5,7 @@ import { consume } from '@lit/context';
 import { StoreSubscriber } from "@holochain-open-dev/stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
+import {EntryHashB64, decodeHashFromBase64, encodeHashToBase64} from "@holochain/client";
 import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, Dictionary, Unit} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -23,6 +23,7 @@ import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
 import { CommentControl, Control } from "../controls";
 import {until} from 'lit-html/directives/until.js';
+import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
 
 /**
  * @element how-document
@@ -397,6 +398,15 @@ import {until} from 'lit-html/directives/until.js';
       return false
     }
 
+    private async addAttachment() {
+      if (this._store.weClient) {
+        const hrl = await this._store.weClient.userSelectHrl()
+        if (hrl) {
+          const doc : Document = this._documents.value[this.currentDocumentEh]
+          await this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: JSON.stringify(hrlWithContextToB64(hrl)), markType: MarkTypes.Attachment}])            }
+      }
+    }
+
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>, isSteward: boolean) : TemplateResult {
       let commentsHTML
       if (this.canSeeComments(doc, section)) {
@@ -542,6 +552,57 @@ import {until} from 'lit-html/directives/until.js';
                   .click=${() => this.confirmApply()}
                   ></svg-button>
                 </div>`)
+          }
+          if (this._store.weClient) {
+            const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
+            if (isSteward) {
+              affordancesHTML.push(html`
+                  <div>
+                  <svg-button
+                    button="clipboard"
+                    info="hrl to clipboard"
+                    infoPosition="right"
+                    .click=${() => {
+                      const attachment = { hrl: [this._store.dnaHash, decodeHashFromBase64(this.currentDocumentEh)], context: {} }
+                      // @ts-ignore
+                      this._store.weClient?.hrlToClipboard(attachment)
+                    }}
+                    ></svg-button>
+                    <svg-button
+                    button="plus"
+                    info="add attachment"
+                    infoPosition="right"
+                    .click=${() => this.addAttachment()}
+                    ></svg-button>
+                  </div>`)
+            }
+            for (const mark of doc.marks.filter(m=>m.markType==MarkTypes.Attachment)) {
+              const attachment = JSON.parse(`${mark.mark}`)
+              affordancesHTML.push(html`
+                <div style="display:flex; align-items:center">
+                ${until(this._store.weClient.entryInfo(hrlB64WithContextToRaw(attachment).hrl)
+                .then(res=> {
+                  if (res) {
+                    const entryInfo = res.entryInfo
+                    return html`
+                    ${entryInfo.name}
+                    
+                    <svg-button
+                      button="paperclip"
+                      .click=${()=>{
+                          const hrl = hrlB64WithContextToRaw(attachment)
+                          // @ts-ignore
+                          this._store.weClient.openHrl(hrl.hrl, hrl.context)
+                         }}
+                     >
+                    </svg-button>`
+                  }}
+                  ),
+                html`...`
+                )}
+                </div>
+                `)
+            }
           }
         }
         let tasksHTML: Array<TemplateResult> = []

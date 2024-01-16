@@ -79,6 +79,22 @@ fn get_documents_inner(base: EntryHash) -> HowResult<Vec<DocumentOutput>> {
             get_input.push(GetInput::new(hash, GetOptions::default()))
         }
     }
+    _get_docs(get_input)
+}
+
+#[hdk_extern]
+pub fn get_document(hash: EntryHash) -> ExternResult<DocumentOutput> {
+    let mut get_input=  vec!();
+    let x = GetInput::new(hash.try_into().map_err(|_e| wasm_error!("hash error"))?, GetOptions::default());
+    get_input.push(x);
+    let result = _get_docs(get_input)?;
+    if result.len() != 1 {
+       return Err(wasm_error!(WasmErrorInner::Guest(String::from("could not find document"))));
+    }
+    Ok(result[0].clone())
+}
+
+fn _get_docs(get_input: Vec<GetInput>) -> HowResult<Vec<DocumentOutput>> {
 
     let document_elements = HDK.with(|hdk| hdk.borrow().get_details(get_input))?;
 

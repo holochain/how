@@ -307,9 +307,6 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
         </mwc-select>
       </div>`
     } 
-    else {
-      collectionsHTML = html`collections: ${collections.length}`
-    }
 
     return html`
       <div class="unit row">
