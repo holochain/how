@@ -14,6 +14,9 @@ import {
 } from "@scoped-elements/material-web";
 
 import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+
 import { HowNewSectionDialog } from "./how-new-section-dialog";
 import { HowSection } from "./how-section";
 import { HowComment } from "./how-comment";
@@ -538,6 +541,7 @@ import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
         }
         const docStats: DocumentStats = doc.getStats()
         let affordancesHTML: Array<TemplateResult> = []
+        let attachmentsHTML: Array<TemplateResult> = []
         if (!this.readOnly) {
           this.controls.forEach(control=>{
             affordancesHTML = affordancesHTML.concat(control.affordances(this._store.myAgentPubKey, doc, this._confirmElem!))
@@ -556,12 +560,9 @@ import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
           if (this._store.weClient) {
             const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
             if (isSteward) {
-              affordancesHTML.push(html`
-                  <div>
+              attachmentsHTML.push(html`
                   <svg-button
-                    button="clipboard"
-                    info="hrl to clipboard"
-                    infoPosition="right"
+                    button="faShare"
                     .click=${() => {
                       const attachment = { hrl: [this._store.dnaHash, decodeHashFromBase64(this.currentDocumentEh)], context: {} }
                       // @ts-ignore
@@ -569,37 +570,35 @@ import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
                     }}
                     ></svg-button>
                     <svg-button
-                    button="plus"
-                    info="add attachment"
-                    infoPosition="right"
+                    button="link"
                     .click=${() => this.addAttachment()}
                     ></svg-button>
-                  </div>`)
+                  `)
             }
             for (const mark of doc.marks.filter(m=>m.markType==MarkTypes.Attachment)) {
               const attachment = JSON.parse(`${mark.mark}`)
-              affordancesHTML.push(html`
-                <div style="display:flex; align-items:center">
-                ${until(this._store.weClient.entryInfo(hrlB64WithContextToRaw(attachment).hrl)
-                .then(res=> {
-                  if (res) {
-                    const entryInfo = res.entryInfo
-                    return html`
-                    ${entryInfo.name}
-                    
-                    <svg-button
-                      button="paperclip"
-                      .click=${()=>{
+              attachmentsHTML.push(html`
+                <div class="hrl-link">
+                  <sl-button size="small"
+                  .click=${()=>{
                           const hrl = hrlB64WithContextToRaw(attachment)
                           // @ts-ignore
-                          this._store.weClient.openHrl(hrl.hrl, hrl.context)
+                          this._store.weClient.openHrl(hrl)
                          }}
-                     >
-                    </svg-button>`
-                  }}
-                  ),
-                html`...`
-                )}
+                  >
+                  ${until(this._store.weClient.attachableInfo(hrlB64WithContextToRaw(attachment))
+                    .then(res=> {
+                      if (res) {
+                        const attachableInfo = res.attachableInfo
+                        return html`
+                        
+                        <sl-icon style="margin-right:4px;" src=${attachableInfo.icon_src} ></sl-icon>${attachableInfo.name}
+                        `
+                      }}
+                      ),
+                    html`...`
+                    )}
+                  </sl-button>
                 </div>
                 `)
             }
@@ -616,6 +615,8 @@ import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
           tasksHTML = tasksHTML.concat(control.tasks(this._store.myAgentPubKey, doc))
         })
       return html`
+                      ${attachmentsHTML.length>0 ? html`<div class="attachments">${attachmentsHTML}</div>`:''}
+
           <div id="header">
             ${doc.documentType == DocType.Collection ? html`<h3>Collection</h3>` : 
               html`
@@ -661,6 +662,17 @@ import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
           }
           how-section {
             width: 1000px;
+          }
+          .attachments {
+            justify-content: flex-end;
+            display:flex;
+            flex-direction: row;
+            align-items:center;
+          }
+          .hrl-link {
+            display:flex;
+            align-items:center;
+            background: 1px solid ligh
           }
           `,
         ];

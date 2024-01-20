@@ -20,7 +20,6 @@ import {
 } from '@holochain/client';
 import { provide } from '@lit/context';
 import { LitElement, css, html } from 'lit';
-import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {HowController} from "./elements/how-controller"
@@ -61,7 +60,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
   _profilesStore!: ProfilesStore;
 
   renderType = RenderType.App
-  hrl: Hrl| undefined
+  hrlWithContext: HrlWithContext| undefined
 
   async firstUpdated() {
 
@@ -111,7 +110,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
                     throw new Error("Unknown applet-view block type:"+weClient.renderInfo.view.block);
                 }
                 break;
-              case "entry":
+              case "attachable":
                 switch (weClient.renderInfo.view.roleName) {
                   case "how":
                     switch (weClient.renderInfo.view.integrityZomeName) {
@@ -119,11 +118,11 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
                         switch (weClient.renderInfo.view.entryType) {
                           case "unitx":
                             this.renderType = RenderType.Unit
-                            this.hrl = weClient.renderInfo.view.hrl
+                            this.hrlWithContext = weClient.renderInfo.view.hrlWithContext
                             break;
                           case "document":
                             this.renderType = RenderType.Document
-                            this.hrl = weClient.renderInfo.view.hrl
+                            this.hrlWithContext = weClient.renderInfo.view.hrlWithContext
                             break;
                           default:
                             throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
@@ -182,10 +181,10 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
       <profile-prompt>
         ${this.renderType == RenderType.App ? html`
          <how-controller></how-controller>`:""}
-        ${this.renderType == RenderType.Unit && this.hrl ? html`
-         <how-unit .currentUnitEh=${encodeHashToBase64(this.hrl[1])}></how-unit>`:""}
-        ${this.renderType == RenderType.Document && this.hrl ? html`
-         <how-document .currentDocumentEh=${encodeHashToBase64(this.hrl[1])}></how-document>`:""}
+        ${this.renderType == RenderType.Unit && this.hrlWithContext ? html`
+         <how-unit .currentUnitEh=${encodeHashToBase64(this.hrlWithContext.hrl[1])}></how-unit>`:""}
+        ${this.renderType == RenderType.Document && this.hrlWithContext ? html`
+         <how-document .currentDocumentEh=${encodeHashToBase64(this.hrlWithContext.hrl[1])}></how-document>`:""}
       </profile-prompt>
                   <!-- <how-controller id="controller" dummy="{true}""></how-controller> -->
 

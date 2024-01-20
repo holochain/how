@@ -1,5 +1,5 @@
-import { CellType, type AppAgentClient, type RoleName, type ZomeName, type DnaHash, decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
-import type { AppletHash, AppletServices, EntryInfo, Hrl, HrlWithContext, WeServices } from '@lightningrodlabs/we-applet';
+import { type AppAgentClient, type RoleName, type ZomeName, decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+import type { AppletHash, AppletServices, AttachableInfo, HrlWithContext, WeServices } from '@lightningrodlabs/we-applet';
 import { HowStore } from './how.store';
 import { getMyDna } from './util';
 
@@ -17,18 +17,18 @@ export const appletServices: AppletServices = {
     // Types of UI widgets/blocks that this Applet supports
     blockTypes: {
     },
-    getEntryInfo: async (
+    getAttachableInfo: async (
       appletClient: AppAgentClient,
       roleName: RoleName,
       integrityZomeName: ZomeName,
       entryType: string,
-      hrl: Hrl
-    ): Promise<EntryInfo | undefined> => {
+      hrlWithContext: HrlWithContext
+    ): Promise<AttachableInfo | undefined> => {
 
         const store = new HowStore(undefined, appletClient, "how")
         switch (entryType) {
             case "document": {
-                const docHash = hrl[1]
+                const docHash = hrlWithContext.hrl[1]
                 const doc = await store.pullDocument(docHash)
                 const title = doc.content.content[0].content
                 return {
@@ -38,7 +38,7 @@ export const appletServices: AppletServices = {
             }
             case "unitx":
                 const units = await store.pullUnits()
-                const unitHash = encodeHashToBase64(hrl[1])
+                const unitHash = encodeHashToBase64(hrlWithContext.hrl[1])
         
                 return {
                     icon_src: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"/></svg>`,

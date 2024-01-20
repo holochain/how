@@ -41,6 +41,12 @@
             "instanceName": "notebooks",
             "registeringAgent": 1,
             "joiningAgents": [2]
+          },
+          {
+            "name": "kando",
+            "instanceName": "kando",
+            "registeringAgent": 1,
+            "joiningAgents": [2]
           }
         ]
       }
@@ -70,7 +76,20 @@
         },
         "source": {
           "type": "https",
-          "url": "https://github.com/lightningrodlabs/notebooks/releases/download/v0.0.8/notebooks.webhapp"
+          "url": "https://github.com/lightningrodlabs/notebooks/releases/download/v0.0.13/notebooks.webhapp"
+        }
+      },
+      {
+        "name": "kando",
+        "subtitle": "kanban boards",
+        "description": "Real-time kanban boards based on syn",
+        "icon": {
+          "type": "filesystem",
+          "path": "/home/eric/code/metacurrency/holochain/kando/we_dev/kando_icon.png"
+        },
+        "source": {
+          "type": "https",
+          "url": "https://github.com/holochain-apps/kando/releases/download/v0.8.15/kando.webhapp"
         }
       }
     ]
