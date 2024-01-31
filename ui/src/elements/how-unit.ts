@@ -209,7 +209,7 @@ export class HowUnit extends ScopedElementsMixin(LitElement) {
     } else {
       state = unitInfo.state
     }
-    if ( (state == SysState.UnderConstruction || state == SysState.Alive) && isSteward) {
+    if ( (state == SysState.UnderConstruction || state == SysState.Alive)) {
       controlsHTML.push(html`
           <svg-button
             .click=${() => this.dispatchEvent(new CustomEvent('add-child', { detail: this.currentUnitEh, bubbles: true, composed: true }))} 

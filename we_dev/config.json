@@ -62,7 +62,7 @@
         },
         "source": {
           "type": "localhost",
-          "happPath": "./workdir/how.happ",
+          "happPath": "/home/eric/code/metacurrency/holochain/how/workdir/how.happ",
           "uiPort": 8888
         }
       },
