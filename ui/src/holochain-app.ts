@@ -16,10 +16,10 @@ import {
   AdminWebsocket,
   AppAgentClient,
   AppAgentWebsocket,
+  encodeHashToBase64,
 } from '@holochain/client';
 import { provide } from '@lit/context';
 import { LitElement, css, html } from 'lit';
-import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import {HowController} from "./elements/how-controller"
@@ -28,9 +28,18 @@ import {howContext} from "./types"
 import { localized, msg } from '@lit/localize';
 
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { WeClient, isWeContext, initializeHotReload } from '@lightningrodlabs/we-applet';
+import { WeClient, isWeContext, initializeHotReload, HrlWithContext, Hrl } from '@lightningrodlabs/we-applet';
+import { appletServices } from './we';
+import { HowUnit } from './elements/how-unit';
+import { HowDocument } from './elements/how-document';
 
 const appId = 'how'
+
+enum RenderType {
+  App,
+  Unit,
+  Document,
+}
 
 @localized()
 @customElement('holochain-app')
@@ -49,6 +58,9 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
   @provide({ context: profilesStoreContext })
   @property()
   _profilesStore!: ProfilesStore;
+
+  renderType = RenderType.App
+  hrlWithContext: HrlWithContext| undefined
 
   async firstUpdated() {
 
@@ -71,30 +83,88 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
       const url = appPort ? `ws://localhost:${appPort}` : 'ws://localhost';
 
       if (adminPort) {
-        const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
+        const adminWebsocket = await AdminWebsocket.connect({url: new URL(`ws://localhost:${adminPort}`)})
         const x = await adminWebsocket.listApps({})
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
-      const appAgentClient = await AppAgentWebsocket.connect(new URL(url), appId)
+      const appAgentClient = await AppAgentWebsocket.connect(appId,{url: new URL(url)})
     
-      this._howStore = new HowStore(appAgentClient, "how")
+      this._howStore = new HowStore(undefined, appAgentClient, "how")
       
       this._profilesStore = new ProfilesStore(
         new ProfilesClient(appAgentClient, 'how'), config
       );
     } else {
-        const weClient = await WeClient.connect();
+        const weClient = await WeClient.connect(appletServices);
 
-        if (
-          !(weClient.renderInfo.type === "applet-view")
-          && !(weClient.renderInfo.view.type === "main")
-        ) throw new Error("This Applet only implements the applet main view.");
+        switch (weClient.renderInfo.type) {
+          case "applet-view":
+            switch (weClient.renderInfo.view.type) {
+              case "main":
+                // default is allready App
+                break;
+              case "block":
+                switch(weClient.renderInfo.view.block) {
+                  default:
+                    throw new Error("Unknown applet-view block type:"+weClient.renderInfo.view.block);
+                }
+                break;
+              case "attachable":
+                switch (weClient.renderInfo.view.roleName) {
+                  case "how":
+                    switch (weClient.renderInfo.view.integrityZomeName) {
+                      case "how_integrity":
+                        switch (weClient.renderInfo.view.entryType) {
+                          case "unitx":
+                            this.renderType = RenderType.Unit
+                            this.hrlWithContext = weClient.renderInfo.view.hrlWithContext
+                            break;
+                          case "document":
+                            this.renderType = RenderType.Document
+                            this.hrlWithContext = weClient.renderInfo.view.hrlWithContext
+                            break;
+                          default:
+                            throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
+                        }
+                        break;
+                      default:
+                        throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.integrityZomeName);
+                    }
+                    break;
+                  default:
+                    throw new Error("Unknown role name:"+weClient.renderInfo.view.roleName);
+                }
+                break;
+              default:
+                throw new Error("Unsupported applet-view type");
+            }
+            break;
+          case "cross-applet-view":
+            switch (weClient.renderInfo.view.type) {
+              case "main":
+                // here comes your rendering logic for the cross-applet main view
+                //break;
+              case "block":
+                //
+                //break;
+              default:
+                throw new Error("Unknown cross-applet-view render type.")
+            }
+            break;
+          default:
+            throw new Error("Unknown render view type");
   
+        }  
         //@ts-ignore
         const client = weClient.renderInfo.appletClient;
-        this._howStore = new HowStore(client, "how")
-
+        this._howStore = new HowStore(weClient, client, "how")
+        if (this.renderType == RenderType.Unit) this._howStore.pullUnits()
+        else if (this.renderType == RenderType.Document) {
+          await this._howStore.pullUnits()
+          // @ts-ignore
+          await this._howStore.pullDocument(this.hrl[1])
+        } 
 
         //@ts-ignore
         const profilesClient = weClient.renderInfo.profilesClient;
@@ -109,7 +179,12 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
     if (!this.loaded) return html`<span>Loading...</span>`;
     return html`
       <profile-prompt>
-         <how-controller></how-controller>
+        ${this.renderType == RenderType.App ? html`
+         <how-controller></how-controller>`:""}
+        ${this.renderType == RenderType.Unit && this.hrlWithContext ? html`
+         <how-unit .currentUnitEh=${encodeHashToBase64(this.hrlWithContext.hrl[1])}></how-unit>`:""}
+        ${this.renderType == RenderType.Document && this.hrlWithContext ? html`
+         <how-document .currentDocumentEh=${encodeHashToBase64(this.hrlWithContext.hrl[1])}></how-document>`:""}
       </profile-prompt>
                   <!-- <how-controller id="controller" dummy="{true}""></how-controller> -->
 
@@ -119,6 +194,8 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
   static get scopedElements() {
     return {
       "how-controller": HowController,
+      "how-unit": HowUnit,
+      "how-document": HowDocument,
     };
   }
 }

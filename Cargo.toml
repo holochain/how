@@ -6,17 +6,12 @@ opt-level = "z"
 
 [workspace]
 members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
+resolver = "2"
 
 [workspace.dependencies]
-hdi = "0.4.0-beta-dev.20"
-hdk = "0.3.0-beta-dev.24"
+hdi = "0.4.0-beta-dev.31"
+hdk = "0.3.0-beta-dev.35"
 serde = "1"
-
-[workspace.dependencies.file_storage]
-path = "dnas/how/zomes/coordinator/file_storage"
-
-[workspace.dependencies.file_storage_integrity]
-path = "dnas/how/zomes/integrity/file_storage"
 
 [workspace.dependencies.how]
 path = "dnas/how/zomes/coordinator/how"

@@ -1,4 +1,4 @@
-import { EntryHashB64, AgentPubKeyB64, AppAgentClient, RoleName, encodeHashToBase64, decodeHashFromBase64, AgentPubKey } from '@holochain/client';
+import { EntryHashB64, AgentPubKeyB64, AppAgentClient, RoleName, encodeHashToBase64, decodeHashFromBase64, AgentPubKey, DnaHash, EntryHash } from '@holochain/client';
 import { AgentPubKeyMap, EntryRecord } from '@holochain-open-dev/utils';
 import { writable, Writable, derived, Readable, get } from 'svelte/store';
 import cloneDeep from 'lodash/cloneDeep';
@@ -24,6 +24,8 @@ import {
   Progress,
 } from './types';
 import { Action, ActionHash } from '@holochain/client';
+import { WeClient } from '@lightningrodlabs/we-applet';
+import { getMyDna } from './util';
 
 export type HowConfig = {
   processRoot: string
@@ -60,6 +62,7 @@ export class HowStore {
   public tree: Readable<Node> = derived(this.treeStore, i => i)
   public documentPaths: Readable<Dictionary<Array<DocumentOutput>>> = derived(this.documentPathStore, i => i)
   public processes: Readable<Array<Process>> = derived(this.documents, d => this.getProcesses(get(this.treeStore)))
+  public dnaHash: DnaHash|undefined
 
   private processTypes: Readable<Array<Node>> = derived(
     this.tree, 
@@ -70,13 +73,18 @@ export class HowStore {
   )
 
   constructor(
+    public weClient: WeClient|undefined,
     protected client: AppAgentClient,
     roleName: RoleName,
-    zomeName = 'how'
+    zomeName = 'how',
+
   ) {
     this.myAgentPubKey = encodeHashToBase64(client.myPubKey);
     this.service = new HowService(client, roleName, zomeName);
-
+    
+    getMyDna(roleName, client).then(res=>{
+      this.dnaHash = res
+    })
     client.on( 'signal', signal => {
       console.log("SIGNAL",signal.payload)
       const payload  = signal.payload as HowSignal
@@ -241,12 +249,14 @@ export class HowStore {
 
   async pullMeta() {
     const docs = await this.pullDocuments("")
-    const meta = docs.find(d=>d.content.documentType == DocType.TreeMeta)
-    if (meta) {
-      this.treeName = meta.content.content[0].name
-      this.config = JSON.parse(meta.content.content[0].content) as HowConfig
-      this.processRootPath = this.config.processRoot.split(".")
-      Document.processRoot = this.config.processRoot
+    if (docs) {
+      const meta = docs.find(d=>d.content.documentType == DocType.TreeMeta)
+      if (meta) {
+        this.treeName = meta.content.content[0].name
+        this.config = JSON.parse(meta.content.content[0].content) as HowConfig
+        this.processRootPath = this.config.processRoot.split(".")
+        Document.processRoot = this.config.processRoot
+      }
     }
    // await this.pullDocuments("soc_proto.process.define.declaration")
 
@@ -264,6 +274,19 @@ export class HowStore {
     }
     return get(this.documentPathStore)[path]
   }
+
+  async pullDocument(hash: EntryHash) : Promise<DocumentOutput> {
+    const doc = await this.service.getDocument(hash)
+    doc.content = new Document(doc.content)
+    doc.content.documentHash = doc.hash
+    doc.content.marks = doc.marks
+    const unit = get(this.units)[encodeHashToBase64(doc.content.unitHash)]
+    if (unit) {
+      this.updateDocumentStores(unit.path(), doc)
+    }
+    return doc
+  }
+
 
   async updateDocument(hash: EntryHashB64, document: Document) : Promise<EntryHashB64> {
     const path = this.getDocumentPath(hash)

@@ -5,7 +5,7 @@ import { consume } from '@lit/context';
 import { StoreSubscriber } from "@holochain-open-dev/stores";
 
 import {sharedStyles} from "../sharedStyles";
-import {EntryHashB64, encodeHashToBase64} from "@holochain/client";
+import {EntryHashB64, decodeHashFromBase64, encodeHashToBase64} from "@holochain/client";
 import {howContext, Section, SectionType, SourceManual, Document, DocType, HilightRange, CommentInfo, Comment, CommentStatus, MarkTypes, MarkDocumentInput, CommentAction, applyApprovedComments, CommentStats, DocumentStats, DocumentAction, VoteAction, ApprovalAction, Dictionary, Unit} from "../types";
 import {HowStore} from "../how.store";
 import {ScopedElementsMixin} from "@open-wc/scoped-elements";
@@ -14,6 +14,9 @@ import {
 } from "@scoped-elements/material-web";
 
 import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+
 import { HowNewSectionDialog } from "./how-new-section-dialog";
 import { HowSection } from "./how-section";
 import { HowComment } from "./how-comment";
@@ -23,6 +26,7 @@ import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
 import { CommentControl, Control } from "../controls";
 import {until} from 'lit-html/directives/until.js';
+import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
 
 /**
  * @element how-document
@@ -397,6 +401,15 @@ import {until} from 'lit-html/directives/until.js';
       return false
     }
 
+    private async addAttachment() {
+      if (this._store.weClient) {
+        const hrl = await this._store.weClient.userSelectHrl()
+        if (hrl) {
+          const doc : Document = this._documents.value[this.currentDocumentEh]
+          await this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: JSON.stringify(hrlWithContextToB64(hrl)), markType: MarkTypes.Attachment}])            }
+      }
+    }
+
     private sectionRow(doc:Document, section: Section, index: number, comments:Array<Comment>, isSteward: boolean) : TemplateResult {
       let commentsHTML
       if (this.canSeeComments(doc, section)) {
@@ -528,6 +541,7 @@ import {until} from 'lit-html/directives/until.js';
         }
         const docStats: DocumentStats = doc.getStats()
         let affordancesHTML: Array<TemplateResult> = []
+        let attachmentsHTML: Array<TemplateResult> = []
         if (!this.readOnly) {
           this.controls.forEach(control=>{
             affordancesHTML = affordancesHTML.concat(control.affordances(this._store.myAgentPubKey, doc, this._confirmElem!))
@@ -543,6 +557,52 @@ import {until} from 'lit-html/directives/until.js';
                   ></svg-button>
                 </div>`)
           }
+          if (this._store.weClient) {
+            const isSteward = unit.stewards.includes(this._store.myAgentPubKey)
+            if (isSteward) {
+              attachmentsHTML.push(html`
+                  <svg-button
+                    button="faShare"
+                    .click=${() => {
+                      const attachment = { hrl: [this._store.dnaHash, decodeHashFromBase64(this.currentDocumentEh)], context: {} }
+                      // @ts-ignore
+                      this._store.weClient?.hrlToClipboard(attachment)
+                    }}
+                    ></svg-button>
+                    <svg-button
+                    button="link"
+                    .click=${() => this.addAttachment()}
+                    ></svg-button>
+                  `)
+            }
+            for (const mark of doc.marks.filter(m=>m.markType==MarkTypes.Attachment)) {
+              const attachment = JSON.parse(`${mark.mark}`)
+              attachmentsHTML.push(html`
+                <div class="hrl-link">
+                  <sl-button size="small"
+                  .click=${()=>{
+                          const hrl = hrlB64WithContextToRaw(attachment)
+                          // @ts-ignore
+                          this._store.weClient.openHrl(hrl)
+                         }}
+                  >
+                  ${until(this._store.weClient.attachableInfo(hrlB64WithContextToRaw(attachment))
+                    .then(res=> {
+                      if (res) {
+                        const attachableInfo = res.attachableInfo
+                        return html`
+                        
+                        <sl-icon style="margin-right:4px;" src=${attachableInfo.icon_src} ></sl-icon>${attachableInfo.name}
+                        `
+                      }}
+                      ),
+                    html`...`
+                    )}
+                  </sl-button>
+                </div>
+                `)
+            }
+          }
         }
         let tasksHTML: Array<TemplateResult> = []
         if (docStats.emptySections > 0) {
@@ -555,6 +615,8 @@ import {until} from 'lit-html/directives/until.js';
           tasksHTML = tasksHTML.concat(control.tasks(this._store.myAgentPubKey, doc))
         })
       return html`
+                      ${attachmentsHTML.length>0 ? html`<div class="attachments">${attachmentsHTML}</div>`:''}
+
           <div id="header">
             ${doc.documentType == DocType.Collection ? html`<h3>Collection</h3>` : 
               html`
@@ -600,6 +662,17 @@ import {until} from 'lit-html/directives/until.js';
           }
           how-section {
             width: 1000px;
+          }
+          .attachments {
+            justify-content: flex-end;
+            display:flex;
+            flex-direction: row;
+            align-items:center;
+          }
+          .hrl-link {
+            display:flex;
+            align-items:center;
+            background: 1px solid ligh
           }
           `,
         ];
