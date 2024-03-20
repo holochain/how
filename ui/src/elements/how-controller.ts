@@ -14,7 +14,7 @@ import { HowUnitDialog } from "./how-unit-dialog";
 import { HowUnitDialogEdit } from "./how-unit-dialog-edit";
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
 import {HowDocument } from "./how-document";
-import { AsyncReadable, AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
+import { AsyncStatus, StoreSubscriber } from '@holochain-open-dev/stores';
 import { aliveImage } from "../images";
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
