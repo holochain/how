@@ -28,7 +28,7 @@ import {howContext} from "./types"
 import { localized, msg } from '@lit/localize';
 
 import { ScopedElementsMixin } from "@open-wc/scoped-elements";
-import { WeClient, isWeContext, initializeHotReload, HrlWithContext, Hrl } from '@lightningrodlabs/we-applet';
+import { WeClient, isWeContext, initializeHotReload, WAL, Hrl } from '@lightningrodlabs/we-applet';
 import { appletServices } from './we';
 import { HowUnit } from './elements/how-unit';
 import { HowDocument } from './elements/how-document';
@@ -60,7 +60,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
   _profilesStore!: ProfilesStore;
 
   renderType = RenderType.App
-  hrlWithContext: HrlWithContext| undefined
+  wal: WAL| undefined
 
   async firstUpdated() {
 
@@ -110,7 +110,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
                     throw new Error("Unknown applet-view block type:"+weClient.renderInfo.view.block);
                 }
                 break;
-              case "attachable":
+              case "asset":
                 switch (weClient.renderInfo.view.roleName) {
                   case "how":
                     switch (weClient.renderInfo.view.integrityZomeName) {
@@ -118,11 +118,11 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
                         switch (weClient.renderInfo.view.entryType) {
                           case "unitx":
                             this.renderType = RenderType.Unit
-                            this.hrlWithContext = weClient.renderInfo.view.hrlWithContext
+                            this.wal = weClient.renderInfo.view.wal
                             break;
                           case "document":
                             this.renderType = RenderType.Document
-                            this.hrlWithContext = weClient.renderInfo.view.hrlWithContext
+                            this.wal = weClient.renderInfo.view.wal
                             break;
                           default:
                             throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
@@ -181,10 +181,10 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
       <profile-prompt>
         ${this.renderType == RenderType.App ? html`
          <how-controller></how-controller>`:""}
-        ${this.renderType == RenderType.Unit && this.hrlWithContext ? html`
-         <how-unit .currentUnitEh=${encodeHashToBase64(this.hrlWithContext.hrl[1])}></how-unit>`:""}
-        ${this.renderType == RenderType.Document && this.hrlWithContext ? html`
-         <how-document .currentDocumentEh=${encodeHashToBase64(this.hrlWithContext.hrl[1])}></how-document>`:""}
+        ${this.renderType == RenderType.Unit && this.wal ? html`
+         <how-unit .currentUnitEh=${encodeHashToBase64(this.wal.hrl[1])}></how-unit>`:""}
+        ${this.renderType == RenderType.Document && this.wal ? html`
+         <how-document .currentDocumentEh=${encodeHashToBase64(this.wal.hrl[1])}></how-document>`:""}
       </profile-prompt>
                   <!-- <how-controller id="controller" dummy="{true}""></how-controller> -->
 

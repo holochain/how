@@ -26,7 +26,8 @@ import { ActionHash } from "@holochain/client";
 import { HowConfirm } from "./how-confirm";
 import { CommentControl, Control } from "../controls";
 import {until} from 'lit-html/directives/until.js';
-import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
+import { WALUrl } from "../util";
+import { weaveUrlFromWal, weaveUrlToWAL } from "@lightningrodlabs/we-applet";
 
 /**
  * @element how-document
@@ -403,10 +404,10 @@ import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
 
     private async addAttachment() {
       if (this._store.weClient) {
-        const hrl = await this._store.weClient.userSelectHrl()
-        if (hrl) {
+        const wal = await this._store.weClient.userSelectWal()
+        if (wal) {
           const doc : Document = this._documents.value[this.currentDocumentEh]
-          await this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: JSON.stringify(hrlWithContextToB64(hrl)), markType: MarkTypes.Attachment}])            }
+          await this._store.markDocument(this.path, [{hash: doc.documentHash!, mark: weaveUrlFromWal(wal), markType: MarkTypes.Attachment}])            }
       }
     }
 
@@ -581,18 +582,17 @@ import { hrlB64WithContextToRaw, hrlWithContextToB64 } from "../util";
                 <div class="hrl-link">
                   <sl-button size="small"
                   .click=${()=>{
-                          const hrl = hrlB64WithContextToRaw(attachment)
-                          // @ts-ignore
-                          this._store.weClient.openHrl(hrl)
+                          const wal = weaveUrlToWAL(attachment)
+                          this._store.weClient?.openWal(wal)
                          }}
                   >
-                  ${until(this._store.weClient.attachableInfo(hrlB64WithContextToRaw(attachment))
+                  ${until(this._store.weClient.assetInfo(weaveUrlToWAL(attachment))
                     .then(res=> {
                       if (res) {
-                        const attachableInfo = res.attachableInfo
+                        const assetInfo = res.assetInfo
                         return html`
                         
-                        <sl-icon style="margin-right:4px;" src=${attachableInfo.icon_src} ></sl-icon>${attachableInfo.name}
+                        <sl-icon style="margin-right:4px;" src=${assetInfo.icon_src} ></sl-icon>${assetInfo.name}
                         `
                       }}
                       ),

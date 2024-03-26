@@ -1,19 +1,6 @@
 import { AppAgentClient, CellType, decodeHashFromBase64, DnaHash, encodeHashToBase64, type EntryHash } from "@holochain/client";
-import type { HrlB64WithContext, HrlWithContext } from "@lightningrodlabs/we-applet";
 
-export function hrlWithContextToB64(hrl: HrlWithContext): HrlB64WithContext {
-  return {
-    hrl: [encodeHashToBase64(hrl.hrl[0]), encodeHashToBase64(hrl.hrl[1])],
-    context: hrl.context,
-  };
-}
-  
-export function hrlB64WithContextToRaw(hrlB64: HrlB64WithContext): HrlWithContext {
-  return {
-    hrl: [decodeHashFromBase64(hrlB64.hrl[0]), decodeHashFromBase64(hrlB64.hrl[1])],
-    context: hrlB64.context,
-  };
-}
+export type WALUrl = string
 
 export const hashEqual = (a:EntryHash, b:EntryHash) : boolean => {
   if (!a || !b) {

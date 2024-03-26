@@ -13,5 +13,6 @@
     "sourceMap": true,
     "inlineSources": true,
     "declaration": true
-  }
+  },
+  "include": ["we_dev/*.ts"]
 }
