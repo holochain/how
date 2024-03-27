@@ -1,4 +1,4 @@
-use hdk::{prelude::*, hdi::link};
+use hdk::prelude::*;
 use how_integrity::*;
 
 pub fn create_relaxed(entry_type: EntryTypes, entry: Entry)  -> ExternResult<ActionHash> {

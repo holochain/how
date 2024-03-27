@@ -1,9 +1,7 @@
 use crate::error::*;
 use crate::tree::*;
-pub use hdk::prelude::Path;
+pub use hdi::prelude::Path;
 pub use hdk::prelude::*;
-use hdk::prelude::holo_hash::AgentPubKeyB64;
-use holo_hash::{EntryHashB64};
 use how_integrity::{Document, EntryTypes, LinkTypes};
 use crate::utils::*;
 

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 pub use hdk::prelude::*;
-pub use hdk::prelude::Path;
+pub use hdi::prelude::Path;
 pub use error::{HowError, HowResult};
 
 pub mod error;
@@ -11,7 +11,6 @@ pub mod tree;
 pub mod signals;
 pub mod utils;
 
-use hdk::prelude::holo_hash::AgentPubKeyB64;
 use how_integrity::{Unit, Section, Document};
 use unit::create_unit_inner;
 use crate::document::{DocumentInput, create_document};

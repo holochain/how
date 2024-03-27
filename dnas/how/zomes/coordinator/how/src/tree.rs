@@ -37,7 +37,7 @@ fn get_entry_hashes(path: &Path) -> ExternResult<(Vec<UnitInfo>,Vec<EntryHash>)>
             zome_type: l.link_type,
         })?;
 
-        let target = l.target.try_into().map_err(|e| HowError::HashConversionError)?;
+        let target = l.target.try_into().map_err(|_e| HowError::HashConversionError)?;
         match link_type {
             LinkTypes::Document => documents.push(target),
             LinkTypes::Unit => {

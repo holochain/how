@@ -1,8 +1,6 @@
-use std::any::Any;
 use std::collections::HashMap;
 
 pub use hdk::prelude::*;
-use holo_hash::{EntryHashB64};
 use how_integrity::Document;
 use how_integrity::{Unit, EntryTypes, LinkTypes};
 
@@ -139,7 +137,7 @@ fn get_units_inner(base: EntryHash) -> HowResult<Vec<UnitOutput>> {
     for link in links.clone() {
         let (state, version, flags) = convert_tag(link.tag.clone())?;
 
-        let hash = EntryHash::try_from(link.target).map_err(|e| HowError::HashConversionError)?;
+        let hash = EntryHash::try_from(link.target).map_err(|_e| HowError::HashConversionError)?;
         unit_infos.insert(hash.clone(), UnitInfo {
             hash,
             version,
