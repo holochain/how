@@ -163,7 +163,7 @@ export class HolochainApp extends ScopedElementsMixin(LitElement) {
         else if (this.renderType == RenderType.Document) {
           await this._howStore.pullUnits()
           // @ts-ignore
-          await this._howStore.pullDocument(this.hrl[1])
+          await this._howStore.pullDocument(this.wal.hrl[1])
         } 
 
         //@ts-ignore

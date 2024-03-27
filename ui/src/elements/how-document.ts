@@ -563,30 +563,29 @@ import { weaveUrlFromWal, weaveUrlToWAL } from "@lightningrodlabs/we-applet";
             if (isSteward) {
               attachmentsHTML.push(html`
                   <svg-button
-                    button="faShare"
+                    button="addToPocket"
                     .click=${() => {
                       const attachment = { hrl: [this._store.dnaHash, decodeHashFromBase64(this.currentDocumentEh)], context: {} }
                       // @ts-ignore
-                      this._store.weClient?.hrlToClipboard(attachment)
+                      this._store.weClient?.walToPocket(attachment)
                     }}
                     ></svg-button>
-                    <svg-button
+                  <svg-button
                     button="link"
                     .click=${() => this.addAttachment()}
                     ></svg-button>
                   `)
             }
             for (const mark of doc.marks.filter(m=>m.markType==MarkTypes.Attachment)) {
-              const attachment = JSON.parse(`${mark.mark}`)
+              const wal = weaveUrlToWAL(`${mark.mark}`)
               attachmentsHTML.push(html`
-                <div class="hrl-link">
+                <div class="wal-link">
                   <sl-button size="small"
-                  .click=${()=>{
-                          const wal = weaveUrlToWAL(attachment)
-                          this._store.weClient?.openWal(wal)
-                         }}
+                    @click=${()=>{
+                      this._store.weClient?.openWal(wal)
+                      }}
                   >
-                  ${until(this._store.weClient.assetInfo(weaveUrlToWAL(attachment))
+                  ${until(this._store.weClient.assetInfo(wal)
                     .then(res=> {
                       if (res) {
                         const assetInfo = res.assetInfo
@@ -669,7 +668,7 @@ import { weaveUrlFromWal, weaveUrlToWAL } from "@lightningrodlabs/we-applet";
             flex-direction: row;
             align-items:center;
           }
-          .hrl-link {
+          .wal-link {
             display:flex;
             align-items:center;
             background: 1px solid ligh
